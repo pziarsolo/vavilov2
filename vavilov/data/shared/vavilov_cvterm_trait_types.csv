@@ -1,0 +1,10 @@
+cv,name,definition,dbxref
+trait_types,numeric,A numeric keypad with additional symbols available.,
+trait_types,percent,A percent scrollbar.,
+trait_types,date,Displays the current date with options to move forward and backward by single days. A No Date option sets the date to Jan 1 2000.,
+trait_types,text,Opens the device software keyboard for input,
+trait_types,boolean,True/false button that toggles when pressed.,
+trait_types,image,Image type trait,
+trait_types,morphometric_points,"morphometric points equally spaced between the proximal and distal ends, proximal end point. The original coordinate point (0,0) is located in the upper left corner of the rectangle defined by the MaximumWidth and the Maximum Heigth. ",
+trait_types,LAB_color,CIELAB color space of fruits  measured with Chromameter (Konica Minolta),
+trait_types,RGB_color,RGB color space,

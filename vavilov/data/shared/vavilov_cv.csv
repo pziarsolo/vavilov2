@@ -1,0 +1,13 @@
+name,description
+collecting_source,Collecting/acquisition source
+biological_status,Biological status of accession
+person_types,Types of the contact entity
+accession_relationship_types,Types for the relationship of the accessions
+accession_types,Types of the accessions
+synonym_types,Types of the synonyms
+taxonomic_ranks,Types of taxonomic ranks
+taxa_relationships,Relations between taxa
+assay_props,Properties for assays
+plant_parts,Parts of plants
+trait_types,Trait types
+trait_props,Trait extra data

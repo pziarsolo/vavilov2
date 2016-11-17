@@ -1,0 +1,11 @@
+{% load staticfiles %}
+{% load urlbuilder %}
+
+{% url 'search_observations' as base_url %}
+<div class=download_csv>
+    <ul> 
+        <li>Download</li>
+        <li><a href='{% build_url base_url search_criteria download_search=True,format=csv%}' download><img src="{% static "genebank/style/images/csv_icon.png"%}"/></a></li>
+        <li><a href='{% build_url base_url search_criteria download_search=True,format=excel%}' download><img src="{% static "genebank/style/images/xls_icon.png"%}"/></a></li>
+    </ul>
+</div>

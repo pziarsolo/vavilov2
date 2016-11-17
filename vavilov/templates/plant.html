@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+{% block title %}Plant {{ plant.unique_id}} {% endblock title %}
+{% block content %}
+<h1> Plant {{ plant.unique_id}} </h1>
+<div class="table-container">
+	<table class="data_table">
+	    <tr>
+	        <td class="key">Accession number :</td>
+	        <td class="value">{{plant.accession.code}}</td>
+	    </tr>
+	    {% if plant.experimental_field %}
+	    <tr>
+	        <td class="key">Experimental field :</td>
+	        <td class="value">{{plant.experimental_field}}</td>
+	    </tr>
+	    {% endif %}
+	    {% if plant.row %}
+	    <tr>
+	        <td class="key">Row :</td>
+	        <td class="value">{{plant.row}}</td>
+	    </tr>
+	    {% endif %}
+	    {% if plant.column %}
+	    <tr>
+	        <td class="key">Column :</td>
+	        <td class="value">{{plant.column}}</td>
+	    </tr>
+	    {% endif %}
+	    {% if plant.pot_number %}
+	    <tr>
+	        <td class="key">Pot number :</td>
+	        <td class="value">{{plant.pot_number}}</td>
+	    </tr>
+	    {% endif %}
+	    
+	</table>
+</div>
+
+<h3> This plant has been used in these assays</h3>
+{% render_table assays %}
+<span class="clear"></span>
+
+{% if observations %}
+	<h3> Observations on this plant</h3>
+	{% render_table observations %}
+	{% include 'download_observations.html' with search_criteria=obs_search_criteria %}
+	<span class="clear"></span>
+{% endif %}
+
+{% include 'galleria_js.html' with images=obs_images %}
+
+{% endblock %}

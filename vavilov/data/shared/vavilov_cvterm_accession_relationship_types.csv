@@ -1,0 +1,6 @@
+cv,name,definition,dbxref
+accession_relationship_types,is_duplicated_from,FAO WIEWS code of the donor institute,
+accession_relationship_types,is,Is the same accession,
+accession_relationship_types,is_a_duplicated,Is a duplicated of the accession in other genebank,
+accession_relationship_types,is_split_from,The accession is a split from other accession,
+accession_relationship_types,is_synonym,The accession is a synonym,

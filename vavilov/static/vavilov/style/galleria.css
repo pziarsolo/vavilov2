@@ -1,0 +1,43 @@
+.galleria{ 
+    width: 800px; 
+    height: 500px; 
+    background: #ffffff; 
+}
+
+.galleria-fscr{
+    width:40px;
+    height:40px;
+    position:absolute;
+    bottom:0px;
+    right:10px;
+    background:black url('/static/vavilov/images/fullscreen.png');
+    z-index:4;
+    cursor: pointer;
+    opacity: 0.5;
+}
+.galleria-fscr:hover{
+    opacity:1;
+}
+.galleria-rotate{
+    width:40px;
+    height:40px;
+    position:absolute;
+    bottom:40px;
+    right:10px;
+    background:black url('/static/vavilov/images/rotate.png');
+    z-index:4;
+    cursor: pointer;
+    opacity: 0.5;
+}
+.galleria-fscr:hover{
+    opacity:1;
+}
+
+.galleria-theme-classic .galleria-info{
+    width:25%;
+    opacity:0.5;
+}
+.galleria-container{
+    background:#fff; 
+}
+

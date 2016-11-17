@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+{% block title %} Trait {{ trait.name}} in assay {{trait.assay.name}} {% endblock title %}
+{% block content %}
+<h1>Trait <strong>{{ trait.name}}</strong></h1>
+{% if trait.description %}
+    <p><strong>"{{ trait.description|capfirst }}"</strong></p>
+{% endif %}
+<p> Used in:  
+{% for assay in trait.assays %}
+    <a href={{assay.get_absolute_url}}>{{assay.name}}</a>,
+{% endfor %}
+</p>
+
+
+{% if observations %}
+	<h3> Observations </h3>
+	{% render_table observations %}
+	<span class="clear"></span>
+{% endif %}
+
+{% endblock %}

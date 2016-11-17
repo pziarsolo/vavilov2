@@ -1,0 +1,44 @@
+{% if images%}
+    <hr class='empty_line'>
+    <div class='image_container'>
+	    <h3> Observation Images </h3>
+		 <div class='galleria' style="margin:auto;">
+		    {% for obs_image  in images %}
+		        <a href="{{obs_image.image.url}}"><img src="{{obs_image.thumbnail.url}}" data-title="Assay={{obs_image.assay.name}}" ></a>
+		    {% endfor %}
+		
+		<script>
+		   Galleria.loadTheme('/static/vavilov/js/galleria/themes/classic/galleria.classic.min.js');
+		   Galleria.run('.galleria', { 
+		                trueFullscreen:true,
+		{#                clicknext:true,#}
+		{#                showImagenav:false,#}
+		                showInfo:true,
+		                _toggleInfo:false
+		                }); 
+		   Galleria.ready(function() {
+		     var gallery = this;
+		     this.addElement('fscr');
+		     this.addElement('rotate');
+		     this.appendChild('stage','fscr');
+		     this.appendChild('stage','rotate');
+		     var fscr = this.$('fscr')
+		            .click(function() {
+		            gallery.toggleFullscreen();
+		            });
+		     var rotate = this.$('rotate')
+		            .click(function() {
+		                var image = gallery.getActiveImage();
+		                var value = j(image).getRotateAngle();
+		                j(image).rotate(parseInt(value)+90);
+		                
+		            });
+		
+		    this.addIdleState(this.get('fscr'), { opacity:0 });
+		    this.addIdleState(this.get('rotate'), { opacity:0 });
+		    this.addIdleState(this.get('galleria-info'), { opacity:0 });
+		   });
+		</script>
+		</div>
+	</div>
+{% endif %}

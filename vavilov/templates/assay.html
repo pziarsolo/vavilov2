@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+{% block title %}Accession {{ accession.code}} {% endblock title %}
+{% block content %}
+
+<section id=central_column>
+    <h2>Assay {{assay.name}} </h2>
+    <div class='accession_table'>
+        <table class="data_table">
+            {% if assay.start_date %}
+                <tr>
+                    <td class="key">Start Date :</td>
+                    <td class="value">{{assay.start_date}}</td>
+                </tr>
+            {% endif%}
+            {% if assay.end_date %}
+                <tr>
+                    <td class="key">End Date :</td>
+                    <td class="value">{{assay.end_date}}</td>
+                </tr>
+            {% endif%}
+            {% for key, value in assay.props.items%}
+                <tr>
+                    <td class="key">{{ key }}</td>
+                    <td class="value">{{value}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</section>
+{% if plants %}
+	<h3> Plants on this assay </h3>
+	{% render_table plants %}
+	<span class="clear"></span>
+{% endif %}
+
+{% if observations %}
+	<h3> Observations on this assay </h3>
+	{% render_table observations %}
+	{% include 'download_observations.html' with search_criteria=obs_search_criteria %}
+	<span class="clear"></span>
+{% endif %}
+
+{#{% include 'galleria_js.html' with images=obs_images %}#}
+
+{% endblock %}

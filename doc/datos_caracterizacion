@@ -1,0 +1,147 @@
+Datos de caracterizacion traditom:
+
+Una entrada puede estar medida en más de un ensayo:
+
+Ensayo:
+    datos del ensayo:
+    Field name
+    Cultivation type	: open field / greenhouse / mesh tunnel
+    Number of plants per accession
+    Temperature max. (in ºC) Mean of the cropping period
+    Temperature min. (in ºC) Mean of the cropping period
+    Temperature mean (in ºC) Mean of the cropping period
+    Watering	: flooding / local irrigation
+    Fertilization kg ha-1 N
+    Fertilization kg ha-1 P2O5
+    Fertilization kg ha-1 K2O
+    UTM Coordinates UTM X
+    UTM Coordinates UTM Y
+    Mode of cultivation (brief description)
+    Organic matter content (%)
+    pH	EC (dS/m)
+    USDA Soil texture classe
+    Clay (<0.002mm) (%)
+    Fine silt (0.002 to 0.02 mm) (%)
+    Silt (0.02 to 0.05 mm) (%)
+    Total sand (0.05 to 2 mm) (%)
+
+
+datos caracterizacion:
+    Los ensayos tienen un metodo:
+        Modo de cultivo, fertilizacion...
+
+
+    Puedes ser por planta:
+        -Qualitative descriptors 1 por planta(puede tener más de un valor por planta)
+        
+        - Yield: más de una medida por planta( solo los controles)
+        - Plant structure: más de una medida por planta
+    Cada planta está idetificada por un numero, Se supone que ese numero es el mismo para cada planta en los distintos tipos de medciones.
+
+
+    Puede ser por fruto de planta:
+        - Morphometrics: La medida es para cada fruto y está definida por el corte: Longitudinal o transversal.
+       
+    Metodos de medida:
+        observacion directa
+        Tomato analyzer
+
+    Rasgos que se miran: 
+        Por ejemplo para saber el color por Lab se neceitan tres valores: L, a, b
+        Tenemos que pensar como poner esto, si la relacon va a estar en la db o se va a poner en el codigo.
+        
+        
+    
+    
+    Lo que se observa se puede definir en una nueva tabla(traits) o directamemnte en un cvterm. Exist una ontologia(PATO) para rasgos fenotipicos de plantas, pero no se si cuadra con los rasgos que se miden en traditom.
+    
+    
+        
+PARA TRADITOM ESTAMOS OBVIANDO SI LA ENTIDAD OBSERVADA VIENE DE UNA ACCESSION O DE UN BOTE DE SEMILLA(STOCK)
+------------------------------------------------------------------------------------------------------------
+   
+    
+    
+Entidades:
+    accession
+    assay
+    methodOFAssay/Treatment
+    traits
+    trait_relationship
+    ObservationalEntity
+    ObservationalNumericalValue
+    ObservationalQualitativeValue
+
+   
+   
+    
+Posibles tablas
+---------------
+
+Yo crearia una nueva entidad que definiera que es lo que se ha medido:
+Puede ser una planta, un grupo de plantas o un fruto, por ahora:
+
+AccessionAssay:
+    accession: reference to accession
+    assay: reference to assay
+
+Location:(esta tabla puede servir tambien para datos de pasaporte)
+    long: longitude
+    lat: latitude
+    LocalName
+    country:
+    ...
+    
+Method:
+    name:
+    descriptions
+    
+MethodProp:
+    key: reference to cvterm
+    value:
+    
+
+Assay:
+    id:
+    name:
+    Method:
+    Location:
+    Date created:
+    Lasmodified:
+    
+AssayProp:
+    assay: refernce to assay
+    type: reference to cvterm(ej: Field  name)
+    value: value of the typed data(ej: NameOfTheField)
+     
+    
+ObservationEntity:
+    id:
+    AccesioAssay: reference to accessionAssay
+    type: planta, grupo de plantas o fruto
+    algo que identifique la entidad:
+    
+ObservationEntityRelationship:
+    subject: 
+    object:
+    type: (Belongs to group, Children of, ...)
+    
+
+ObservacionPhenotipicaNumerica
+    ObservationEntity
+    method: Como se ha medido(observacion directa/Tomato analizer)
+    type(cvterm) o puede ser trait con una nueva table
+    valor
+    rank: Puede haber más de un dato por accession, pero no dividido por planta
+    
+ObservacionPhenotipicaQualitativa
+    ObservationEntity
+    method:
+    type(cvterm)
+    valor(cvterm)
+    rank: Puede haber más de un dato por accession, pero no dividido por planta
+        
+        
+        
+        
+        

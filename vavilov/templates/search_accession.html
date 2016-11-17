@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load extras %}
+{% load render_table from django_tables2 %}
+{% block title %}Search passport data {% endblock title %}
+{% block content %}
+	{% if search_criteria and not accessions%}
+	  <p>No Accessions found</p>
+	{% endif %}
+	
+	{% if accessions %}
+	   <h3> Search result</h3>
+	  {% render_table accessions %}
+    {% url 'search_accessions' as base_url %}
+    {% load urlbuilder %}
+        <div class=download_csv>
+            <p><a href='{% build_url base_url search_criteria download_search=True %}' download><img src="{% static "genebank/style/images/csv_icon.png"%}"/></a></p>
+        </div>
+	{% else %}
+	 <h3> Search Passport data</h3>
+	   <form action="{% url 'search_accession' %}" method="post">{% csrf_token %}
+	       <div class='search_form'>
+	       {{ form.as_table }}
+	       </div>
+	       <input type="submit" value="Search" />
+	  </form>
+	{% endif %}
+{% endblock %}

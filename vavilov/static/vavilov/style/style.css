@@ -1,0 +1,257 @@
+body{
+    margin:8px;
+    font-family: Calibri,verdana,Gandara,Tahoma,sans-serif;
+}
+
+main{
+    margin-left: 20%;
+    margin-right: 20%;
+}
+nav{
+    margin-left: 20%;
+    margin-right: 20%;
+}
+nav ul li{
+  display: inline;
+  margin: 2em;
+}
+
+label {
+    color: #4d4d4d;
+    cursor: pointer;
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+h1{
+    margin: 0px;
+    padding: 0px;
+    margin-bottom: 10px;
+    font-weight: normal;
+    font-family: Calibri,verdana,Gandara,Tahoma,sans-serif;
+    color: #999;
+    font-size: 22px;
+    line-height: 22px;
+    margin-top: 0px;
+    margin-top: 0px;
+}
+
+
+section{
+    margin: 16px 0;
+}
+
+th{
+    font-size: 13px;
+    color: #000;
+    font-weight:normal;
+    padding: 0 2px;
+}
+
+
+tr{
+    height:50px;
+}
+
+button[value]{
+    padding:0;
+    height:20px;
+    width:20px;
+}
+
+.searchresult {
+    width:100%;
+    padding:0px;
+    margin-top:15px;
+    margin-bottom:15px;
+    margin-left:0px;
+    border-spacing:0;
+    float:left;
+    border-collapse: collapse;  
+}
+.searchresult thead th a{ 
+    text-align: center;
+    text-decoration:none;
+    color: black;  
+}
+.searchresult thead th{ 
+    text-align: center;
+    font-size: 0.9em;
+    color: black;
+    font-style: bold;  
+}
+.searchresult thead th.orderable { 
+    background:url(/static/vavilov/style/images/sort_both.png);
+    background-repeat:no-repeat;
+    background-position: center right; 
+}
+.searchresult thead th.asc { 
+    background: url(/static/vavilov/style/images/sort_asc.png); 
+    background-repeat:no-repeat; 
+    background-position: center right; 
+}
+.searchresult thead th.desc { 
+    background: url(/static/vavilov/style/images/sort_desc.png);
+    background-repeat:no-repeat; 
+    background-position: center right;
+}
+
+.searchresult tr th{
+    border-style:solid;
+    border-color: #656464; 
+    border-width: 0px 0px 1px 0px;
+    padding-top:8px;
+    padding-bottom:8px;
+    padding-right:15px;
+    padding-left:7px;
+    white-space: nowrap;
+    text-align: center;
+    color: #656464; 
+}
+.searchresult tbody td{
+    border:1;
+    margin:0;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-right:7px;
+    padding-left:7px;
+    font-size:10pt;
+    text-align: center;
+    color: #505050 ;
+}
+
+.data_table td{
+    border:1;
+    margin:0;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-right:7px;
+    padding-left:7px;
+    font-size:10pt;
+    color: #505050 ;
+}
+
+.accession_table div{
+    margin-bottom:300px;
+    width:100%;
+}
+.passport_data_map{
+    overflow:auto;
+}
+.passport_table{
+    float:left  
+}
+
+#googleMap {
+    float:right;  
+    width:500px;
+    height: 400px;
+}
+.empty_line{
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+.pagination{
+    color:#222222;
+}
+ul.pagination {
+    display: block;
+    margin-left: -0.3125rem;
+    min-height: 1.5rem
+    color:red;
+}
+
+ul.pagination li {
+
+    font-size: 1rem;
+    height: 1.5rem;
+    margin-left: 0.3125rem
+}
+
+ul.pagination li a,
+ul.pagination li button {
+    border-radius: 3px;
+    transition: background-color 300ms ease-out;
+    background: none;
+    color: #211200;
+    display: block;
+    font-size: 1em;
+    font-weight: normal;
+    line-height: inherit;
+    padding: 0.0625rem 0.625rem 0.0625rem
+}
+
+ul.pagination li.next:hover ,
+ul.pagination li.previous:hover{
+    border-radius: 3px;
+    background: #999999;
+    color:white;
+    cursor: default;
+    font-weight: 700
+}
+
+ul.pagination li.next ,
+ul.pagination li.previous{
+    border-radius: 3px;
+    background: #F0F0F0;
+    color: #FFFFFF;
+    cursor: default;
+    font-weight: 700
+}
+
+ul.pagination li.unavailable a,
+ul.pagination li.unavailable button {
+    cursor: default;
+    color: #999999
+}
+
+ul.pagination li.unavailable:hover a,
+ul.pagination li.unavailable a:focus,
+ul.pagination li.unavailable:hover button,
+ul.pagination li.unavailable button:focus {
+    background: transparent
+}
+
+ul.pagination li.current a,
+ul.pagination li.current button {
+    background: #a4131c;
+    color: #FFFFFF;
+    cursor: default;
+    font-weight: 700
+}
+
+ul.pagination li.current a:hover,
+ul.pagination li.current a:focus,
+ul.pagination li.current button:hover,
+ul.pagination li.current button:focus {
+    background: #a4131c
+}
+
+ul.pagination li {
+    display: block;
+    float: left
+}
+
+.pagination-centered {
+    text-align: center
+}
+
+.pagination-centered ul.pagination li {
+    display: inline-block;
+    float: none
+}
+.download_csv{
+    float: right;
+    font-size: 0.8em;
+}
+.search_form {
+    margin-right:30%;
+    margin-bottom   :10px;
+}
+.search_form input, select {
+    width: 100%;
+}
