@@ -2,7 +2,7 @@ import argparse
 
 from django.core.management.base import BaseCommand
 
-from vavilov.db_management.excel import add_or_load_excel_observations
+from vavilov.db_management.phenotype import add_or_load_excel_observations
 
 
 class Command(BaseCommand):

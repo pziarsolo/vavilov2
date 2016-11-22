@@ -7,8 +7,9 @@ from vavilov.api.filters import AssayFilter, PlantFilter
 from vavilov.api.permissions import CustomObjectPermissions, IsStaffOrReadOnly
 from vavilov.api.serializers import (AssaySerializer, PlantSerializer,
                                      AssayPlantSerializer, AssayPropSerializer,
-                                     PlantPartSerializer)
-from vavilov.models import (Assay, Plant, AssayPlant, AssayProp, PlantPart)
+                                     ObservationEntitySerializer)
+from vavilov.models import (Assay, Plant, AssayPlant, AssayProp,
+                            ObservationEntity)
 
 
 class AssayViewSet(ModelViewSet):
@@ -41,9 +42,9 @@ class PlantViewSet(ModelViewSet):
     filter_class = PlantFilter
 
 
-class PlantPartViewSet(ModelViewSet):
-    queryset = PlantPart.objects.all()
-    serializer_class = PlantPartSerializer
+class ObservationEntityViewSet(ModelViewSet):
+    queryset = ObservationEntity.objects.all()
+    serializer_class = ObservationEntitySerializer
     permission_classes = (CustomObjectPermissions,)
     filter_backends = (DjangoObjectPermissionsFilter,
                        DjangoFilterBackend)

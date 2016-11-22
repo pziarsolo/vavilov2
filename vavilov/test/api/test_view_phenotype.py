@@ -114,8 +114,7 @@ class PlantViewTest(TestCase):
         assert client.login(username='admin', password='pass')
         response = client.get(reverse('plant-list'))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 7
-        assert len(response.data[0]['assays']) == 2
+        assert len(response.data) == 18
         # print(response.data[0]['assays'][0])
         # assert response.data[0]['assays'][0] == 'http://testserver/assays/1/'
         assert 'plant_id' in response.data[0]
@@ -163,7 +162,7 @@ class PlantViewTest(TestCase):
         assert client.login(username='admin', password='pass')
         response = client.get(reverse('plant-list'),
                               {'plant_name': plant.plant_name})
-        assert len(response.data) == 1
+        assert len(response.data) == 2
         assert response.data[0]['plant_name'] == plant.plant_name
         assert response.status_code == status.HTTP_200_OK
 
@@ -224,13 +223,14 @@ class AssayPropViewTest(TestCase):
 
     def test_create_mod_delete(self):
         client = Client()
-        cvterm = Cvterm.objects.filter(cv__name='assay_props').first()
+        cvterm = Cvterm.objects.filter(cv__name='assay_props').last()
         response = client.post(reverse('assayprop-list'), {'assay': 1,
                                                            'type': cvterm.cvterm_id,
                                                            'value': '11'})
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         assert client.login(username='admin', password='pass')
+
         response = client.post(reverse('assayprop-list'), {'assay': 1,
                                                            'type': cvterm.cvterm_id,
                                                            'value': '11'})

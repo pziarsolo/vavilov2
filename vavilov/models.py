@@ -20,7 +20,7 @@ class Country(models.Model):
     name = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'country'
+        db_table = 'vavilov_country'
 
     def __str__(self):
         return '{}({})'.format(self.name, self.code2)
@@ -34,7 +34,7 @@ class Db(models.Model):
     url = models.CharField(max_length=255, null=True)
 
     class Meta:
-        db_table = 'db'
+        db_table = 'vavilov_db'
 
 
 class Dbxref(models.Model):
@@ -43,7 +43,7 @@ class Dbxref(models.Model):
     accession_name = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'dbxref'
+        db_table = 'vavilov_dbxref'
         unique_together = ('db', 'accession_name')
 
 
@@ -53,7 +53,7 @@ class Cv(models.Model):
     description = models.CharField(max_length=255, null=True)
 
     class Meta:
-        db_table = 'cv'
+        db_table = 'vavilov_cv'
 
     def __str__(self):
         return self.name
@@ -67,7 +67,7 @@ class Cvterm(models.Model):
     dbxref = models.ForeignKey(Dbxref, null=True)
 
     class Meta:
-        db_table = 'cvterm'
+        db_table = 'vavilov_cvterm'
         unique_together = ('cv', 'name')
 
     def __str__(self):
@@ -84,7 +84,7 @@ class Taxa(models.Model):
     rank = models.ForeignKey(Cvterm)
 
     class Meta:
-        db_table = 'taxa'
+        db_table = 'vavilov_taxa'
 
 
 class TaxaRelationship(models.Model):
@@ -94,7 +94,7 @@ class TaxaRelationship(models.Model):
     type = models.ForeignKey(Cvterm)
 
     class Meta:
-        db_table = 'taxa_relationship'
+        db_table = 'vavilov_taxa_relationship'
         unique_together = ('taxa_subject', 'taxa_object', 'type')
 
 
@@ -105,7 +105,7 @@ class Person(models.Model):
     type = models.ForeignKey(Cvterm)  # is Lab, person,...
 
     class Meta:
-        db_table = 'person'
+        db_table = 'vavilov_person'
 
     def __str__(self):
         if self.description:
@@ -121,7 +121,7 @@ class PersonRelationship(models.Model):
     type = models.ForeignKey(Cvterm)
 
     class Meta:
-        db_table = 'contact_relationship'
+        db_table = 'vavilov_contact_relationship'
 
 
 class Pub(models.Model):
@@ -129,7 +129,7 @@ class Pub(models.Model):
     name = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'pub'
+        db_table = 'vavilov_pub'
 
 
 class Accession(models.Model):
@@ -143,7 +143,7 @@ class Accession(models.Model):
     dbxref = models.ForeignKey(Dbxref, null=True)
 
     class Meta:
-        db_table = 'accession'
+        db_table = 'vavilov_accession'
         permissions = (('view_accession', 'View Accession'),)
 
     def __str__(self):
@@ -343,25 +343,26 @@ class Accession(models.Model):
     def plants(self, user):
         plants = Plant.objects.filter(accession=self)
         plants = get_objects_for_user(user, 'vavilov.view_plant',
-                                      klass=plants)
+                                      klass=plants, accept_global_perms=False)
         return plants
 
     def assays(self, user):
         assays = Assay.objects.filter(assayplant__plant__in=self.plants(user)).distinct()
         assays = get_objects_for_user(user, 'vavilov.view_assay',
-                                      klass=assays)
+                                      klass=assays, accept_global_perms=False)
         return assays
 
     def observations(self, user):
-        obs = Observation.objects.filter(plant_part__plant__in=self.plants(user))
+        obs = Observation.objects.filter(obs_entity__observationentityplant__plant__in=self.plants(user))
         obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs)
+                                   klass=obs, accept_global_perms=False)
         return obs
 
     def obs_images(self, user):
         obs_images = ObservationImages.objects.filter(plant_part__plant__in=self.plants(user))
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                          klass=obs_images)
+                                          klass=obs_images,
+                                          accept_global_perms=False)
         return obs_images
 
 
@@ -411,7 +412,7 @@ class Location(models.Model):
     altitude = models.IntegerField(null=True)  # ELEVATION
 
     class Meta:
-        db_table = 'location'
+        db_table = 'vavilov_location'
         permissions = (('view_location', 'View Location'),)
 
     @property
@@ -439,7 +440,7 @@ class Passport(models.Model):
     # type = '
 
     class Meta:
-        db_table = 'passport'
+        db_table = 'vavilov_passport'
         permissions = (('view_passport', 'View Passport'),)
 
     @property
@@ -505,7 +506,7 @@ class AccessionProp(models.Model):
     value = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'accessionprop'
+        db_table = 'vavilov_accessionprop'
 
 
 class AccessionTaxa(models.Model):
@@ -517,7 +518,7 @@ class AccessionTaxa(models.Model):
     pub = models.ForeignKey(Pub, null=True)
 
     class Meta:
-        db_table = 'accession_organism'
+        db_table = 'vavilov_accession_organism'
         unique_together = ('accession', 'taxa', 'creating_date')
         permissions = (('view_accessiontaxa', 'View Accession Taxa'),)
 
@@ -529,7 +530,7 @@ class AccessionRelationship(models.Model):
     type = models.ForeignKey(Cvterm)
 
     class Meta:
-        db_table = 'accession_relationship'
+        db_table = 'vavilov_accession_relationship'
         permissions = (('view_accessionrelationship',
                         'View Accession Relationship'),)
 
@@ -542,7 +543,7 @@ class AccessionSynonym(models.Model):
     type = models.ForeignKey(Cvterm, null=True)
 
     class Meta:
-        db_table = 'accession_synonym'
+        db_table = 'vavilov_accession_synonym'
 
 
 class Assay(models.Model):
@@ -557,7 +558,7 @@ class Assay(models.Model):
     owner = models.ForeignKey(User, null=True)
 
     class Meta:
-        db_table = 'assay'
+        db_table = 'vavilov_assay'
         permissions = (('view_assay', 'View Assay'),)
 
     def __str__(self):
@@ -566,7 +567,7 @@ class Assay(models.Model):
     def traits(self, user):
         traits = Trait.objects.filter(assaytrait__assay=self)
         return get_objects_for_user(user, 'vavilov.view_trait',
-                                    klass=traits)
+                                    klass=traits, accept_global_perms=False)
 
     @property
     def props(self):
@@ -582,19 +583,20 @@ class Assay(models.Model):
     def plants(self, user):
         plants = Plant.objects.filter(assayplant__assay=self).distinct()
         plants = get_objects_for_user(user, 'vavilov.view_plant',
-                                      klass=plants)
+                                      klass=plants, accept_global_perms=False)
         return plants
 
     def observations(self, user):
         obs = Observation.objects.filter(assay=self)
         obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs)
+                                   klass=obs, accept_global_perms=False)
         return obs
 
     def obs_images(self, user):
         obs_images = ObservationImages.objects.filter(assay=self)
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                          klass=obs_images)
+                                          klass=obs_images,
+                                          accept_global_perms=False)
         return obs_images
 
 
@@ -608,7 +610,7 @@ class AssayProp(models.Model):
 #     end_date = models.DateField(null=True)
 #     location = models.CharField(max_length=255, null=True)
     class Meta:
-        db_table = 'assayprop'
+        db_table = 'vavilov_assayprop'
         unique_together = ('assay', 'type')
         permissions = (('view_assayprop', 'View AssayProp'),)
 
@@ -623,31 +625,33 @@ class Plant(models.Model):
     pot_number = models.CharField(max_length=10, null=True)
 
     class Meta:
-        db_table = 'plant'
+        db_table = 'vavilov_plant'
         permissions = (('view_plant', 'View Plant'),)
 
     def __str__(self):
-        return self.unique_id
+        return self.plant_name
 
     def get_absolute_url(self):
-        return reverse('plant_view', kwargs={'unique_id': self.unique_id})
+        return reverse('plant_view', kwargs={'plant_name': self.plant_name})
 
     def assays(self, user):
         assays = Assay.objects.filter(assayplant__plant=self).distinct()
         assays = get_objects_for_user(user, 'vavilov.view_assay',
-                                      klass=assays)
+                                      klass=assays, accept_global_perms=False)
         return assays
 
     def observations(self, user):
-        obs = Observation.objects.filter(plant_part__plant=self)
+        obs = Observation.objects.filter(obs_entity__observationentityplant__plant=self)
         obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs)
+                                   klass=obs, accept_global_perms=False)
+
         return obs
 
     def obs_images(self, user):
         obs_images = ObservationImages.objects.filter(plant_part__plant=self)
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                          klass=obs_images)
+                                          klass=obs_images,
+                                          accept_global_perms=False)
         return obs_images
 
 
@@ -657,18 +661,8 @@ class AssayPlant(models.Model):
     plant = models.ForeignKey(Plant)
 
     class Meta:
-        db_table = 'assay_plant'
+        db_table = 'vavilov_assay_plant'
         unique_together = ('assay', 'plant')
-
-
-class PlantPart(models.Model):
-    plant_part_id = models.AutoField(primary_key=True)
-    plant_part_uid = models.CharField(max_length=255, unique=True)
-    plant = models.ForeignKey(Plant)
-    part = models.ForeignKey(Cvterm)
-
-    class Meta:
-        db_table = 'plant_part'
 
 
 class Trait(models.Model):
@@ -677,7 +671,7 @@ class Trait(models.Model):
     type = models.ForeignKey(Cvterm)
 
     class Meta:
-        db_table = 'trait'
+        db_table = 'vavilov_trait'
         permissions = (('view_trait', 'View Trait'),)
 
     def __str__(self):
@@ -715,7 +709,7 @@ class AssayTrait(models.Model):
     trait = models.ForeignKey(Trait)
 
     class Meta:
-        db_table = 'assay_trait'
+        db_table = 'vavilov_assay_trait'
         unique_together = ('trait', 'assay')
 
 
@@ -726,13 +720,38 @@ class TraitProp(models.Model):
     value = models.CharField(max_length=100)
 
     class Meta:
-        db_table = 'trait_prop'
+        db_table = 'vavilov_trait_prop'
         unique_together = ('trait', 'type')
+
+
+class ObservationEntity(models.Model):
+    obs_entity_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
+    part = models.ForeignKey(Cvterm)
+
+    class Meta:
+        db_table = 'vavilov_observation_entity'
+
+    @property
+    def plants(self):
+        return Plant.objects.filter(observationentityplant__obs_entity=self)
+
+    def __str__(self):
+        return self.name
+
+
+class ObservationEntityPlant(models.Model):
+    plant_group_plant_id = models.AutoField(primary_key=True)
+    obs_entity = models.ForeignKey(ObservationEntity)
+    plant = models.ForeignKey(Plant)
+
+    class Meta:
+        db_table = 'vavilov_observation_entity_plant'
 
 
 class Observation(models.Model):
     observation_id = models.AutoField(primary_key=True)
-    plant_part = models.ForeignKey(PlantPart)
+    obs_entity = models.ForeignKey(ObservationEntity)
     assay = models.ForeignKey(Assay)
     trait = models.ForeignKey(Trait)
     value = models.CharField(max_length=100)
@@ -740,7 +759,7 @@ class Observation(models.Model):
     observer = models.CharField(max_length=100, null=True)
 
     class Meta:
-        db_table = 'observation'
+        db_table = 'vavilov_observation'
         permissions = (('view_observation', 'View Observation'),)
 
     @property
@@ -770,7 +789,7 @@ only_scan_storage = OnlyScanStorage(location=settings.MEDIA_ROOT,
 class ObservationImages(models.Model):
     observation_image_id = models.AutoField(primary_key=True)
     observation_image_uid = models.CharField(max_length=255, unique=True)
-    plant_part = models.ForeignKey(PlantPart)
+    obs_entity = models.ForeignKey(ObservationEntity)
     assay = models.ForeignKey(Assay)
     trait = models.ForeignKey(Trait)
     image = models.ImageField(max_length=255, storage=only_scan_storage,
@@ -782,9 +801,9 @@ class ObservationImages(models.Model):
     user = models.CharField(max_length=100, null=True)
 
     class Meta:
-        db_table = 'observation_image'
+        db_table = 'vavilov_observation_image'
         permissions = (('view_observation_images', 'View observation images'),)
 
     @property
-    def plant(self):
-        return self.plant_part.plant
+    def plants(self):
+        return self.obs_entity.plant_part.plant

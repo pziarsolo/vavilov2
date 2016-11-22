@@ -74,6 +74,16 @@ def add_or_load_users(fpath):
                                          password=entry['password'])
 
 
+def add_or_load_persons(fhand):
+    with transaction.atomic():
+        for entry in csv.DictReader(fhand, dialect=comma_dialect):
+            cv = Cv.objects.get(name='person_types')
+            type_ = Cvterm.objects.get(cv=cv, name=entry['type'])
+            Person.objects.get_or_create(name=entry['name'],
+                                         description=entry['description'],
+                                         type=type_)
+
+
 def _add_or_load_no_ref_table_data(fhand, model):
     with transaction.atomic():
         for line in csv.DictReader(fhand, dialect=comma_dialect):

@@ -4,16 +4,12 @@ from operator import attrgetter
 from os.path import join, dirname, splitext
 import time
 
-from django.conf import settings as site_settings
 from django.utils.html import strip_tags
 from openpyxl.reader.excel import load_workbook
-from pytz import timezone
 from xlsxwriter import Workbook
 
 import vavilov
-from vavilov.db_management.phenotype import (add_or_load_observation,
-                                             suggest_plant_part_uid)
-from vavilov.models import Trait, Plant, Cvterm, PlantPart
+from vavilov.models import Trait, Plant
 
 
 DATA_DIR = join(dirname(vavilov.__file__), 'data')
@@ -29,62 +25,12 @@ USER_HEDER_NAME = 'Autor'
 MANDATORY_COLS = [PLANT_ID, TRAIT_HEADER_NAME, TRAIT_TYPE_NAME,
                   VALUE_HEARDER_NAME, DATE_HEADER_NAME, USER_HEDER_NAME]
 
-OUR_TIMEZONE = timezone(site_settings.TIME_ZONE)
-
 
 class trt_dialect(csv.excel):
     delimiter = ','
     skipinitialspace = True
     doublequote = False
     lineterminator = '\n'
-
-
-def add_or_load_excel_observations(fpath, observer, assay, plant_part,
-                                   value_header='Valor', date_header='Fecha',
-                                   observer_header='Autor',
-                                   part_uid_header='part_uid',
-                                   trait_header='Caracteristica'):
-    wb = load_workbook(fpath)
-    sheet = wb.active
-    header_pos = {}
-    first = True
-    for row in sheet.rows:
-        if first:
-            for index, cell in enumerate(row):
-                header = cell.value
-                header_pos[header] = index
-            first = False
-            continue
-
-        value = row[header_pos[value_header]].value
-        if value is None:
-            continue
-
-        plant_id = row[header_pos['unique_id']].value
-        if plant_id is None:
-            break
-
-        plant = Plant.objects.get(unique_id=plant_id)
-
-        if part_uid_header in header_pos:
-            plant_part_uid = row[header_pos[part_uid_header]].value
-        else:
-            plant_part_uid = suggest_plant_part_uid(plant_id, plant_part)
-
-        part = Cvterm.objects.get(cv__name='plant_parts', name=plant_part)
-        plant_part_obj = PlantPart.objects.get_or_create(plant=plant,
-                                                         plant_part_uid=plant_part_uid,
-                                                         part=part)[0]
-
-        creation_time = row[header_pos[date_header]].value
-        creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
-        excel_observer = row[header_pos[observer_header]].value
-        if excel_observer:
-            observer = excel_observer
-        trait_name = row[header_pos[trait_header]].value
-
-        add_or_load_observation(plant_part_obj, trait_name, [assay], value,
-                                creation_time, observer)
 
 
 def _parse_traits(fpath):
@@ -109,18 +55,8 @@ def _parse_csv_traits(fpath):
 
 
 def _parse_excel_traits(fpath):
-    workbook = load_workbook(fpath, use_iterators=True)
-    sheet = workbook.active
-    first = True
-    header_pos = {}
-    for row in sheet.rows:
-        if first:
-            for index, cell in enumerate(row):
-                header = cell.value
-                header_pos[header] = index
-            first = False
-            continue
-        yield row[header_pos['name']].value
+    for row in excel_dict_reader(fpath):
+        yield row['name']
 
 
 def write_row_in_sheet(sheet, row_content, row_index):
@@ -271,3 +207,23 @@ def create_excel_from_queryset(out_fhand, queryset, table, in_memory=False):
         worksheet.set_column(col_index, col_index, length + 2)
     workbook.close()
     return out_fhand
+
+
+def excel_dict_reader(fpath):
+    wb = load_workbook(fpath)
+    sheet = wb.active
+    header_pos = {}
+    first = True
+    for row in sheet.iter_rows():
+        if first:
+            for index, cell in enumerate(row):
+                header = cell.value
+                if not header:
+                    continue
+                header_pos[header] = index
+            first = False
+            continue
+        row_dict = {}
+        for header, pos in header_pos.items():
+            row_dict[header] = row[pos].value
+        yield row_dict

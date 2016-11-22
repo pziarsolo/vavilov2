@@ -8,7 +8,8 @@ from vavilov.models import (Accession, Cvterm, AccessionRelationship,
                             AccessionSynonym, Passport, Location, Person,
                             PersonRelationship, Taxa, TaxaRelationship,
                             Country, Cv, Db, Pub, AccessionProp, AccessionTaxa,
-                            Assay, Plant, AssayPlant, AssayProp, PlantPart)
+                            Assay, Plant, AssayPlant, AssayProp,
+                            ObservationEntity)
 
 
 class PasswordSerializer(serializers.Serializer):
@@ -214,7 +215,7 @@ class AssayPlantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PlantPartSerializer(serializers.ModelSerializer):
+class ObservationEntitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = PlantPart
+        model = ObservationEntity
         fields = '__all__'

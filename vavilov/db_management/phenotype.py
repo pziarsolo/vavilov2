@@ -1,19 +1,25 @@
 import csv
+import datetime
 import os
 from random import Random
 
+from django.conf import settings as site_settings
 from django.contrib.auth.models import User, Group
 from django.db import transaction
 from guardian.shortcuts import assign_perm
-from openpyxl.reader.excel import load_workbook
+from pytz import timezone
 
 from vavilov.db_management.base import comma_dialect
-from vavilov.models import (PlantPart, Observation, Trait, Assay, AssayPlant,
+from vavilov.db_management.excel import excel_dict_reader
+from vavilov.models import (Observation, Trait, Assay, AssayPlant,
                             Cvterm, TraitProp, AssayTrait, AssayProp, Plant,
-                            Accession)
+                            Accession, ObservationEntity,
+                            ObservationEntityPlant)
+
 
 TRAIT_PROPS_CV = 'trait_props'
 TRAIT_TYPES_CV = 'trait_types'
+OUR_TIMEZONE = timezone(site_settings.TIME_ZONE)
 
 
 def add_or_load_assays(fpath):
@@ -53,20 +59,27 @@ def add_or_load_assays(fpath):
                 group.user_set.add(owner)
 
 
-def add_or_load_observation(plant_part, trait, assay, value, creation_time,
-                            observer=None):
+def add_or_load_observation(obs_entity, trait_name, assay_name, value,
+                            creation_time, observer=None):
     try:
-        trait = Trait.objects.get(name=trait, assaytrait__assay=assay)
+        assay = Assay.objects.get(name=assay_name)
+    except Assay.DoesNotExist:
+        raise ValueError('Assay not loaded yet in db: {}'.format(assay_name))
+    try:
+        trait = Trait.objects.get(name=trait_name,
+                                  assaytrait__assay=assay)
     except Trait.DoesNotExist:
         raise ValueError('Trait not loaded yet in db: {}'.format(trait))
-    plant = plant_part.plant
-    try:
-        AssayPlant.objects.get(assay=assay, plant=plant)
-    except AssayPlant.DoesNotExist:
-        msg = 'This assay {} and this plant {} are not related'
-        raise RuntimeError(msg.format(assay, plant))
+    plants = obs_entity.plants
 
-    obs = Observation.objects.get_or_create(plant_part=plant_part,
+    try:
+        [AssayPlant.objects.filter(assay=assay, plant=p) for p in plants]
+    except AssayPlant.DoesNotExist:
+        msg = 'This assay {} and this plants {} are not related'
+        msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
+        raise RuntimeError(msg)
+
+    obs = Observation.objects.get_or_create(obs_entity=obs_entity,
                                             trait=trait, assay=assay,
                                             value=value,
                                             creation_time=creation_time,
@@ -75,23 +88,10 @@ def add_or_load_observation(plant_part, trait, assay, value, creation_time,
 
 
 def add_or_load_excel_traits(fpath, assays):
-    wb = load_workbook(fpath)
-    sheet = wb.active
-    header_pos = {}
-    first = True
-    for row in sheet.iter_rows():
-        if first:
-            for index, cell in enumerate(row):
-                header = cell.value
-                if not header:
-                    continue
-                header_pos[header] = index
-            first = False
-            continue
-
-        name = row[header_pos['name']].value
-        type_ = row[header_pos['type']].value
-        description = row[header_pos['description']].value
+    for row in excel_dict_reader(fpath):
+        name = row['name']
+        type_ = row['type']
+        description = row['description']
         try:
             type_ = Cvterm.objects.get(name=type_, cv__name=TRAIT_TYPES_CV)
         except Cvterm.DoesNotExist:
@@ -149,6 +149,7 @@ def add_or_load_plants(fpath, assay, experimental_field_header=None,
                                              experimental_field=exp_field,
                                              row=row, column=column,
                                              pot_number=pot_number)
+
                 assign_perm('view_plant', group, plant)
             AssayPlant.objects.get_or_create(assay=assay, plant=plant)
 
@@ -183,13 +184,118 @@ class RandomNameSequence:
 NAMER = RandomNameSequence()
 
 
-def suggest_plant_part_uid(plant_name, plant_part):
+def suggest_obs_entity_name(plant_name, plant_part):
     if plant_part == 'plant':
         return '{}_{}'.format(plant_name, plant_part)
-    part_uid = '{}_{}_{}'.format(plant_name, plant_part, next(NAMER))
+    obs_ent_name = '{}_{}_{}'.format(plant_name, plant_part, next(NAMER))
     try:
-        PlantPart.objects.get(plant_part_uid=part_uid)
-    except PlantPart.DoesNotExist:
-        return part_uid
+        ObservationEntity.objects.get(name=obs_ent_name)
+    except ObservationEntity.DoesNotExist:
+        return obs_ent_name
     else:
-        return suggest_plant_part_uid(plant_name, plant_part)
+        return suggest_obs_entity_name(plant_name, plant_part)
+
+
+def get_or_create_obs_entity(accession_number, assay_name, plant_part, plant_name=None,
+                             obs_entity_name=None, plant_number=None,
+                             perm_gr=None):
+    plant_part_type = Cvterm.objects.get(cv__name='plant_parts',
+                                         name=plant_part)
+    accession = Accession.objects.get(accession_number=accession_number)
+    assay = Assay.objects.get(name=assay_name)
+    if obs_entity_name:
+        # In this case, the obs_entity must be added already
+        obs_ent = ObservationEntity.objects.get(name=obs_entity_name,
+                                                part=plant_part_type)
+    elif plant_name:
+        obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
+        obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                   part=plant_part_type)
+        if created:
+            plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
+                                                         accession=accession)
+            if p_creat:
+                assign_perm('view_plant', perm_gr, plant)
+                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
+                                                      plant=plant)
+                AssayPlant.objects.create(plant=plant, assay=assay)
+
+    elif plant_number:
+        obs_entity_name = '{}_{}_{}_{}'.format(accession.accession_number,
+                                               assay.name, plant_part,
+                                               plant_number)
+        obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                   part=plant_part_type)
+        if created:
+            plant_name = '{}_{}_{}'.format(accession.accession_number,
+                                           assay.name, plant_number)
+            plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
+                                                         accession=accession)
+            if p_creat:
+                assign_perm('view_plant', perm_gr, plant)
+                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
+                                                      plant=plant)
+                AssayPlant.objects.create(plant=plant, assay=assay)
+    else:
+        # hay que crear una obs entity con todas las plantas de este accession
+        # en este ensayo
+        plants = Plant.objects.filter(accession=accession,
+                                      assayplant__assay=assay)
+        obs_entity_name = '{}_{}_{}'.format(accession.accession_number,
+                                            assay.name, plant_part)
+        obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                   part=plant_part_type)
+        if created:
+            for plant in plants:
+                assign_perm('view_plant', perm_gr, plant)
+                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
+                                                      plant=plant)
+    return obs_ent
+
+
+def add_or_load_excel_observations(fpath, observer=None, assay=None,
+                                   plant_part=None,
+                                   accession_header='accession',
+                                   value_header='value', date_header='Fecha',
+                                   observer_header='Autor',
+                                   assay_header='assay',
+                                   plant_part_header='plant_part',
+                                   obs_uid_header='part_uid',
+                                   plant_name_header='plant_name',
+                                   plant_number_header='plant_number',
+                                   trait_header='trait',
+                                   view_perm_group=None):
+
+    for row in excel_dict_reader(fpath):
+        value = row.get(value_header, None)
+        if value is None:
+            continue
+
+        plant_name = row.get(plant_name_header, None)
+        plant_part = row.get(plant_part_header, plant_part)
+        obs_entity_name = row.get(obs_uid_header, None)
+        plant_number = row.get(plant_number_header, None)
+        accession = row.get(accession_header, None)
+        assayname = row.get(assay_header, assay)
+        if view_perm_group is None:
+            view_perm_group = assayname
+        perm_gr = Group.objects.get(name=view_perm_group)
+
+        obs_entity = get_or_create_obs_entity(accession_number=accession,
+                                              assay_name=assayname,
+                                              plant_part=plant_part,
+                                              plant_name=plant_name,
+                                              obs_entity_name=obs_entity_name,
+                                              plant_number=plant_number,
+                                              perm_gr=perm_gr)
+
+        creation_time = row.get(date_header)
+        if creation_time is None:
+            creation_time = datetime.datetime.now()
+        creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
+
+        observer = row.get(observer_header, observer)
+        trait_name = row.get(trait_header)
+        obs = add_or_load_observation(obs_entity, trait_name, assayname, value,
+                                      creation_time, observer)
+        assign_perm('view_observation', perm_gr, obs)

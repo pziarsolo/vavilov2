@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from vavilov.db_management.tests import load_test_data
 from vavilov.models import (Accession, AccessionRelationship, Cvterm, Assay,
-                            Trait)
+                            Trait, Plant)
 
 
 class AccessionTest(TestCase):
@@ -11,6 +11,8 @@ class AccessionTest(TestCase):
     def setUp(self):
         load_test_data()
         self.user = User.objects.get(username='user')
+        self.user2 = User.objects.get(username='user2')
+        self.admin = User.objects.get(username='admin')
 
     def test_str(self):
         acc = Accession.objects.get(accession_number='BGV000932')
@@ -55,27 +57,56 @@ class AccessionTest(TestCase):
         acc = Accession.objects.get(accession_number='BGV000933')
         assert acc.organism == 'Capsicum spp'
 
+    def test_assay(self):
+        acc = Accession.objects.get(accession_number='BGV000928')
+        assert acc.assays(self.user)[0].name == 'NSF1'
+
+    def test_plants(self):
+        acc = Accession.objects.get(accession_number='BGV000928')
+        plant = acc.plants(self.user)[0]
+        assert plant.plant_name == 'BGV000928_plant'
+
+    def test_observations(self):
+        acc = Accession.objects.get(accession_number='BGV000928')
+        assert acc.observations(self.user).count() == 5
+        assert acc.observations(self.user2).count() == 0
+
+
+class PhenotypeTest(TestCase):
+    def setUp(self):
+        load_test_data()
+        self.user = User.objects.get(username='user')
+        self.user2 = User.objects.get(username='user2')
+        self.admin = User.objects.get(username='admin')
+
     def test_assays(self):
         assay = Assay.objects.get(name='NSF1')
         self.assertEqual(assay.get_absolute_url, '/assay/NSF1/')
         self.assertEqual(assay.props, {'campaign': 'NSF-March-2016'})
         self.assertEqual(assay.owner, self.user)
-        self.assertEqual(len(assay.traits(user=self.user)), 1)
+        self.assertEqual(len(assay.traits(user=self.user)), 2)
+        self.assertEqual(assay.plants(self.user).count(), 18)
+        self.assertEqual(assay.plants(self.admin).count(), 18)
+        self.assertEqual(assay.plants(self.user2).count(), 0)
 
-#         self.assertEqual(assay.plants(self.user).count(), 192)
-#         self.assertEqual(assay.plants(self.admin).count(), 192)
-#         self.assertEqual(assay.plants(self.user2).count(), 0)
-#
-#         self.assertEqual(assay.observations(self.user).count(), 13)
-#         self.assertEqual(assay.observations(self.admin).count(), 13)
-#         self.assertEqual(assay.observations(self.user2).count(), 0)
+        self.assertEqual(assay.observations(self.user).count(), 12)
+        self.assertEqual(assay.observations(self.admin).count(), 12)
+        self.assertEqual(assay.observations(self.user2).count(), 0)
 
     def test_traits(self):
         trait = Trait.objects.get(name='Growth habit',
                                   assaytrait__assay__name='NSF1')
         self.assertEqual(trait.description, 'grow habit')
 
+        trait = Trait.objects.get(name='Area', assaytrait__assay__name='NSF1')
+        self.assertEqual(trait.observations(self.user).count(), 12)
+        self.assertEqual(trait.observations(self.admin).count(), 12)
+        self.assertEqual(trait.observations(self.user2).count(), 0)
 
-#         self.assertEqual(trait.observations(self.user).count(), 9)
-#         self.assertEqual(trait.observations(self.admin).count(), 9)
-#         self.assertEqual(trait.observations(self.user2).count(), 0)
+    def test_plants(self):
+        plants = Plant.objects.all()
+        plant = plants.first()
+        self.assertEqual(plant.assays(self.user)[0].name, 'NSF1')
+        self.assertEqual(plant.assays(self.user2)[0].name, 'NSF3')
+        plant = Plant.objects.get(plant_name='BGV000917_NSF1_2')
+        assert plant.observations(self.user).count() == 2

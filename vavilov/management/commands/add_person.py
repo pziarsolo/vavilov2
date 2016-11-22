@@ -1,11 +1,8 @@
 import argparse
-import csv
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
 
-from vavilov.db_management.base import comma_dialect
-from vavilov.models import Cv, Cvterm, Person
+from vavilov.db_management.base import add_or_load_persons
 
 
 class Command(BaseCommand):
@@ -16,10 +13,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         fhand = options['infhand']
-        with transaction.atomic():
-            for entry in csv.DictReader(fhand, dialect=comma_dialect):
-                cv = Cv.objects.get(name='person_types')
-                type_ = Cvterm.objects.get(cv=cv, name=entry['type'])
-                Person.objects.get_or_create(name=entry['name'],
-                                             description=entry['description'],
-                                             type=type_)
+        add_or_load_persons(fhand)
