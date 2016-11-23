@@ -2,6 +2,7 @@ import csv
 import datetime
 import os
 from random import Random
+import sys
 
 from django.contrib.auth.models import User, Group
 from django.db import transaction
@@ -194,17 +195,36 @@ def suggest_obs_entity_name(plant_name, plant_part):
         return suggest_obs_entity_name(plant_name, plant_part)
 
 
-def get_or_create_obs_entity(accession_number, assay_name, plant_part, plant_name=None,
-                             obs_entity_name=None, plant_number=None,
-                             perm_gr=None):
-    plant_part_type = Cvterm.objects.get(cv__name='plant_parts',
-                                         name=plant_part)
-    accession = Accession.objects.get(accession_number=accession_number)
-    assay = Assay.objects.get(name=assay_name)
+def get_or_create_obs_entity(accession_number, assay_name, plant_part,
+                             plant_name=None, obs_entity_name=None,
+                             plant_number=None, perm_gr=None):
+    try:
+        plant_part_type = Cvterm.objects.get(cv__name='plant_parts',
+                                             name=plant_part)
+    except Cvterm.DoesNotExist:
+        msg = '{} plant part not in cvterm table'.format(plant_part)
+        raise ValueError(msg)
+
+    try:
+        accession = Accession.objects.get(accession_number=accession_number)
+    except Accession.DoesNotExist:
+        msg = '{} accession not in db'.format(accession_number)
+        raise ValueError(msg)
+    try:
+        assay = Assay.objects.get(name=assay_name)
+    except Assay.DoesNotExist:
+        msg = '{} assay not in db'.format(assay_name)
+        raise ValueError(msg)
+
     if obs_entity_name:
         # In this case, the obs_entity must be added already
-        obs_ent = ObservationEntity.objects.get(name=obs_entity_name,
-                                                part=plant_part_type)
+        try:
+            obs_ent = ObservationEntity.objects.get(name=obs_entity_name,
+                                                    part=plant_part_type)
+        except ObservationEntity.DoesNotExist:
+            msg = '{} obs_entity'.format(obs_entity_name)
+            raise ValueError(msg)
+
     elif plant_name:
         obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
@@ -262,7 +282,8 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
                                    plant_name_header='plant_name',
                                    plant_number_header='plant_number',
                                    trait_header='trait',
-                                   view_perm_group=None):
+                                   view_perm_group=None,
+                                   raise_on_error=True):
 
     for row in excel_dict_reader(fpath):
         value = row.get(value_header, None)
@@ -278,14 +299,20 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
         if view_perm_group is None:
             view_perm_group = assayname
         perm_gr = Group.objects.get(name=view_perm_group)
-
-        obs_entity = get_or_create_obs_entity(accession_number=accession,
-                                              assay_name=assayname,
-                                              plant_part=plant_part,
-                                              plant_name=plant_name,
-                                              obs_entity_name=obs_entity_name,
-                                              plant_number=plant_number,
-                                              perm_gr=perm_gr)
+        try:
+            obs_entity = get_or_create_obs_entity(accession_number=accession,
+                                                  assay_name=assayname,
+                                                  plant_part=plant_part,
+                                                  plant_name=plant_name,
+                                                  obs_entity_name=obs_entity_name,
+                                                  plant_number=plant_number,
+                                                  perm_gr=perm_gr)
+        except ValueError as error:
+            if raise_on_error:
+                raise
+            else:
+                sys.stderr.write(error)
+                continue
 
         creation_time = row.get(date_header)
         if creation_time is None:
