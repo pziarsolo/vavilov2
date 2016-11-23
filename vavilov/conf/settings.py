@@ -1,12 +1,16 @@
 import os
 
 from django.conf import settings
+from pytz import timezone
 
+# expose api rest to anyone
 EXPOSE_API = getattr(settings, 'VAVILOV_EXPOSE_API', True)
 
-EXCLUDED_FIELDBOOK_TRAITS_TO_LOAD_IN_DB = ['Photos', 'Audio']
-
+# group that belongs public permissions
 PUBLIC_GROUP_NAME = 'public'
+
+# our timezone
+OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
 
 DB_CODE_PREFIX = getattr(settings, 'VAVILOV_DB_CODE_PREFIX', None)
@@ -37,4 +41,7 @@ ACCESSION_SEARCH_RESULT_FIELDS = getattr(settings,
 TAXONS_CACHE_FILE = os.path.join(settings.CACHE_DIR, 'taxons.json')
 SEARCH_CHOICES_CACHE_FILE = os.path.join(settings.CACHE_DIR, 'search_choices.json')
 
+# Phenotype data
 PHENO_PHOTO_DIR = getattr(settings, 'VAVILOV_PHENO_PHOTO_DIR', None)
+
+EXCLUDED_FIELDBOOK_TRAITS_TO_LOAD_IN_DB = ['Photos', 'Audio']

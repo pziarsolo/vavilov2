@@ -1,20 +1,13 @@
-# In order to install gi we have to:
-# sudo apt-get install libgexiv2-2 libgexiv2-dev
-# sudo apt-get install python-gobject
-# cd $VIRTUALENV/lib/python3/site-packages
-# ln -s /usr/lib/python3/dist-packages/gi .
-# ln -s /usr/lib/python3/dist-packages/pygobject-3.20.1.egg-info .
 import datetime
 import os
 
-from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from guardian.shortcuts import assign_perm
-from pytz import timezone
 
 from imagetools.exif import get_exif_comments, get_exif_metadata
 from imagetools.utils import get_image_format
+from vavilov.conf.settings import OUR_TIMEZONE
 from vavilov.db_management.phenotype import suggest_obs_entity_name
 from vavilov.models import (Plant, Assay, Trait, ObservationImages,
                             Accession, Cvterm, ObservationEntity,
@@ -28,8 +21,6 @@ MAGIC_NUMBERS_BY_FORMAT = {'jpg': [b'\xFF\xD8\xFF\xE0', b'\xFF\xD8\xFF\xDB',
                            'gif': [b'\x47\x49\x46\x38\x39\x61',
                                    b'\x47\x49\x46\x38\x37\x61'],
                            'png': [b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A']}
-
-OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
 
 def get_thumbnail_path(photo_path, image_format):

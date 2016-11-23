@@ -7,9 +7,9 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils.dateparse import parse_datetime
 from guardian.shortcuts import assign_perm
-from pytz import timezone
 
 from vavilov.conf import settings
+from vavilov.conf.settings import OUR_TIMEZONE
 from vavilov.db_management.phenotype import (add_or_load_observation,
                                              suggest_plant_part_uid)
 from vavilov.models import (Assay, Cvterm, Trait, TraitProp, Plant,
@@ -17,7 +17,6 @@ from vavilov.models import (Assay, Cvterm, Trait, TraitProp, Plant,
                             AccessionSynonym, Observation, PlantPart)
 
 
-OUR_TIMEZONE = timezone(site_settings.TIME_ZONE)
 FIELDBOOK_TO_DB_TYPE_TRANSLATOR = {'categorical': 'text', 'numeric': 'numeric',
                                    'percent': 'percent', 'date': 'date',
                                    'text': 'text', 'boolean': 'boolean',

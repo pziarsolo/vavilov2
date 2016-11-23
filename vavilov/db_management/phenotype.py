@@ -3,12 +3,11 @@ import datetime
 import os
 from random import Random
 
-from django.conf import settings as site_settings
 from django.contrib.auth.models import User, Group
 from django.db import transaction
 from guardian.shortcuts import assign_perm
-from pytz import timezone
 
+from vavilov.conf.settings import OUR_TIMEZONE
 from vavilov.db_management.base import comma_dialect
 from vavilov.db_management.excel import excel_dict_reader
 from vavilov.models import (Observation, Trait, Assay, AssayPlant,
@@ -19,7 +18,6 @@ from vavilov.models import (Observation, Trait, Assay, AssayPlant,
 
 TRAIT_PROPS_CV = 'trait_props'
 TRAIT_TYPES_CV = 'trait_types'
-OUR_TIMEZONE = timezone(site_settings.TIME_ZONE)
 
 
 def add_or_load_assays(fpath):
