@@ -10,19 +10,16 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
-import gi
-from gi.repository import GExiv2
 from guardian.shortcuts import assign_perm
 from pytz import timezone
 
-from imagetools.exif import get_metadata
+from imagetools.exif import get_exif_comments, get_exif_metadata
 from imagetools.utils import get_image_format
-from vavilov.db_management.phenotype import suggest_plant_part_uid
+from vavilov.db_management.phenotype import suggest_obs_entity_name
 from vavilov.models import (Plant, Assay, Trait, ObservationImages,
-                            Accession, Cvterm, PlantPart)
+                            Accession, Cvterm, ObservationEntity,
+                            ObservationEntityPlant)
 
-
-gi.require_version('GExiv2', '0.10')
 
 PLANT_PART = 'plant_part'
 MAGIC_NUMBERS_BY_FORMAT = {'jpg': [b'\xFF\xD8\xFF\xE0', b'\xFF\xD8\xFF\xDB',
@@ -47,7 +44,7 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     image_format = get_image_format(image_fpath)
     thumb_fpath = get_thumbnail_path(image_fpath, image_format)
 
-    exif = GExiv2.Metadata(image_fpath)
+    exif = get_exif_metadata(image_fpath)
     try:
         creation_time = exif.get_date_time()
         creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
@@ -55,7 +52,7 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
         creation_time = datetime.datetime.now()
         creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
 
-    exif_data = get_metadata(image_fpath)
+    exif_data = get_exif_comments(image_fpath)
     try:
         image_id = exif_data['image_id']
     except KeyError:
@@ -108,10 +105,12 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     part_name = exif_data[PLANT_PART].lower()
     part_type = Cvterm.objects.get(cv__name='plant_parts', name=part_name)
 
-    plant_part_uid = suggest_plant_part_uid(plant_id, part_name)
-    plant_part = PlantPart.objects.create(plant_part_uid=plant_part_uid,
-                                          plant=plant,
-                                          part=part_type)
+    obs_entity_name = suggest_obs_entity_name(plant_id, part_name)
+    obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                  part=part_type)
+    if created:
+        ObservationEntityPlant.objects.create(obs_entity=obs_entity,
+                                              plant=plant)
 
     trait_name = 'image_{}'.format(part_name)
 
@@ -130,7 +129,7 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     thumb_suf = SimpleUploadedFile(os.path.basename(thumb_fpath),
                                    open(thumb_fpath, 'rb').read(),
                                    content_type=content_type)
-    obs_image = ObservationImages.objects.create(plant_part=plant_part,
+    obs_image = ObservationImages.objects.create(obs_entity=obs_entity,
                                                  observation_image_uid=image_id,
                                                  assay=assay,
                                                  image=image_suf,

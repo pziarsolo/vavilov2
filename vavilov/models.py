@@ -359,7 +359,7 @@ class Accession(models.Model):
         return obs
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(plant_part__plant__in=self.plants(user))
+        obs_images = ObservationImages.objects.filter(obs_entity__observationentityplant__plant__in=self.plants(user))
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
                                           klass=obs_images,
                                           accept_global_perms=False)
@@ -648,7 +648,7 @@ class Plant(models.Model):
         return obs
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(plant_part__plant=self)
+        obs_images = ObservationImages.objects.filter(obs_entity__observationentityplant__plant=self)
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
                                           klass=obs_images,
                                           accept_global_perms=False)
@@ -769,16 +769,16 @@ class Observation(models.Model):
 
 def get_photo_dir(instance, filename):
     # photo_dir/accession/imagename
-    accession = instance.plant_part.plant.accession.accession_number
-    plant_part = instance.plant_part.part.name
+    accession = instance.obs_entity.plants[0].accession.accession_number
+    plant_part = instance.obs_entity.part.name
     return '{}/{}/{}/{}'.format(PHENO_PHOTO_DIR, accession, plant_part,
                                 filename)
 
 
 def get_thumb_dir(instance, filename):
     # photo_dir/accession/thumbnails/imagename
-    accession = instance.plant_part.plant.accession.accession_number
-    plant_part = instance.plant_part.part.name
+    accession = instance.obs_entity.plants[0].accession.accession_number
+    plant_part = instance.obs_entity.part.name
     return '{}/{}/{}/thumbnails/{}'.format(PHENO_PHOTO_DIR, accession,
                                            plant_part, filename)
 
