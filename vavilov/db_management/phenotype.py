@@ -68,7 +68,7 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
         trait = Trait.objects.get(name=trait_name,
                                   assaytrait__assay=assay)
     except Trait.DoesNotExist:
-        raise ValueError('Trait not loaded yet in db: {}'.format(trait))
+        raise ValueError('Trait not loaded yet in db: {}'.format(trait_name))
     plants = obs_entity.plants
 
     try:
@@ -76,7 +76,7 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
     except AssayPlant.DoesNotExist:
         msg = 'This assay {} and this plants {} are not related'
         msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
-        raise RuntimeError(msg)
+        raise ValueError(msg)
 
     obs = Observation.objects.get_or_create(obs_entity=obs_entity,
                                             trait=trait, assay=assay,
@@ -311,7 +311,7 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
             if raise_on_error:
                 raise
             else:
-                sys.stderr.write(error)
+                sys.stderr.write(str(error) + '\n')
                 continue
 
         creation_time = row.get(date_header)
@@ -321,6 +321,13 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
 
         observer = row.get(observer_header, observer)
         trait_name = row.get(trait_header)
-        obs = add_or_load_observation(obs_entity, trait_name, assayname, value,
-                                      creation_time, observer)
-        assign_perm('view_observation', perm_gr, obs)
+        try:
+            obs = add_or_load_observation(obs_entity, trait_name, assayname,
+                                          value, creation_time, observer)
+            assign_perm('view_observation', perm_gr, obs)
+        except ValueError as error:
+            if raise_on_error:
+                raise
+            else:
+                sys.stderr.write(str(error) + '\n')
+                continue
