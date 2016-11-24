@@ -755,7 +755,7 @@ class Observation(models.Model):
     assay = models.ForeignKey(Assay)
     trait = models.ForeignKey(Trait)
     value = models.CharField(max_length=100)
-    creation_time = models.DateTimeField()
+    creation_time = models.DateTimeField(null=True)
     observer = models.CharField(max_length=100, null=True)
 
     class Meta:
