@@ -1,4 +1,5 @@
 
+from builtins import isinstance
 import csv
 from operator import attrgetter
 from os.path import join, dirname, splitext
@@ -220,10 +221,19 @@ def excel_dict_reader(fpath):
                 header = cell.value
                 if not header:
                     continue
+                try:
+                    header = header.strip()
+                except Exception:
+                    pass
                 header_pos[header] = index
             first = False
             continue
         row_dict = {}
         for header, pos in header_pos.items():
-            row_dict[header] = row[pos].value
+            value = row[pos].value
+            try:
+                value = value.strip()
+            except Exception:
+                pass
+            row_dict[header] = value
         yield row_dict

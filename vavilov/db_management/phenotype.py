@@ -65,10 +65,10 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
     except Assay.DoesNotExist:
         raise ValueError('Assay not loaded yet in db: {}'.format(assay_name))
     try:
-        trait = Trait.objects.get(name=trait_name,
-                                  assaytrait__assay=assay)
+        trait = Trait.objects.get(name=trait_name, assaytrait__assay=assay)
     except Trait.DoesNotExist:
-        raise ValueError('Trait not loaded yet in db: {}'.format(trait_name))
+        raise ValueError('Trait not loaded yet in db: {}:{}'.format(trait_name,
+                                                                    assay_name))
     plants = obs_entity.plants
 
     try:
@@ -87,33 +87,34 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
 
 
 def add_or_load_excel_traits(fpath, assays):
-    for row in excel_dict_reader(fpath):
-        name = row['name']
-        type_ = row['type']
-        description = row['description']
-        try:
-            type_ = Cvterm.objects.get(name=type_, cv__name=TRAIT_TYPES_CV)
-        except Cvterm.DoesNotExist:
-            msg = 'Trait type not loaded yet in db: {}'.format(type_)
-            raise RuntimeError(msg)
-
-        trait, trait_created = Trait.objects.get_or_create(name=name, type=type_)
-        for assay in assays:
+    with transaction.atomic():
+        for row in excel_dict_reader(fpath):
+            name = row['name']
+            type_ = row['type']
+            description = row['description']
             try:
-                assay = Assay.objects.get(name=assay)
-            except Assay.DoesNotExist:
-                raise RuntimeError('Assay not loaded yet in db: {}'.format(assay))
+                type_ = Cvterm.objects.get(name=type_, cv__name=TRAIT_TYPES_CV)
+            except Cvterm.DoesNotExist:
+                msg = 'Trait type not loaded yet in db: {}'.format(type_)
+                raise RuntimeError(msg)
 
-            created = AssayTrait.objects.get_or_create(assay=assay,
-                                                       trait=trait)[1]
-            if created:
-                assign_perm('view_trait', assay.owner, trait)
+            trait, trait_created = Trait.objects.get_or_create(name=name, type=type_)
+            for assay in assays:
+                try:
+                    assay = Assay.objects.get(name=assay)
+                except Assay.DoesNotExist:
+                    raise RuntimeError('Assay not loaded yet in db: {}'.format(assay))
 
-        if trait_created and description:
-            desc_type = Cvterm.objects.get(cv__name=TRAIT_PROPS_CV,
-                                           name='description')
-            TraitProp.objects.create(trait=trait, type=desc_type,
-                                     value=description)
+                created = AssayTrait.objects.get_or_create(assay=assay,
+                                                           trait=trait)[1]
+                if created:
+                    assign_perm('view_trait', assay.owner, trait)
+
+            if trait_created and description:
+                desc_type = Cvterm.objects.get(cv__name=TRAIT_PROPS_CV,
+                                               name='description')
+                TraitProp.objects.create(trait=trait, type=desc_type,
+                                         value=description)
 
 
 def add_or_load_plants(fpath, assay, experimental_field_header=None,
@@ -271,6 +272,18 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
     return obs_ent
 
 
+def parse_qual_translator(fhand):
+    trait_values = {}
+    for entry in csv.DictReader(fhand):
+        trait = entry['name'].strip()
+        score = entry['score'].strip()
+        value = entry['value'].strip()
+        if trait not in trait_values:
+            trait_values[trait] = {}
+        trait_values[trait][score] = value
+    return trait_values
+
+
 def add_or_load_excel_observations(fpath, observer=None, assay=None,
                                    plant_part=None,
                                    accession_header='accession',
@@ -283,51 +296,64 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
                                    plant_number_header='plant_number',
                                    trait_header='trait',
                                    view_perm_group=None,
-                                   raise_on_error=True):
-
-    for row in excel_dict_reader(fpath):
-        value = row.get(value_header, None)
-        if value is None:
-            continue
-
-        plant_name = row.get(plant_name_header, None)
-        plant_part = row.get(plant_part_header, plant_part)
-        obs_entity_name = row.get(obs_uid_header, None)
-        plant_number = row.get(plant_number_header, None)
-        accession = row.get(accession_header, None)
-        assayname = row.get(assay_header, assay)
-        if view_perm_group is None:
-            view_perm_group = assayname
-        perm_gr = Group.objects.get(name=view_perm_group)
-        try:
-            obs_entity = get_or_create_obs_entity(accession_number=accession,
-                                                  assay_name=assayname,
-                                                  plant_part=plant_part,
-                                                  plant_name=plant_name,
-                                                  obs_entity_name=obs_entity_name,
-                                                  plant_number=plant_number,
-                                                  perm_gr=perm_gr)
-        except ValueError as error:
-            if raise_on_error:
-                raise
-            else:
-                sys.stderr.write(str(error) + '\n')
+                                   raise_on_error=True,
+                                   qualitative_translator=None):
+    with transaction.atomic():
+        for row in excel_dict_reader(fpath):
+            value = row.get(value_header, None)
+            if value is None or value == 'nd':
                 continue
 
-        creation_time = row.get(date_header)
-        if creation_time is None:
-            creation_time = datetime.datetime.now()
-        creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
+            plant_name = row.get(plant_name_header, None)
+            plant_part = row.get(plant_part_header, plant_part)
+            obs_entity_name = row.get(obs_uid_header, None)
+            plant_number = row.get(plant_number_header, None)
+            accession = row.get(accession_header, None)
+            assayname = row.get(assay_header, assay)
 
-        observer = row.get(observer_header, observer)
-        trait_name = row.get(trait_header)
-        try:
-            obs = add_or_load_observation(obs_entity, trait_name, assayname,
-                                          value, creation_time, observer)
-            assign_perm('view_observation', perm_gr, obs)
-        except ValueError as error:
-            if raise_on_error:
-                raise
-            else:
-                sys.stderr.write(str(error) + '\n')
-                continue
+            if view_perm_group is None:
+                view_perm_group = assayname
+            perm_gr = Group.objects.get(name=view_perm_group)
+            try:
+                obs_entity = get_or_create_obs_entity(accession_number=accession,
+                                                      assay_name=assayname,
+                                                      plant_part=plant_part,
+                                                      plant_name=plant_name,
+                                                      obs_entity_name=obs_entity_name,
+                                                      plant_number=plant_number,
+                                                      perm_gr=perm_gr)
+            except ValueError as error:
+                if raise_on_error:
+                    raise
+                else:
+                    sys.stderr.write(str(error) + '\n')
+                    continue
+
+            creation_time = row.get(date_header)
+            if creation_time is None:
+                creation_time = datetime.datetime.now()
+            creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
+
+            observer = row.get(observer_header, observer)
+            trait_name = row.get(trait_header)
+
+            if qualitative_translator:
+                try:
+                    value = qualitative_translator[trait_name][value]
+                except KeyError as error:
+                    if raise_on_error:
+                        raise
+                else:
+                    sys.stderr.write(str(error) + '\n')
+                    continue
+
+            try:
+                obs = add_or_load_observation(obs_entity, trait_name, assayname,
+                                              value, creation_time, observer)
+                assign_perm('view_observation', perm_gr, obs)
+            except ValueError as error:
+                if raise_on_error:
+                    raise
+                else:
+                    sys.stderr.write(str(error) + '\n')
+                    continue
