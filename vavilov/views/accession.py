@@ -39,23 +39,34 @@ def accession(request, accession_number):
     context['accession'] = acc
 
     # assays
-    assay_table = AssaysTable(acc.assays(user), template='table.html',
-                              prefix='assays-')
-    RequestConfig(request).configure(assay_table)
+    assays = acc.assays(user)
+    if assays:
+        assay_table = AssaysTable(assays, template='table.html',
+                                  prefix='assays-')
+        RequestConfig(request).configure(assay_table)
+    else:
+        assay_table = None
     context['assays'] = assay_table
 
     # plants
-    plant_table = PlantsTable(acc.plants(user),
-                              template='table.html',
-                              prefix='accessions-')
-    RequestConfig(request).configure(plant_table)
+    plants = acc.plants(user)
+    if plants:
+        plant_table = PlantsTable(acc.plants(user),
+                                  template='table.html',
+                                  prefix='accessions-')
+        RequestConfig(request).configure(plant_table)
+    else:
+        plant_table = None
     context['plants'] = plant_table
 
     # Observations
-    observations_table = ObservationsTable(acc.observations(user),
-                                           template='table.html',
-                                           prefix='observations-')
-    RequestConfig(request).configure(observations_table)
+    obs = acc.observations(user)
+    if obs:
+        observations_table = ObservationsTable(obs, template='table.html',
+                                               prefix='observations-')
+        RequestConfig(request).configure(observations_table)
+    else:
+        observations_table = None
     context['observations'] = observations_table
 
     context['obs_images'] = acc.obs_images(user)
