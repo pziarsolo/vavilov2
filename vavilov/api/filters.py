@@ -1,7 +1,7 @@
 
 from django.db.models import Q
+from django_filters import filters
 import django_filters
-from django_filters.filters import MethodFilter
 
 from vavilov.conf.settings import GENEBANK_CODE
 from vavilov.models import (Taxa, get_bottom_taxons, Accession, Cvterm, Cv,
@@ -10,16 +10,17 @@ from vavilov.models import (Taxa, get_bottom_taxons, Accession, Cvterm, Cv,
 
 class AccessionFilter(django_filters.FilterSet):
     # Accesion filter must be the first in process
-    accession = MethodFilter(action='accession_number_filter')
+    accession = filters.CharFilter(method='accession_number_filter')
     collecting_source = django_filters.NumberFilter(name='passport__collecting_source')
     country = django_filters.NumberFilter(name='passport__location__country')
     region = django_filters.CharFilter(name='passport__location__region',
                                        lookup_expr='icontains')
     biological_status = django_filters.NumberFilter(name='passport__biological_status')
-    taxa = MethodFilter(action='accession_by_taxa')
+    taxa = filters.CharFilter(method='accession_by_taxa')
 
     class Meta:
         model = Accession
+        fields = '__all__'
 
     def accession_number_filter(self, queryset, value):
         # this is just the logic to get related accessions to value
@@ -50,6 +51,7 @@ class DbFilter(django_filters.FilterSet):
 
     class Meta:
         model = Db
+        fields = ['name']
 
 
 class CvtermFilter(django_filters.FilterSet):
@@ -57,6 +59,7 @@ class CvtermFilter(django_filters.FilterSet):
 
     class Meta:
         model = Cvterm
+        fields = ['cv']
 
 
 class CvFilter(django_filters.FilterSet):
@@ -64,6 +67,7 @@ class CvFilter(django_filters.FilterSet):
 
     class Meta:
         model = Cv
+        fields = ['name']
 
 
 class CountryFilter(django_filters.FilterSet):
@@ -71,6 +75,7 @@ class CountryFilter(django_filters.FilterSet):
 
     class Meta:
         model = Country
+        fields = ['name']
 
 
 class AssayFilter(django_filters.FilterSet):
@@ -78,6 +83,7 @@ class AssayFilter(django_filters.FilterSet):
 
     class Meta:
         model = Assay
+        fields = ['name']
 
 
 class PlantFilter(django_filters.FilterSet):
@@ -85,3 +91,4 @@ class PlantFilter(django_filters.FilterSet):
 
     class Meta:
         model = Plant
+        fields = ['plant_name']
