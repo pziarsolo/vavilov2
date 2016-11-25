@@ -12,7 +12,7 @@ class AccessionViewTest(TestCase):
 
     def test_simple(self):
         client = Client()
-        response = client.get(reverse('accession',
+        response = client.get(reverse('accession_view',
                                       kwargs={'accession_number': 'BGV000933'}))
         assert response.status_code == 200
 
@@ -26,8 +26,9 @@ class AccessionViewTest(TestCase):
         acc = Accession.objects.get(accession_number='BGV000933')
         response = client.post(reverse('search_accession'),
                                {'accession': acc.accession_number})
+
         assert response.status_code == 302
-        assert reverse('accession', kwargs={'accession_number': 'BGV000933'}) in response.url
+        assert reverse('accession_view', kwargs={'accession_number': 'BGV000933'}) in response.url
 
         response = client.post(reverse('search_accession'),
                                {'accession': 'BGV00093'})
@@ -39,4 +40,4 @@ class AccessionViewTest(TestCase):
                                {'accession': 'AN-L-18'})
 
         assert response.status_code == 302
-        assert reverse('accession', kwargs={'accession_number': 'BGV000917'}) in response.url
+        assert reverse('accession_view', kwargs={'accession_number': 'BGV000917'}) in response.url

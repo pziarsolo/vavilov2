@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.conf import settings
 import vavilov.models
 import vavilov.utils.storage
-from django.conf import settings
 
 
 class Migration(migrations.Migration):
@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Accession',
             fields=[
-                ('accession_id', models.AutoField(primary_key=True, serialize=False)),
-                ('accession_number', models.CharField(verbose_name='Accession number', max_length=20)),
+                ('accession_id', models.AutoField(serialize=False, primary_key=True)),
+                ('accession_number', models.CharField(max_length=20, verbose_name='Accession number')),
             ],
             options={
                 'db_table': 'vavilov_accession',
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccessionProp',
             fields=[
-                ('accession_prop_id', models.AutoField(primary_key=True, serialize=False)),
+                ('accession_prop_id', models.AutoField(serialize=False, primary_key=True)),
                 ('value', models.CharField(max_length=255)),
                 ('accession', models.ForeignKey(to='vavilov.Accession')),
             ],
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccessionRelationship',
             fields=[
-                ('accession_relationship_id', models.AutoField(primary_key=True, serialize=False)),
+                ('accession_relationship_id', models.AutoField(serialize=False, primary_key=True)),
                 ('object', models.ForeignKey(related_name='object', to='vavilov.Accession')),
                 ('subject', models.ForeignKey(related_name='subject', to='vavilov.Accession')),
             ],
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccessionSynonym',
             fields=[
-                ('accession_synonym_id', models.AutoField(primary_key=True, serialize=False)),
+                ('accession_synonym_id', models.AutoField(serialize=False, primary_key=True)),
                 ('synonym_code', models.CharField(max_length=255)),
                 ('accession', models.ForeignKey(to='vavilov.Accession')),
             ],
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccessionTaxa',
             fields=[
-                ('accession_organism_id', models.AutoField(primary_key=True, serialize=False)),
+                ('accession_organism_id', models.AutoField(serialize=False, primary_key=True)),
                 ('creating_date', models.DateField(null=True)),
                 ('accession', models.ForeignKey(to='vavilov.Accession')),
             ],
@@ -74,12 +74,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Assay',
             fields=[
-                ('assay_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(unique=True, max_length=100)),
-                ('description', models.CharField(null=True, max_length=100)),
+                ('assay_id', models.AutoField(serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=100, unique=True)),
+                ('description', models.CharField(max_length=100, null=True)),
                 ('start_date', models.DateField(null=True)),
                 ('end_date', models.DateField(null=True)),
-                ('year', models.CharField(null=True, max_length=255)),
+                ('year', models.CharField(max_length=255, null=True)),
             ],
             options={
                 'db_table': 'vavilov_assay',
@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AssayPlant',
             fields=[
-                ('assay_plant_id', models.AutoField(primary_key=True, serialize=False)),
+                ('assay_plant_id', models.AutoField(serialize=False, primary_key=True)),
                 ('assay', models.ForeignKey(to='vavilov.Assay')),
             ],
             options={
@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AssayProp',
             fields=[
-                ('assay_prop_id', models.AutoField(primary_key=True, serialize=False)),
+                ('assay_prop_id', models.AutoField(serialize=False, primary_key=True)),
                 ('value', models.CharField(max_length=255)),
                 ('assay', models.ForeignKey(to='vavilov.Assay')),
             ],
@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AssayTrait',
             fields=[
-                ('assay_trait_id', models.AutoField(primary_key=True, serialize=False)),
+                ('assay_trait_id', models.AutoField(serialize=False, primary_key=True)),
                 ('assay', models.ForeignKey(to='vavilov.Assay')),
             ],
             options={
@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Country',
             fields=[
-                ('country_id', models.AutoField(primary_key=True, serialize=False)),
+                ('country_id', models.AutoField(serialize=False, primary_key=True)),
                 ('code2', models.CharField(max_length=2)),
                 ('code3', models.CharField(max_length=3)),
                 ('name', models.CharField(max_length=255)),
@@ -133,9 +133,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Cv',
             fields=[
-                ('cv_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(unique=True, max_length=48)),
-                ('description', models.CharField(null=True, max_length=255)),
+                ('cv_id', models.AutoField(serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=48, unique=True)),
+                ('description', models.CharField(max_length=255, null=True)),
             ],
             options={
                 'db_table': 'vavilov_cv',
@@ -144,9 +144,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Cvterm',
             fields=[
-                ('cvterm_id', models.AutoField(primary_key=True, serialize=False)),
+                ('cvterm_id', models.AutoField(serialize=False, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
-                ('definition', models.CharField(null=True, max_length=255)),
+                ('definition', models.CharField(max_length=255, null=True)),
                 ('cv', models.ForeignKey(to='vavilov.Cv')),
             ],
             options={
@@ -156,11 +156,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Db',
             fields=[
-                ('db_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(unique=True, max_length=48)),
-                ('description', models.CharField(null=True, max_length=255)),
-                ('urlprefix', models.CharField(null=True, max_length=255)),
-                ('url', models.CharField(null=True, max_length=255)),
+                ('db_id', models.AutoField(serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=48, unique=True)),
+                ('description', models.CharField(max_length=255, null=True)),
+                ('urlprefix', models.CharField(max_length=255, null=True)),
+                ('url', models.CharField(max_length=255, null=True)),
             ],
             options={
                 'db_table': 'vavilov_db',
@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Dbxref',
             fields=[
-                ('dbxref_id', models.AutoField(primary_key=True, serialize=False)),
+                ('dbxref_id', models.AutoField(serialize=False, primary_key=True)),
                 ('accession_name', models.CharField(max_length=255)),
                 ('db', models.ForeignKey(to='vavilov.Db')),
             ],
@@ -180,12 +180,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Location',
             fields=[
-                ('location_id', models.AutoField(primary_key=True, serialize=False)),
-                ('site', models.CharField(null=True, max_length=50)),
-                ('province', models.CharField(null=True, max_length=50)),
-                ('region', models.CharField(null=True, max_length=50)),
-                ('latitude', models.DecimalField(max_digits=9, null=True, decimal_places=4)),
-                ('longitude', models.DecimalField(max_digits=9, null=True, decimal_places=4)),
+                ('location_id', models.AutoField(serialize=False, primary_key=True)),
+                ('site', models.CharField(max_length=50, null=True)),
+                ('province', models.CharField(max_length=50, null=True)),
+                ('region', models.CharField(max_length=50, null=True)),
+                ('latitude', models.DecimalField(max_digits=9, decimal_places=4, null=True)),
+                ('longitude', models.DecimalField(max_digits=9, decimal_places=4, null=True)),
                 ('altitude', models.IntegerField(null=True)),
                 ('country', models.ForeignKey(null=True, to='vavilov.Country')),
             ],
@@ -197,10 +197,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Observation',
             fields=[
-                ('observation_id', models.AutoField(primary_key=True, serialize=False)),
+                ('observation_id', models.AutoField(serialize=False, primary_key=True)),
                 ('value', models.CharField(max_length=100)),
-                ('creation_time', models.DateTimeField()),
-                ('observer', models.CharField(null=True, max_length=100)),
+                ('creation_time', models.DateTimeField(null=True)),
+                ('observer', models.CharField(max_length=100, null=True)),
                 ('assay', models.ForeignKey(to='vavilov.Assay')),
             ],
             options={
@@ -211,8 +211,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ObservationEntity',
             fields=[
-                ('obs_entity_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(unique=True, max_length=100)),
+                ('obs_entity_id', models.AutoField(serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=100, unique=True)),
                 ('part', models.ForeignKey(to='vavilov.Cvterm')),
             ],
             options={
@@ -222,7 +222,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ObservationEntityPlant',
             fields=[
-                ('plant_group_plant_id', models.AutoField(primary_key=True, serialize=False)),
+                ('plant_group_plant_id', models.AutoField(serialize=False, primary_key=True)),
                 ('obs_entity', models.ForeignKey(to='vavilov.ObservationEntity')),
             ],
             options={
@@ -232,12 +232,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ObservationImages',
             fields=[
-                ('observation_image_id', models.AutoField(primary_key=True, serialize=False)),
-                ('observation_image_uid', models.CharField(unique=True, max_length=255)),
-                ('image', models.ImageField(storage=vavilov.utils.storage.OnlyScanStorage(base_url='/media/', location='/'), max_length=255, upload_to=vavilov.models.get_photo_dir)),
-                ('thumbnail', models.ImageField(null=True, storage=vavilov.utils.storage.OnlyScanStorage(base_url='/media/', location='/'), max_length=255, upload_to=vavilov.models.get_thumb_dir, blank=True)),
+                ('observation_image_id', models.AutoField(serialize=False, primary_key=True)),
+                ('observation_image_uid', models.CharField(max_length=255, unique=True)),
+                ('image', models.ImageField(max_length=255, storage=vavilov.utils.storage.OnlyScanStorage(base_url='/media/', location='/home/peio/devel/pyenv3/vavilov_dev/vavilov_web/media'), upload_to=vavilov.models.get_photo_dir)),
+                ('thumbnail', models.ImageField(blank=True, max_length=255, null=True, storage=vavilov.utils.storage.OnlyScanStorage(base_url='/media/', location='/home/peio/devel/pyenv3/vavilov_dev/vavilov_web/media'), upload_to=vavilov.models.get_thumb_dir)),
                 ('creation_time', models.DateTimeField()),
-                ('user', models.CharField(null=True, max_length=100)),
+                ('user', models.CharField(max_length=100, null=True)),
                 ('assay', models.ForeignKey(to='vavilov.Assay')),
                 ('obs_entity', models.ForeignKey(to='vavilov.ObservationEntity')),
             ],
@@ -249,14 +249,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Passport',
             fields=[
-                ('passport_id', models.AutoField(primary_key=True, serialize=False)),
-                ('local_name', models.CharField(null=True, max_length=50)),
-                ('traditional_location', models.CharField(null=True, max_length=50)),
+                ('passport_id', models.AutoField(serialize=False, primary_key=True)),
+                ('local_name', models.CharField(max_length=50, null=True)),
+                ('traditional_location', models.CharField(max_length=50, null=True)),
                 ('acquisition_date', models.DateField(null=True)),
                 ('collecting_date', models.DateField(null=True)),
                 ('accession', models.ForeignKey(to='vavilov.Accession')),
-                ('biological_status', models.ForeignKey(related_name='biological_status', verbose_name='Biological status of accession', null=True, to='vavilov.Cvterm')),
-                ('collecting_source', models.ForeignKey(related_name='collecting_source', verbose_name='collecting_source', null=True, to='vavilov.Cvterm')),
+                ('biological_status', models.ForeignKey(null=True, verbose_name='Biological status of accession', related_name='biological_status', to='vavilov.Cvterm')),
+                ('collecting_source', models.ForeignKey(null=True, verbose_name='collecting_source', related_name='collecting_source', to='vavilov.Cvterm')),
                 ('location', models.ForeignKey(null=True, to='vavilov.Location')),
             ],
             options={
@@ -267,9 +267,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Person',
             fields=[
-                ('person_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(unique=True, max_length=20)),
-                ('description', models.CharField(null=True, max_length=255)),
+                ('person_id', models.AutoField(serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=20, unique=True)),
+                ('description', models.CharField(max_length=255, null=True)),
                 ('type', models.ForeignKey(to='vavilov.Cvterm')),
             ],
             options={
@@ -279,7 +279,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PersonRelationship',
             fields=[
-                ('person_relationship_id', models.AutoField(primary_key=True, serialize=False)),
+                ('person_relationship_id', models.AutoField(serialize=False, primary_key=True)),
                 ('object', models.ForeignKey(related_name='object', to='vavilov.Person')),
                 ('subject', models.ForeignKey(related_name='subject', to='vavilov.Person')),
                 ('type', models.ForeignKey(to='vavilov.Cvterm')),
@@ -291,12 +291,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Plant',
             fields=[
-                ('plant_id', models.AutoField(primary_key=True, serialize=False)),
-                ('plant_name', models.CharField(unique=True, max_length=100)),
-                ('experimental_field', models.CharField(null=True, max_length=255)),
-                ('row', models.CharField(null=True, max_length=10)),
-                ('column', models.CharField(null=True, max_length=10)),
-                ('pot_number', models.CharField(null=True, max_length=10)),
+                ('plant_id', models.AutoField(serialize=False, primary_key=True)),
+                ('plant_name', models.CharField(max_length=100, unique=True)),
+                ('experimental_field', models.CharField(max_length=255, null=True)),
+                ('row', models.CharField(max_length=10, null=True)),
+                ('column', models.CharField(max_length=10, null=True)),
+                ('pot_number', models.CharField(max_length=10, null=True)),
                 ('accession', models.ForeignKey(to='vavilov.Accession')),
             ],
             options={
@@ -307,7 +307,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Pub',
             fields=[
-                ('pub_id', models.AutoField(primary_key=True, serialize=False)),
+                ('pub_id', models.AutoField(serialize=False, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
             ],
             options={
@@ -317,7 +317,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Taxa',
             fields=[
-                ('taxa_id', models.AutoField(primary_key=True, serialize=False)),
+                ('taxa_id', models.AutoField(serialize=False, primary_key=True)),
                 ('name', models.CharField(max_length=100)),
                 ('rank', models.ForeignKey(to='vavilov.Cvterm')),
             ],
@@ -328,7 +328,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TaxaRelationship',
             fields=[
-                ('taxa_relationship_id', models.AutoField(primary_key=True, serialize=False)),
+                ('taxa_relationship_id', models.AutoField(serialize=False, primary_key=True)),
                 ('taxa_object', models.ForeignKey(related_name='taxa_object', to='vavilov.Taxa')),
                 ('taxa_subject', models.ForeignKey(related_name='taxa_subject', to='vavilov.Taxa')),
                 ('type', models.ForeignKey(to='vavilov.Cvterm')),
@@ -340,8 +340,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Trait',
             fields=[
-                ('trait_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(unique=True, max_length=100)),
+                ('trait_id', models.AutoField(serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=100, unique=True)),
                 ('type', models.ForeignKey(to='vavilov.Cvterm')),
             ],
             options={
@@ -352,7 +352,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TraitProp',
             fields=[
-                ('trait_prop_id', models.AutoField(primary_key=True, serialize=False)),
+                ('trait_prop_id', models.AutoField(serialize=False, primary_key=True)),
                 ('value', models.CharField(max_length=100)),
                 ('trait', models.ForeignKey(to='vavilov.Trait')),
                 ('type', models.ForeignKey(to='vavilov.Cvterm')),

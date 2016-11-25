@@ -19,6 +19,7 @@ from vavilov.forms.accession import SearchPassportForm
 from vavilov.models import (Accession, Person, AccessionRelationship, Cvterm,
                             Country, Taxa, get_bottom_taxons)
 from vavilov.utils.csv import return_csv_response
+from vavilov.utils.streams import return_excel_response
 from vavilov.views.observation import ObservationsTable
 from vavilov.views.plant import AssaysTable, PlantsTable
 
@@ -67,7 +68,7 @@ def accession(request, accession_number):
 class AccessionsTable(tables.Table):
     search_fields = ACCESSION_SEARCH_RESULT_FIELDS
     if 'accession_number' in search_fields:
-        accession_number = tables.LinkColumn('accession',
+        accession_number = tables.LinkColumn('accession_view',
                                              args=[A('accession_number')],
                                              verbose_name='Accession')
 
@@ -179,11 +180,15 @@ def search(request):
                                                user=request.user)
             download_search = request.GET.get('download_search', False)
             if download_search:
-                return return_csv_response(queryset, AccessionsTable)
+                format_ = request.GET['format']
+                if format_ == 'csv':
+                    return return_csv_response(queryset, AccessionsTable)
+                elif format_ == 'excel':
+                    return return_excel_response(queryset, AccessionsTable)
 
             elif queryset and not download_search:
                 if len(queryset) == 1:
-                    return redirect(reverse('accession',
+                    return redirect(reverse('accession_view',
                                             kwargs={'accession_number': queryset[0].accession_number}))
 
                 accession_table = AccessionsTable(queryset,

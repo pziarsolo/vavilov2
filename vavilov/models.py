@@ -766,6 +766,10 @@ class Observation(models.Model):
     def plant(self):
         return self.plant_part.plant
 
+    @property
+    def accession(self):
+        return self.obs_entity.plants.first().accession
+
 
 def get_photo_dir(instance, filename):
     # photo_dir/accession/imagename

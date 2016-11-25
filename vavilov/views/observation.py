@@ -10,18 +10,18 @@ from guardian.shortcuts import get_objects_for_user
 import django_tables2 as tables
 
 from vavilov.forms.observations import SearchObservationForm
-from vavilov.models import Observation
+from vavilov.models import Observation, Plant
 from vavilov.utils.streams import return_csv_response, return_excel_response
 
 
 class ObservationsTable(tables.Table):
-    Accession = tables.LinkColumn('accession_view', args=[A('plant.accession.code')],
-                                  accessor=A('plant.accession.code'),
+    Accession = tables.LinkColumn('accession_view', args=[A('accession.accession_number')],
+                                  accessor=A('accession.accession_number'),
                                   orderable=True, verbose_name='Accession')
     plant = tables.LinkColumn('plant_view', args=[A('plant_part.plant.unique_id')],
                               accessor=A('plant_part.plant.unique_id'),
                               orderable=True, verbose_name='Plant')
-    plant_part = tables.Column('Plant part', accessor=A('plant_part.part.name'),
+    plant_part = tables.Column('Plant part', accessor=A('obs_entity.part.name'),
                                default='', orderable=True)
     assay = tables.LinkColumn('assay_view', args=[A('assay.name')],
                               accessor=A('assay.name'),
@@ -45,15 +45,19 @@ def _build_entry_query(search_criteria, user):
     query = Observation.objects.all()
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
-        query = query.filter(Q(plant_part__plant__accession__code__icontains=accession_code) |
-                             Q(plant_part__plant__accession__accessionsynonyms__code__icontains=accession_code))
+        acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
+                                          Q(accession__accessionsynonyms__synonym_code__icontains=accession_code))
+        query = query.filter(obs_entity__obsentityplant__plant__in=acc_plants)
+
+#         query = query.filter(Q(plant_part__plant__accession__code__icontains=accession_code) |
+#                              Q(plant_part__plant__accession__accessionsynonyms__code__icontains=accession_code))
     if 'plant' in search_criteria and search_criteria['plant'] != "":
         plant_code = search_criteria['plant']
         query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
 
     if 'plant_part' in search_criteria and search_criteria['plant_part'] != "":
         plant_part = search_criteria['plant_part']
-        query = query.filter(plant_part__part__name=plant_part)
+        query = query.filter(obs_entity__part__name=plant_part)
 
     if 'assay' in search_criteria and search_criteria['assay'] != "":
         query = query.filter(assay__name=search_criteria['assay'])
@@ -68,7 +72,7 @@ def _build_entry_query(search_criteria, user):
     if 'observer' in search_criteria and search_criteria['observer']:
         observer = search_criteria['observer']
         query = query.filter(user__icontains=observer)
-    query = get_objects_for_user(user, 'pheno_manager.view_observation',
+    query = get_objects_for_user(user, 'vavilov.view_observation',
                                  klass=query)
 
     return query

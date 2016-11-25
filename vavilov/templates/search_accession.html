@@ -11,11 +11,20 @@
 	{% if accessions %}
 	   <h3> Search result</h3>
 	  {% render_table accessions %}
-    {% url 'search_accessions' as base_url %}
-    {% load urlbuilder %}
-        <div class=download_csv>
-            <p><a href='{% build_url base_url search_criteria download_search=True %}' download><img src="{% static "genebank/style/images/csv_icon.png"%}"/></a></p>
-        </div>
+{#    {% url 'search_accessions' as base_url %}#}
+{#    {% load urlbuilder %}#}
+{#        <div class=download_csv>#}
+{#            <p><a href='{% build_url base_url search_criteria download_search=True %}' download><img src="{% static "vavilov/style/images/csv_icon.png"%}"/></a></p>#}
+{#        </div>#}
+      {% url 'search_accessions' as base_url %}
+      {% load urlbuilder %}#}
+      <div class=download_csv>
+          <ul> 
+              <li>Download</li>
+              <li><a href='{% build_url base_url search_criteria download_search=True,format=csv%}' download><img src="{% static "vavilov/style/images/csv_icon.png"%}"/></a></li>
+              <li><a href='{% build_url base_url search_criteria download_search=True,format=excel%}' download><img src="{% static "vavilov/style/images/xls_icon.png"%}"/></a></li>
+           </ul>
+      </div>
 	{% else %}
 	 <h3> Search Passport data</h3>
 	   <form action="{% url 'search_accession' %}" method="post">{% csrf_token %}
