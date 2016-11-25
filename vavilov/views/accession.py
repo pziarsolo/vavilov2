@@ -1,6 +1,7 @@
 from functools import reduce
 import operator
 
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http.response import HttpResponseNotFound
@@ -154,6 +155,7 @@ def _build_experiment_query(search_criteria, user=None):
     return query
 
 
+@login_required
 def search(request):
     context = RequestContext(request)
     context.update(csrf(request))
