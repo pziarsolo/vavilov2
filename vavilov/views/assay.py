@@ -19,16 +19,23 @@ def assay(request, name):
     context['assay'] = assay
 
     # plants
-    plant_table = PlantsTable(assay.plants(user), template='table.html',
-                              prefix='plant-')
-    RequestConfig(request).configure(plant_table)
+    plants = assay.plants(user)
+    if plants:
+        plant_table = PlantsTable(plants, template='table.html',
+                                  prefix='plant-')
+        RequestConfig(request).configure(plant_table)
+    else:
+        plant_table = None
     context['plants'] = plant_table
 
     # Observations
-    observations_table = ObservationsTable(assay.observations(user),
-                                           template='table.html',
-                                           prefix='observation-')
-    RequestConfig(request).configure(observations_table)
+    obs = assay.observations(user)
+    if obs:
+        observations_table = ObservationsTable(obs, template='table.html',
+                                               prefix='observations-')
+        RequestConfig(request).configure(observations_table)
+    else:
+        observations_table = None
     context['observations'] = observations_table
 
     context['obs_images'] = assay.obs_images(user)

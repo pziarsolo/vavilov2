@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -46,11 +45,9 @@ def _build_entry_query(search_criteria, user):
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
         acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
-                                          Q(accession__accessionsynonyms__synonym_code__icontains=accession_code))
-        query = query.filter(obs_entity__obsentityplant__plant__in=acc_plants)
+                                          Q(accession__accessionsynonym__synonym_code__icontains=accession_code))
+        query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
 
-#         query = query.filter(Q(plant_part__plant__accession__code__icontains=accession_code) |
-#                              Q(plant_part__plant__accession__accessionsynonyms__code__icontains=accession_code))
     if 'plant' in search_criteria and search_criteria['plant'] != "":
         plant_code = search_criteria['plant']
         query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
@@ -78,7 +75,6 @@ def _build_entry_query(search_criteria, user):
     return query
 
 
-@login_required
 def search(request):
     context = RequestContext(request)
     context.update(csrf(request))

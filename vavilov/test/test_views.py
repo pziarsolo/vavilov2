@@ -41,3 +41,17 @@ class AccessionViewTest(TestCase):
 
         assert response.status_code == 302
         assert reverse('accession_view', kwargs={'accession_number': 'BGV000917'}) in response.url
+
+
+class ObservationsViewTest(TestCase):
+    def setUp(self):
+        load_test_data()
+
+    def test_observations(self):
+        client = Client()
+        response = client.get(reverse('search_observations'))
+        assert response.status_code == 200
+        response = client.post(reverse('search_observations'),
+                               {'accession': 'BGV000917'})
+        assert response.status_code == 200
+        print(response.context)

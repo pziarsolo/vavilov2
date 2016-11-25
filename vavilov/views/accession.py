@@ -1,7 +1,6 @@
 from functools import reduce
 import operator
 
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http.response import HttpResponseNotFound
@@ -51,9 +50,8 @@ def accession(request, accession_number):
     # plants
     plants = acc.plants(user)
     if plants:
-        plant_table = PlantsTable(acc.plants(user),
-                                  template='table.html',
-                                  prefix='accessions-')
+        plant_table = PlantsTable(acc.plants(user), template='table.html',
+                                  prefix='plant-')
         RequestConfig(request).configure(plant_table)
     else:
         plant_table = None
@@ -67,6 +65,7 @@ def accession(request, accession_number):
         RequestConfig(request).configure(observations_table)
     else:
         observations_table = None
+
     context['observations'] = observations_table
 
     context['obs_images'] = acc.obs_images(user)
@@ -166,7 +165,6 @@ def _build_experiment_query(search_criteria, user=None):
     return query
 
 
-@login_required
 def search(request):
     context = RequestContext(request)
     context.update(csrf(request))
