@@ -6,6 +6,7 @@ import sys
 
 from django.contrib.auth.models import User, Group
 from django.db import transaction
+from django.db.utils import DataError
 from guardian.shortcuts import assign_perm
 
 from vavilov.conf.settings import OUR_TIMEZONE
@@ -43,9 +44,8 @@ def add_or_load_assays(fpath):
             except User.DoesNotExist:
                 msg = 'user {} owner of assay {} does not exist'
                 raise RuntimeError(msg.format(owner, entry['name']))
-
-            assay, created = Assay.objects.get_or_create(**assay_data,
-                                                         owner=owner)
+            assay_data['owner'] = owner
+            assay, created = Assay.objects.get_or_create(**assay_data)
 
             if created:
                 for key, value in props.items():
@@ -77,12 +77,15 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
         msg = 'This assay {} and this plants {} are not related'
         msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
         raise ValueError(msg)
-
-    obs = Observation.objects.get_or_create(obs_entity=obs_entity,
-                                            trait=trait, assay=assay,
-                                            value=value,
-                                            creation_time=creation_time,
-                                            observer=observer)[0]
+    try:
+        obs = Observation.objects.get_or_create(obs_entity=obs_entity,
+                                                trait=trait, assay=assay,
+                                                value=value,
+                                                creation_time=creation_time,
+                                                observer=observer)[0]
+    except DataError:
+        print(value, observer)
+        raise
     return obs
 
 
