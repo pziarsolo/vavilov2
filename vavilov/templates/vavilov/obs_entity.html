@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load extras %}
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+{% block title %}Observation entity {{obs_entity.name}} {% endblock title %}
+{% block content %}
+<section id=central_column>
+    <h2> Observation entity {{obs_entity.name}}</h2>
+    <div class='accession_table'>
+	    <table class="data_table">
+		    <tr>
+		        <td class="key">Name :</td>
+		        <td class="value">{{obs_entity.name}}</td>
+		    </tr>
+		    <tr>
+	            <td class="key">Part type:</td>
+	            <td class="value">{{obs_entity.part.name}}</td>
+	        </tr>
+	    </table>
+	 </div>
+	 <hr class='empty_line'>
+</section>
+{% if plants %}
+    <h3> Plants part of this observation entity </h3>
+    {% render_table plants %}
+    <span class="clear"></span>
+{% endif %}
+{% endblock %}

@@ -4,7 +4,7 @@ from django_tables2.config import RequestConfig
 from guardian.decorators import permission_required
 
 from vavilov.models import Trait
-from vavilov.views.observation import ObservationsTable
+from vavilov.views.tables import ObservationsTable
 
 
 @permission_required('view_trait', (Trait, 'trait_id', 'trait_id'))
@@ -24,6 +24,6 @@ def trait(request, trait_id):
     RequestConfig(request).configure(observations_table)
     context['observations'] = observations_table
 
-    template = 'trait.html'
+    template = 'vavilov/trait.html'
     content_type = None
     return render_to_response(template, context, content_type=content_type)

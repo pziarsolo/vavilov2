@@ -4,8 +4,7 @@ from django_tables2.config import RequestConfig
 from guardian.decorators import permission_required
 
 from vavilov.models import Assay
-from vavilov.views.observation import ObservationsTable
-from vavilov.views.plant import PlantsTable
+from vavilov.views.tables import PlantsTable, ObservationsTable
 
 
 @permission_required('view_assay', (Assay, 'name', 'name'))
@@ -42,6 +41,6 @@ def assay(request, name):
     # search criteria
     context['obs_search_criteria'] = {'assay': name}
 
-    template = 'assay.html'
+    template = 'vavilov/assay.html'
     content_type = None
     return render_to_response(template, context, content_type=content_type)

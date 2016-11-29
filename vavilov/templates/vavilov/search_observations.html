@@ -10,7 +10,7 @@
 	{% if entries %}
 	   <h3> Search result</h3>
 	   {% render_table entries %}
-	   {% include 'download_observations.html' with search_criteria=search_criteria %}
+	   {% include 'vavilov/download_observations.html' with search_criteria=search_criteria %}
 	
 	{% else %}
 	   <h3> Search Observations</h3>

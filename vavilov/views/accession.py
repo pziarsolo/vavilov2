@@ -8,20 +8,17 @@ from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from django.template.context_processors import csrf
 from django_tables2 import RequestConfig
-from django_tables2.utils import A
 from guardian.decorators import permission_required
 
-import django_tables2 as tables
 from vavilov.conf.settings import (GENEBANK_CODE,
-                                   ACCESSION_SEARCH_RESULT_FIELDS,
                                    DB_CODE_PREFIX)
 from vavilov.forms.accession import SearchPassportForm
 from vavilov.models import (Accession, Person, AccessionRelationship, Cvterm,
                             Country, Taxa, get_bottom_taxons)
 from vavilov.utils.csv import return_csv_response
 from vavilov.utils.streams import return_excel_response
-from vavilov.views.observation import ObservationsTable
-from vavilov.views.plant import AssaysTable, PlantsTable
+from vavilov.views.tables import ObservationsTable, AssaysTable, PlantsTable, \
+    AccessionsTable
 
 
 @permission_required('view_accession', (Accession, 'accession_number',
@@ -72,56 +69,8 @@ def accession(request, accession_number):
     # search_criteria
     context['obs_search_criteria'] = {'accession': acc}
 
-    template = 'accession.html'
+    template = 'vavilov/accession.html'
     return render_to_response(template, context)
-
-
-class AccessionsTable(tables.Table):
-    search_fields = ACCESSION_SEARCH_RESULT_FIELDS
-    if 'accession_number' in search_fields:
-        accession_number = tables.LinkColumn('accession_view',
-                                             args=[A('accession_number')],
-                                             verbose_name='Accession')
-
-    if 'collecting_number' in search_fields:
-        collecting_number = tables.Column('Collecting number',
-                                          accessor=A('collecting_number'),
-                                          default='', orderable=False)
-
-    if 'holder_number' in search_fields:
-        holder_accession = tables.Column('Holder accession',
-                                         accessor=A('holder_accession'),
-                                         default='', orderable=False)
-    if 'organism' in search_fields:
-        organism = tables.Column('Organism',
-                                 accessor=A('organism'),
-                                 default='', orderable=False)
-
-    if 'country' in search_fields:
-        country = tables.Column('Collecting country',
-                                accessor=A('collecting_country'),
-                                default='', orderable=False)
-
-    if 'region' in search_fields:
-        region = tables.Column('Collecting Region',
-                               accessor=A('collecting_region'),
-                               default='', orderable=False)
-
-    if 'province' in search_fields:
-        province = tables.Column('Collecting province',
-                                 accessor=A('collecting_province'),
-                                 default='', orderable=False)
-    if 'local_name' in search_fields:
-        local_name = tables.Column('Local Name',
-                                   accessor=A('local_name'),
-                                   default='', orderable=False)
-    if 'collecting_date' in search_fields:
-        collecting_date = tables.Column('Collecting date',
-                                        accessor=A('collecting_date'),
-                                        default='', orderable=False)
-
-    class Meta:
-        attrs = {"class": "searchresult"}
 
 
 def _build_experiment_query(search_criteria, user=None):
@@ -178,7 +127,7 @@ def search(request):
     else:
         request_data = None
 
-    template = 'search_accession.html'
+    template = 'vavilov/search_accession.html'
     content_type = None  # default
     if request_data:
         form = SearchPassportForm(request_data)

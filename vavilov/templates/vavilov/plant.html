@@ -8,7 +8,7 @@
 	<table class="data_table">
 	    <tr>
 	        <td class="key">Accession number :</td>
-	        <td class="value">{{plant.accession.code}}</td>
+	        <td class="value">{{plant.accession.accession_number}}</td>
 	    </tr>
 	    {% if plant.experimental_field %}
 	    <tr>
@@ -45,10 +45,10 @@
 {% if observations %}
 	<h3> Observations on this plant</h3>
 	{% render_table observations %}
-	{% include 'download_observations.html' with search_criteria=obs_search_criteria %}
+	{% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
 	<span class="clear"></span>
 {% endif %}
 
-{% include 'galleria_js.html' with images=obs_images %}
+{% include 'vavilov/galleria_js.html' with images=obs_images %}
 
 {% endblock %}

@@ -51,7 +51,14 @@ class ObservationsViewTest(TestCase):
         client = Client()
         response = client.get(reverse('search_observations'))
         assert response.status_code == 200
+
         response = client.post(reverse('search_observations'),
-                               {'accession': 'BGV000917'})
+                               {'accession': 'BGV000'})
         assert response.status_code == 200
-        print(response.context)
+        assert response.context['entries'] is None
+
+        assert client.login(username='user', password='pass')
+        response = client.post(reverse('search_observations'),
+                               {'accession': 'BGV000'})
+        assert response.status_code == 200
+        assert response.context['table'].data.queryset.all()

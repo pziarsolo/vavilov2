@@ -22,6 +22,11 @@
             <li><a href={% url 'search_observations' %}>Observations</a></li>
           </ul>
         </li>
+        {% if user.is_authenticated %}
+            <li><a href='/logout/' >Logout ({{ user.username}})</a></li>
+        {% else %}
+            <li><a href='/login/?next=/'>Login</a></li>
+        {% endif %}
       </ul>
     </nav>
     <div class="linecab"> </div>

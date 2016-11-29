@@ -3,41 +3,15 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.template.context_processors import csrf
 from django_tables2 import RequestConfig
-from django_tables2.utils import A
+
+from guardian.decorators import permission_required
 from guardian.shortcuts import get_objects_for_user
 
-import django_tables2 as tables
 
 from vavilov.forms.observations import SearchObservationForm
-from vavilov.models import Observation, Plant
+from vavilov.models import Observation, Plant, ObservationEntity
 from vavilov.utils.streams import return_csv_response, return_excel_response
-
-
-class ObservationsTable(tables.Table):
-    Accession = tables.LinkColumn('accession_view', args=[A('accession.accession_number')],
-                                  accessor=A('accession.accession_number'),
-                                  orderable=True, verbose_name='Accession')
-    plant = tables.LinkColumn('plant_view', args=[A('plant_part.plant.unique_id')],
-                              accessor=A('plant_part.plant.unique_id'),
-                              orderable=True, verbose_name='Plant')
-    plant_part = tables.Column('Plant part', accessor=A('obs_entity.part.name'),
-                               default='', orderable=True)
-    assay = tables.LinkColumn('assay_view', args=[A('assay.name')],
-                              accessor=A('assay.name'),
-                              orderable=True, verbose_name='Assay')
-    trait = tables.LinkColumn('trait_view', args=[A('trait.trait_id')],
-                              accessor=A('trait.name'),
-                              orderable=True, verbose_name='Trait')
-    value = tables.Column('Value', accessor=A('value'),
-                          default='', orderable=True)
-    observer = tables.Column('Observer', accessor=A('observer'),
-                             default='', orderable=True)
-    creation_time = tables.Column('Creation Time',
-                                  accessor=A('creation_time'),
-                                  default='', orderable=True)
-
-    class Meta:
-        attrs = {"class": "searchresult"}
+from vavilov.views.tables import ObservationsTable, PlantsTable
 
 
 def _build_entry_query(search_criteria, user):
@@ -89,7 +63,7 @@ def search(request):
     else:
         request_data = None
 
-    template = 'search_observations.html'
+    template = 'vavilov/search_observations.html'
 
     if request_data:
         form = SearchObservationForm(request_data)
@@ -124,4 +98,40 @@ def search(request):
         form = SearchObservationForm()
 
     context['form'] = form
+    return render_to_response(template, context, content_type=content_type)
+
+
+@permission_required('view_obs_entity', (ObservationEntity, 'name',
+                                         'name'))
+def observation_entity(request, name):
+    user = request.user
+    context = RequestContext(request)
+    try:
+        obs_entity = ObservationEntity.objects.get(name=name)
+    except ObservationEntity.DoesNotExist:
+        obs_entity = None
+    context['obs_entity'] = obs_entity
+
+    if obs_entity:
+        plants = obs_entity.plants(user)
+        if plants:
+            plant_table = PlantsTable(plants, template='table.html',
+                                      prefix='plant-')
+            RequestConfig(request).configure(plant_table)
+        else:
+            plant_table = None
+        context['plants'] = plant_table
+
+        obs = obs_entity.observations(user)
+        if obs:
+            observations_table = ObservationsTable(obs, template='table.html',
+                                                   prefix='observations-')
+            RequestConfig(request).configure(observations_table)
+        else:
+            observations_table = None
+
+        context['observations'] = observations_table
+
+    template = 'vavilov/obs_entity.html'
+    content_type = None
     return render_to_response(template, context, content_type=content_type)

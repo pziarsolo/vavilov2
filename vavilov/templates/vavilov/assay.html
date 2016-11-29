@@ -38,10 +38,10 @@
 {% if observations %}
 	<h3> Observations on this assay </h3>
 	{% render_table observations %}
-	{% include 'download_observations.html' with search_criteria=obs_search_criteria %}
+	{% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
 	<span class="clear"></span>
 {% endif %}
 
-{#{% include 'galleria_js.html' with images=obs_images %}#}
+{#{% include 'vavilov/galleria_js.html' with images=obs_images %}#}
 
 {% endblock %}

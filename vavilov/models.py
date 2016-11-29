@@ -731,10 +731,24 @@ class ObservationEntity(models.Model):
 
     class Meta:
         db_table = 'vavilov_observation_entity'
+        permissions = (('view_obs_entity', 'View Observation entity'),)
+
+    def plants(self, user):
+        plants = Plant.objects.filter(observationentityplant__obs_entity=self)
+        plants = get_objects_for_user(user, 'vavilov.view_plant',
+                                      klass=plants, accept_global_perms=False)
+        return plants
+
+    def observations(self, user):
+        obs = Observation.objects.filter(obs_entity=self)
+        obs = get_objects_for_user(user, 'vavilov.view_observation',
+                                   klass=obs, accept_global_perms=False)
+        return obs
 
     @property
-    def plants(self):
-        return Plant.objects.filter(observationentityplant__obs_entity=self)
+    def accession(self):
+        plant = Plant.objects.filter(observationentityplant__obs_entity=self).first()
+        return plant.accession
 
     def __str__(self):
         return self.name
@@ -768,7 +782,7 @@ class Observation(models.Model):
 
     @property
     def accession(self):
-        return self.obs_entity.plants.first().accession
+        return self.obs_entity.accession
 
 
 def get_photo_dir(instance, filename):

@@ -69,7 +69,7 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
     except Trait.DoesNotExist:
         raise ValueError('Trait not loaded yet in db: {}:{}'.format(trait_name,
                                                                     assay_name))
-    plants = obs_entity.plants
+    plants = Plant.objects.filter(observationentityplant__obs_entity=obs_entity)
 
     try:
         [AssayPlant.objects.filter(assay=assay, plant=p) for p in plants]
@@ -234,6 +234,7 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                    part=plant_part_type)
         if created:
+            assign_perm('view_obs_entity', perm_gr, obs_ent)
             plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
                                                          accession=accession)
             if p_creat:
@@ -249,6 +250,7 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                    part=plant_part_type)
         if created:
+            assign_perm('view_obs_entity', perm_gr, obs_ent)
             plant_name = '{}_{}_{}'.format(accession.accession_number,
                                            assay.name, plant_number)
             plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,

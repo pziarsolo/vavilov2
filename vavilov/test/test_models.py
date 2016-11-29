@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from vavilov.db_management.tests import load_test_data
 from vavilov.models import (Accession, AccessionRelationship, Cvterm, Assay,
-                            Trait, Plant)
+                            Trait, Plant, ObservationEntity, Observation)
 
 
 class AccessionTest(TestCase):
@@ -110,3 +110,15 @@ class PhenotypeTest(TestCase):
         self.assertEqual(plant.assays(self.user2)[0].name, 'NSF3')
         plant = Plant.objects.get(plant_name='BGV000917_NSF1_2')
         assert plant.observations(self.user).count() == 2
+
+    def test_obs_entity(self):
+        obs_entitys = ObservationEntity.objects.all()
+        obs_entity = obs_entitys.first()
+        assert str(obs_entity.accession) == "Comav Gene bank(ESP026): BGV000917"
+
+        self.assertEqual(obs_entity.plants(self.user).count(), 1)
+        self.assertEqual(obs_entity.observations(self.user).count(), 1)
+
+    def test_observations(self):
+        obs = Observation.objects.all().first()
+        assert str(obs.accession) == "Comav Gene bank(ESP026): BGV000917"

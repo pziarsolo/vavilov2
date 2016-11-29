@@ -1,0 +1,7 @@
+django<1.9
+pillow
+djangorestframework
+django-filter>=1.0
+django-guardian
+crispy_forms
+corsheader
