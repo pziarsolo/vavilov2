@@ -30,12 +30,14 @@
     </div>
 </section>
 {% if plants %}
+    <hr class='empty_line'>
 	<h3> Plants on this assay </h3>
 	{% render_table plants %}
 	<span class="clear"></span>
 {% endif %}
 
 {% if observations %}
+    <hr class='empty_line'>
 	<h3> Observations on this assay </h3>
 	{% render_table observations %}
 	{% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}

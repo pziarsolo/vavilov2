@@ -459,6 +459,10 @@ ul.pagination li {
     float: right;
     font-size: 0.8em;
 }
+.download_csv li{
+    display: inline;
+}
+
 .search_form {
     margin-right:30%;
     margin-bottom   :10px;
