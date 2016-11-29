@@ -269,6 +269,7 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                    part=plant_part_type)
         if created:
+            assign_perm('view_obs_entity', perm_gr, obs_ent)
             plants = Plant.objects.filter(accession=accession,
                                           assayplant__assay=assay)
             for plant in plants:
