@@ -22,7 +22,7 @@ class AccessionFilter(django_filters.FilterSet):
         model = Accession
         fields = '__all__'
 
-    def accession_number_filter(self, queryset, value):
+    def accession_number_filter(self, queryset, name, value):
         # this is just the logic to get related accessions to value
         queryset2 = queryset.filter(Q(accession_number__icontains=value) |
                                     Q(accessionsynonym__synonym_code__icontains=value))
@@ -39,7 +39,7 @@ class AccessionFilter(django_filters.FilterSet):
         list_ids = [accession.accession_id for accession in accessions]
         return queryset.filter(pk__in=list_ids)
 
-    def accession_by_taxa(self, queryset, value):
+    def accession_by_taxa(self, queryset, name, value):
         taxa = Taxa.objects.get(taxa_id=int(value))
         bottom_taxas = get_bottom_taxons([taxa])
         queryset = queryset.filter(accessiontaxa__taxa__in=bottom_taxas)

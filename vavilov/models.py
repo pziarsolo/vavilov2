@@ -787,7 +787,7 @@ class Observation(models.Model):
 
 def get_photo_dir(instance, filename):
     # photo_dir/accession/imagename
-    accession = instance.obs_entity.plants[0].accession.accession_number
+    accession = instance.obs_entity.accession.accession_number
     plant_part = instance.obs_entity.part.name
     return '{}/{}/{}/{}'.format(PHENO_PHOTO_DIR, accession, plant_part,
                                 filename)
@@ -795,7 +795,7 @@ def get_photo_dir(instance, filename):
 
 def get_thumb_dir(instance, filename):
     # photo_dir/accession/thumbnails/imagename
-    accession = instance.obs_entity.plants[0].accession.accession_number
+    accession = instance.obs_entity.accession.accession_number
     plant_part = instance.obs_entity.part.name
     return '{}/{}/{}/thumbnails/{}'.format(PHENO_PHOTO_DIR, accession,
                                            plant_part, filename)
