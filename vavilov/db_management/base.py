@@ -291,7 +291,7 @@ def add_passport_data(accession, local_name=None, traditional_location=None,
                 print(msg.format(accession.accession_number, longitude))
             longitude = None
     if altitude is not None:
-        altitude = altitude.replace('m', '').strip()
+        altitude = str(altitude).replace('m', '').strip()
 
     if acquisition_date is not None:
         try:
@@ -405,6 +405,7 @@ def add_accession(accession, institute_name, acc_type=None, make_link=True):
 
 
 def _strtime_to_date(str_date):
+    str_date = str(str_date)
     try:
         year = int(str_date[:4])
     except ValueError:

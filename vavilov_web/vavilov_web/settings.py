@@ -73,7 +73,6 @@ INSTALLED_APPS = (
     'guardian',
     'django_filters',
     'crispy_forms',
-    'corsheaders',
 )
 # AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
 #                            'guardian.backends.ObjectPermissionBackend')

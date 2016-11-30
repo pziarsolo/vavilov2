@@ -7,7 +7,10 @@ import time
 
 from django.utils.html import strip_tags
 from openpyxl.reader.excel import load_workbook
-from xlsxwriter import Workbook
+try:
+    from xlsxwriter import Workbook
+except ImportError:
+    pass
 
 import vavilov
 from vavilov.models import Trait, Plant

@@ -1,7 +1,10 @@
 from django.conf import settings as site_settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
+from django.core.exceptions import ImproperlyConfigured
+
 from vavilov.conf import settings
+
 
 urlpatterns = [
     url(r'^plant/(?P<plant_name>.+)/$', 'vavilov.views.plant.plant', name='plant_view'),
@@ -21,5 +24,8 @@ if settings.EXPOSE_API:
     urlpatterns += [url(r'', include('vavilov.api.urls')), ]
 
 if site_settings.DEVELOPMENT_MACHINE:
-    urlpatterns += static(site_settings.MEDIA_URL,
-                          document_root=site_settings.MEDIA_ROOT)
+    try:
+        urlpatterns += static(site_settings.MEDIA_URL,
+                              document_root=site_settings.MEDIA_ROOT)
+    except ImproperlyConfigured:
+        pass

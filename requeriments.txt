@@ -3,5 +3,7 @@ pillow
 djangorestframework
 django-filter>=1.0
 django-guardian
-crispy_forms
-corsheader
+django-crispy-forms
+django-tables2
+openpyxl
+pytz
