@@ -3,7 +3,7 @@ import re
 
 from django.http.response import HttpResponse
 
-from vavilov.conf.settings import TAXONS_CACHE_FILE
+from vavilov.caches import get_taxons
 from vavilov.models import Accession, AccessionSynonym, Plant
 
 
@@ -36,7 +36,7 @@ def accession_numbers(request):
 
 
 def taxons(request):
-    taxons_long = json.load(open(TAXONS_CACHE_FILE))
+    taxons_long = get_taxons()
     if request.method == 'GET':
         if u'term' in request.GET:
             term = request.GET['term']

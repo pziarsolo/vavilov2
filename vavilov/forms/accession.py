@@ -1,11 +1,9 @@
-import json
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms.widgets import Select
 
-from vavilov.conf.settings import (ACCESSION_SEARCH_FORM_FIELDS,
-                                   SEARCH_CHOICES_CACHE_FILE)
+from vavilov.caches import get_passport_data_choices
+from vavilov.conf.settings import ACCESSION_SEARCH_FORM_FIELDS
 from vavilov.forms.widgets import AutocompleteTextInput
 from vavilov.models import Accession
 
@@ -53,7 +51,7 @@ class SearchPassportForm(forms.Form):
     passport_search_fields = ['country', 'region', 'biological_status',
                               'collecting_source']
 
-    pass_choices = json.load(open(SEARCH_CHOICES_CACHE_FILE))
+    pass_choices = get_passport_data_choices()  # json.load(open(SEARCH_CHOICES_CACHE_FILE))
 
     if 'country' in ACCESSION_SEARCH_FORM_FIELDS:
         country = forms.CharField(max_length=100, required=False,

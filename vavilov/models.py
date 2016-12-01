@@ -15,9 +15,9 @@ from vavilov.utils.storage import OnlyScanStorage
 
 class Country(models.Model):
     country_id = models.AutoField(primary_key=True)
-    code2 = models.CharField(max_length=2)
-    code3 = models.CharField(max_length=3)
-    name = models.CharField(max_length=255)
+    code2 = models.CharField(max_length=2, db_index=True)
+    code3 = models.CharField(max_length=3, db_index=True)
+    name = models.CharField(max_length=255, db_index=True)
 
     class Meta:
         db_table = 'vavilov_country'
@@ -49,7 +49,7 @@ class Dbxref(models.Model):
 
 class Cv(models.Model):
     cv_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=48, unique=True)
+    name = models.CharField(db_index=True, max_length=48, unique=True)
     description = models.CharField(max_length=255, null=True)
 
     class Meta:
@@ -62,7 +62,7 @@ class Cv(models.Model):
 class Cvterm(models.Model):
     cvterm_id = models.AutoField(primary_key=True)
     cv = models.ForeignKey(Cv)
-    name = models.CharField(max_length=255)
+    name = models.CharField(db_index=True, max_length=255)
     definition = models.CharField(max_length=255, null=True)
     dbxref = models.ForeignKey(Dbxref, null=True)
 
@@ -405,7 +405,7 @@ class Location(models.Model):
     location_id = models.AutoField(primary_key=True)
     site = models.CharField(max_length=255, null=True)  # COLLSITE
     province = models.CharField(max_length=255, null=True)
-    region = models.CharField(max_length=255, null=True)
+    region = models.CharField(db_index=True, max_length=255, null=True)
     country = models.ForeignKey(Country, null=True)  # ORIGCTY
     latitude = models.DecimalField(max_digits=9, decimal_places=4, null=True)  # LATITUDE
     longitude = models.DecimalField(max_digits=9, decimal_places=4, null=True)  # LONGITUDE
