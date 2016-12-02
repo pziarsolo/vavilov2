@@ -30,7 +30,7 @@ def grouped_trait_choices():
 
 
 class SearchObservationForm(forms.Form):
-    widget = AutocompleteTextInput(source='/apis/accessions/', min_length=1,
+    widget = AutocompleteTextInput(source='/apis/accession_numbers/', min_length=1,
                                    force_check=False)
     accession = forms.CharField(max_length=100, required=False,
                                 label='Accession and synonyms', widget=widget)

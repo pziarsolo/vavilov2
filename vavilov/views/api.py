@@ -58,7 +58,7 @@ def plants(request):
     if request.method == 'GET':
         if u'term' in request.GET:
             term = request.GET['term']
-            query = query.filter(unique_id__icontains=term)
+            query = query.filter(plant_name__icontains=term)
 
         if u'limit' in request.GET:
             try:
@@ -67,6 +67,6 @@ def plants(request):
             except ValueError:
                 pass
 
-    ids = set([row['unique_id'] for row in query.values('unique_id')])
+    ids = set([row['plant_name'] for row in query.values('plant_name')])
     return HttpResponse(json.dumps(sorted(list(ids))),
                         content_type='application/json')
