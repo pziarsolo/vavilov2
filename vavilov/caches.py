@@ -51,7 +51,7 @@ get_passport_data_choices.passportlen = None
 
 
 def get_taxons(**kwargs):
-    acc_taxon_len = AccessionTaxa.objects.count()
+    acc_taxon_len = AccessionTaxa.objects.all().count()
     if acc_taxon_len == get_taxons.assaytaxalen and get_taxons.cache:
         return get_taxons.cache
     else:
@@ -74,3 +74,8 @@ def get_taxons(**kwargs):
 
 get_taxons.cache = None
 get_taxons.assaytaxalen = None
+
+
+def update_caches():
+    get_taxons()
+    get_passport_data_choices()

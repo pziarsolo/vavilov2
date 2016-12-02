@@ -9,8 +9,14 @@ https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
 
 import os
 
+from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vavilov_web.settings")
+
+if settings.DEBUG:
+    from vavilov.caches import update_caches
+    update_caches()
 
 application = get_wsgi_application()
