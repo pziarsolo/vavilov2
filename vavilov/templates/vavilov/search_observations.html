@@ -14,7 +14,7 @@
 	
 	{% else %}
 	   <h3> Search Observations</h3>
-	   <form action="{% url 'search_observations' %}" method="post">{% csrf_token %}
+	   <form action="{% url 'search_observation' %}" method="post">{% csrf_token %}
 	       <div class='search_form'>
 	           {{ form.as_table }}
 	       </div>

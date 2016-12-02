@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^obs_entity/(?P<name>.+)/$', 'vavilov.views.observation.observation_entity', name='obs_entity_view'),
 
     url(r'^search/accession/$', 'vavilov.views.accession.search', name='search_accession'),
-    url(r'^search/observations/$', 'vavilov.views.observation.search', name='search_observations'),
+    url(r'^search/observation/$', 'vavilov.views.observation.search', name='search_observation'),
     url(r'^apis/accession_numbers/$', 'vavilov.views.api.accession_numbers', name='api_accession_numbers'),
     url(r'^apis/taxons/$', 'vavilov.views.api.taxons', name='api_taxons'),
     url(r'^apis/plants/$', 'vavilov.views.api.plants', name='api_plants'),
