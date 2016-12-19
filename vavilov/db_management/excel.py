@@ -214,11 +214,11 @@ def create_excel_from_queryset(out_fhand, queryset, table, in_memory=False):
 
 
 def excel_dict_reader(fpath):
-    wb = load_workbook(fpath)
+    wb = load_workbook(fpath, read_only=True)
     sheet = wb.active
     header_pos = {}
     first = True
-    for row in sheet.iter_rows():
+    for row in sheet.rows:
         if first:
             for index, cell in enumerate(row):
                 header = cell.value
@@ -239,4 +239,5 @@ def excel_dict_reader(fpath):
             except Exception:
                 pass
             row_dict[header] = value
-        yield row_dict
+        if any(row_dict.values()):
+            yield row_dict
