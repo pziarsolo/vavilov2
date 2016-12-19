@@ -1,5 +1,3 @@
-import os
-
 from django.conf import settings
 from pytz import timezone
 
@@ -38,8 +36,8 @@ ACCESSION_SEARCH_RESULT_FIELDS = getattr(settings,
                                          'VAVILOV_ACCESSION_SEARCH_RESULT_FIELDS',
                                          DEF_ACCESSION_SEARCH_RESULT_FIELDS)
 
-TAXONS_CACHE_FILE = os.path.join(settings.CACHE_DIR, 'taxons.json')
-SEARCH_CHOICES_CACHE_FILE = os.path.join(settings.CACHE_DIR, 'search_choices.json')
+# TAXONS_CACHE_FILE = os.path.join(settings.CACHE_DIR, 'taxons.json')
+# SEARCH_CHOICES_CACHE_FILE = os.path.join(settings.CACHE_DIR, 'search_choices.json')
 
 # Phenotype data
 PHENO_PHOTO_DIR = getattr(settings, 'VAVILOV_PHENO_PHOTO_DIR', None)

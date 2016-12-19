@@ -11,10 +11,11 @@ from guardian.shortcuts import assign_perm
 from vavilov.conf import settings
 from vavilov.conf.settings import OUR_TIMEZONE
 from vavilov.db_management.phenotype import (add_or_load_observation,
-                                             suggest_plant_part_uid)
+                                             suggest_obs_entity_name)
 from vavilov.models import (Assay, Cvterm, Trait, TraitProp, Plant,
                             AssayPlant, Accession, AssayTrait,
-                            AccessionSynonym, Observation, PlantPart)
+                            Observation, ObservationEntity,
+                            ObservationEntityPlant)
 
 
 FIELDBOOK_TO_DB_TYPE_TRANSLATOR = {'categorical': 'text', 'numeric': 'numeric',
@@ -46,16 +47,19 @@ def add_or_load_fieldbook_traits(fpath, assays):
                                             name=data_type)
             trait, created = Trait.objects.get_or_create(name=name,
                                                          type=trait_type)
+            for assay in assays:
+                AssayTrait.objects.get_or_create(assay=assay, trait=trait)
+
             if created:
                 for assay in assays:
-                    AssayTrait.objects.create(assay=assay, trait=trait)
-                group = Group.objects.get(name=assay.name)
-                assign_perm('view_trait', group, trait)
+                    group = Group.objects.get(name=assay.name)
+                    assign_perm('view_trait', group, trait)
                 # We nedd fielbook trait type to generate fieldbook db with the
                 # observations. This is the only data that we need from fieldbook
                 # traits
+                trait_prop_trait = Cvterm.objects.get(name=FIELBOOK_TRAIT_TYPE)
                 TraitProp.objects.create(trait=trait,
-                                         type=FIELBOOK_TRAIT_TYPE,
+                                         type=trait_prop_trait,
                                          value=type_)
 
 
@@ -69,12 +73,10 @@ def add_or_load_fieldbook_fields(fpath, assay, accession_header,
     group = Group.objects.get(name=assay.name)
     with transaction.atomic():
         for entry in csv.DictReader(fhand, dialect=trt_dialect):
-            unique_id = entry['unique_id']
+            plant_name = entry['unique_id']
             accession_code = entry.get(accession_header, None)
-
-            if accession_code in ('UNKNOWN', None, ''):
-                accession_code = entry.get(synonym_headers[0], unique_id)
-
+            if accession_code in (None, 'UNKNOWN', ''):
+                accession_code = entry.get(synonym_headers[0], None)
             exp_field = entry.get(experimental_field_header, None)
             row = entry.get(row_header, None)
             column = entry.get(column_header, None)
@@ -82,34 +84,24 @@ def add_or_load_fieldbook_fields(fpath, assay, accession_header,
 
             new_plant = False
             try:
-                plant = Plant.objects.get(unique_id=unique_id)
+                plant = Plant.objects.get(plant_name=plant_name)
             except Plant.DoesNotExist:
                 new_plant = True
             if not new_plant:
                 continue
+            try:
+                accession = Accession.objects.get(accession_number=accession_code)
+            except Accession.DoesNotExist:
+                print(accession_code, entry)
+                raise
 
-            accession, created = Accession.objects.get_or_create(code=accession_code)
-            if created:
-                assign_perm('view_accession', group, accession)
-
-            plant = Plant.objects.create(unique_id=unique_id,
+            plant = Plant.objects.create(plant_name=plant_name,
                                          accession=accession,
                                          experimental_field=exp_field,
                                          row=row, column=column,
                                          pot_number=pot_number)
             assign_perm('view_plant', group, plant)
             AssayPlant.objects.create(plant=plant, assay=assay)
-
-            # Accession can be created with other plant of other field
-            if synonym_headers is None:
-                synonym_headers = []
-
-            for synonym_header in synonym_headers:
-                synonym = entry.get(synonym_header, None)
-                if synonym is not None:
-                    AccessionSynonym.objects.get_or_create(accession=accession,
-                                                           type=synonym_header,
-                                                           code=entry[synonym_header])
 
 
 def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=None,
@@ -124,7 +116,7 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
 
     with transaction.atomic():
         for entry in cursor.execute("select * from user_traits"):
-            plant = entry[1]
+            plant_name = entry[1]
             trait = entry[2]
             if trait in excluded_traits:
                 continue
@@ -133,15 +125,18 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
             if len(entry) > 6:
                 if entry[6] != ' ':
                     observer = entry[6]
-            plant_part_uid = suggest_plant_part_uid(plant, plant_part)
+            obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
 
-            plant = Plant.objects.get(unique_id=plant)
+            plant = Plant.objects.get(plant_name=plant_name)
             plant_part_cv = Cvterm.objects.get(cv__name='plant_parts',
                                                name=plant_part)
-            plant_part_obj = PlantPart.objects.get_or_create(plant_part_uid=plant_part_uid,
-                                                             plant=plant,
-                                                             part=plant_part_cv)[0]
-            add_or_load_observation(plant_part_obj, trait, assays, value,
+            obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                          part=plant_part_cv)
+            if created:
+                ObservationEntityPlant.objects.create(obs_entity=obs_entity,
+                                                      plant=plant)
+
+            add_or_load_observation(obs_entity, trait, assays[0], value,
                                     creation_time, observer)
 
 
@@ -193,14 +188,14 @@ def _to_fieldbook_local_time(utf_datetime):
     return local_datetimetime.strftime('%Y-%m-%d %H:%M:%S%z')
 
 
-def _encode_plant_id_for_sql(plants):
-    plantquery = Plant.objects.filter(unique_id__in=plants).values('plant_id')
-    plant_ids = [plant['plant_id'] for plant in plantquery]
-    if len(plant_ids) == 1:
-        sqlized_plant_ids = '({})'.format(plant_ids[0])
-    else:
-        sqlized_plant_ids = str(tuple(plant_ids))
-    return sqlized_plant_ids
+# def _encode_plant_id_for_sql(plants):
+#     plantquery = Plant.objects.filter(unique_id__in=plants).values('plant_id')
+#     plant_ids = [plant['plant_id'] for plant in plantquery]
+#     if len(plant_ids) == 1:
+#         sqlized_plant_ids = '({})'.format(plant_ids[0])
+#     else:
+#         sqlized_plant_ids = str(tuple(plant_ids))
+#     return sqlized_plant_ids
 
 
 def _encode_plant_part_id_for_sql(plants, plant_part):

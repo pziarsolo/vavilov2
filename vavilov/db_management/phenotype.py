@@ -94,7 +94,7 @@ def add_or_load_excel_traits(fpath, assays):
         for row in excel_dict_reader(fpath):
             name = row['name']
             type_ = row['type']
-            description = row['description']
+            description = row.get('description', None)
             try:
                 type_ = Cvterm.objects.get(name=type_, cv__name=TRAIT_TYPES_CV)
             except Cvterm.DoesNotExist:

@@ -19,7 +19,7 @@ from vavilov.models import Trait, Plant
 DATA_DIR = join(dirname(vavilov.__file__), 'data')
 VBA_MACRO = join(DATA_DIR, 'vbaProject.bin')
 
-PLANT_ID = 'unique_id'
+PLANT_ID = 'plant_name'
 TRAIT_HEADER_NAME = 'Caracteristica'
 TRAIT_TYPE_NAME = 'Tipo'
 VALUE_HEARDER_NAME = 'Valor'
@@ -125,18 +125,18 @@ def write_excel_observations_skeleton(entries_fpath, traits_fpath,
     # Line per Maceta
     row_index = 1
     for plant_def in csv.DictReader(open(entries_fpath, "r")):
-        plant = Plant.objects.get(unique_id=plant_def['unique_id'])
+        plant = Plant.objects.get(plant_name=plant_def['unique_id'])
         for trait in traits:
             row_content = []
             for column_index, column in enumerate(columns):
                 if column == PLANT_ID:
-                    value = plant.unique_id
+                    value = plant.name
                     format_ = locked
                 elif accession_header and column == accession_header:
-                    value = plant.accession.code
+                    value = plant.accession.accession_number
                     format_ = locked
                 elif synonym_header and column == synonym_header:
-                    value = plant.accession.synonyms[synonym_header]
+                    value = plant.accession.synonym
                     format_ = locked
                 elif row_header and column == row_header:
                     value = plant.row

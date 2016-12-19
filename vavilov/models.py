@@ -745,6 +745,12 @@ class ObservationEntity(models.Model):
                                    klass=obs, accept_global_perms=False)
         return obs
 
+    def obs_images(self, user):
+        obs = ObservationImages.objects.filter(obs_entity=self)
+        obs = get_objects_for_user(user, 'vavilov.view_observation_images',
+                                   klass=obs, accept_global_perms=False)
+        return obs
+
     @property
     def accession(self):
         plant = Plant.objects.filter(observationentityplant__obs_entity=self).first()

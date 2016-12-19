@@ -2,7 +2,6 @@ import argparse
 
 from django.core.management.base import BaseCommand
 
-from vavilov.cache_management import update_caches
 from vavilov.db_management.base import add_accessions
 
 
@@ -17,4 +16,3 @@ class Command(BaseCommand):
         fhand = options['infhand']
         silent = options['silent']
         add_accessions(fhand, silent)
-        update_caches()
