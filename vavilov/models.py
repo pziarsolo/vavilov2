@@ -822,3 +822,15 @@ class ObservationImages(models.Model):
     class Meta:
         db_table = 'vavilov_observation_image'
         permissions = (('view_observation_images', 'View observation images'),)
+
+
+class ObservationRelationship(models.Model):
+    obs_relationship_id = models.AutoField(primary_key=True)
+    subject = models.ForeignKey(Observation, related_name='subject')
+    object = models.ForeignKey(Observation, related_name='object')
+    type = models.ForeignKey(Cvterm)
+
+    class Meta:
+        db_table = 'vavilov_observation_relationship'
+        permissions = (('view_observationrelationship',
+                        'View Observation Relationship'),)
