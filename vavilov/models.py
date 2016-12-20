@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from functools import reduce
 import operator
+from os.path import join
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -359,7 +360,7 @@ class Accession(models.Model):
         return obs
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(obs_entity__observationentityplant__plant__in=self.plants(user))
+        obs_images = ObservationImages.objects.filter(observation__obs_entity__observationentityplant__plant__in=self.plants(user))
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
                                           klass=obs_images,
                                           accept_global_perms=False)
@@ -593,7 +594,7 @@ class Assay(models.Model):
         return obs
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(assay=self)
+        obs_images = ObservationImages.objects.filter(observation__assay=self)
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
                                           klass=obs_images,
                                           accept_global_perms=False)
@@ -648,7 +649,7 @@ class Plant(models.Model):
         return obs
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(obs_entity__observationentityplant__plant=self)
+        obs_images = ObservationImages.objects.filter(observation__obs_entity__observationentityplant__plant=self)
         obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
                                           klass=obs_images,
                                           accept_global_perms=False)
@@ -746,7 +747,7 @@ class ObservationEntity(models.Model):
         return obs
 
     def obs_images(self, user):
-        obs = ObservationImages.objects.filter(obs_entity=self)
+        obs = ObservationImages.objects.filter(observation__obs_entity=self)
         obs = get_objects_for_user(user, 'vavilov.view_observation_images',
                                    klass=obs, accept_global_perms=False)
         return obs
@@ -774,7 +775,7 @@ class Observation(models.Model):
     obs_entity = models.ForeignKey(ObservationEntity)
     assay = models.ForeignKey(Assay)
     trait = models.ForeignKey(Trait)
-    value = models.TextField()
+    value = models.TextField(null=True)
     creation_time = models.DateTimeField(null=True)
     observer = models.CharField(max_length=255, null=True)
 
@@ -793,18 +794,16 @@ class Observation(models.Model):
 
 def get_photo_dir(instance, filename):
     # photo_dir/accession/imagename
-    accession = instance.obs_entity.accession.accession_number
-    plant_part = instance.obs_entity.part.name
-    return '{}/{}/{}/{}'.format(PHENO_PHOTO_DIR, accession, plant_part,
-                                filename)
+    accession = instance.observation.obs_entity.accession.accession_number
+    plant_part = instance.observation.obs_entity.part.name
+    return join(PHENO_PHOTO_DIR, accession, plant_part, filename)
 
 
 def get_thumb_dir(instance, filename):
     # photo_dir/accession/thumbnails/imagename
-    accession = instance.obs_entity.accession.accession_number
-    plant_part = instance.obs_entity.part.name
-    return '{}/{}/{}/thumbnails/{}'.format(PHENO_PHOTO_DIR, accession,
-                                           plant_part, filename)
+    accession = instance.observation.obs_entity.accession.accession_number
+    plant_part = instance.observation.obs_entity.part.name
+    return join(PHENO_PHOTO_DIR, accession, plant_part, 'thumbnails', filename)
 
 only_scan_storage = OnlyScanStorage(location=settings.MEDIA_ROOT,
                                     base_url=settings.MEDIA_URL)
@@ -812,22 +811,14 @@ only_scan_storage = OnlyScanStorage(location=settings.MEDIA_ROOT,
 
 class ObservationImages(models.Model):
     observation_image_id = models.AutoField(primary_key=True)
+    observation = models.ForeignKey(Observation)
     observation_image_uid = models.CharField(max_length=255, unique=True)
-    obs_entity = models.ForeignKey(ObservationEntity)
-    assay = models.ForeignKey(Assay)
-    trait = models.ForeignKey(Trait)
     image = models.ImageField(max_length=255, storage=only_scan_storage,
                               upload_to=get_photo_dir)
     thumbnail = models.ImageField(max_length=255, storage=only_scan_storage,
                                   null=True, blank=True,
                                   upload_to=get_thumb_dir)
-    creation_time = models.DateTimeField()
-    user = models.CharField(max_length=255, null=True)
 
     class Meta:
         db_table = 'vavilov_observation_image'
         permissions = (('view_observation_images', 'View observation images'),)
-
-    @property
-    def plants(self):
-        return self.obs_entity.plant_part.plant

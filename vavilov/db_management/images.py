@@ -11,7 +11,7 @@ from vavilov.conf.settings import OUR_TIMEZONE
 from vavilov.db_management.phenotype import suggest_obs_entity_name
 from vavilov.models import (Plant, Assay, Trait, ObservationImages,
                             Accession, Cvterm, ObservationEntity,
-                            ObservationEntityPlant)
+                            ObservationEntityPlant, Observation)
 
 
 PLANT_PART = 'plant_part'
@@ -111,6 +111,10 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
         msg = 'Trait not loaded to db yet: {}, assay {}'
         raise ValueError(msg.format(trait_name, assay))
 
+    observation = Observation.objects.create(obs_entity=obs_entity,
+                                             assay=assay,
+                                             trait=trait,
+                                             creation_time=creation_time)
     content_type = 'image/{}'.format(image_format)
 
     image_suf = SimpleUploadedFile(os.path.basename(image_fpath),
@@ -120,13 +124,10 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     thumb_suf = SimpleUploadedFile(os.path.basename(thumb_fpath),
                                    open(thumb_fpath, 'rb').read(),
                                    content_type=content_type)
-    obs_image = ObservationImages.objects.create(obs_entity=obs_entity,
+    obs_image = ObservationImages.objects.create(observation=observation,
                                                  observation_image_uid=image_id,
-                                                 assay=assay,
                                                  image=image_suf,
-                                                 thumbnail=thumb_suf,
-                                                 trait=trait,
-                                                 creation_time=creation_time)
+                                                 thumbnail=thumb_suf)
 
     assign_perm('vavilov.view_observation_images', group, obs_image)
 

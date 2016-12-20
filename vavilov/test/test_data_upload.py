@@ -71,4 +71,4 @@ class ImageTests(TestCase):
                                      settings.PHENO_PHOTO_DIR,
                                      'VOYAGE', 'leaf', 'thumbnails',
                                      image_fname)
-        assert obs_image.obs_entity.part.name == 'leaf'
+        assert obs_image.observation.obs_entity.part.name == 'leaf'
