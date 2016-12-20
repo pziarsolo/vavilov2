@@ -734,10 +734,11 @@ class ObservationEntity(models.Model):
         db_table = 'vavilov_observation_entity'
         permissions = (('view_obs_entity', 'View Observation entity'),)
 
-    def plants(self, user):
+    def plants(self, user=None):
         plants = Plant.objects.filter(observationentityplant__obs_entity=self)
-        plants = get_objects_for_user(user, 'vavilov.view_plant',
-                                      klass=plants, accept_global_perms=False)
+        if user:
+            plants = get_objects_for_user(user, 'vavilov.view_plant',
+                                          klass=plants, accept_global_perms=False)
         return plants
 
     def observations(self, user):
@@ -784,8 +785,8 @@ class Observation(models.Model):
         permissions = (('view_observation', 'View Observation'),)
 
     @property
-    def plant(self):
-        return self.plant_part.plant
+    def plants(self):
+        return self.obs_entity.plants()
 
     @property
     def accession(self):

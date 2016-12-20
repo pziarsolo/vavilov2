@@ -157,30 +157,22 @@ def _create_empty_fieldbook_db(fhand):
 def _get_db_engine():
     return site_settings.DATABASES['default']['ENGINE'].split('.')[-1]
 
-# RAW_QUERY = "SELECT * FROM observation AS o "
-# RAW_QUERY += "WHERE (o.creation_time = (SELECT MAX(creation_time) "
-# RAW_QUERY += "FROM observation AS o2 WHERE o.project_id=o2.project_id "
-# RAW_QUERY += "AND o.rid=o2.rid AND o.trait_id=o2.trait_id)) AND "
-# RAW_QUERY += "(o.project_id IN (SELECT o3.project_id FROM project AS o3 "
-# RAW_QUERY += "WHERE o3.project_set_id={}))"
-
-# RAW_QUERY = "SELECT * FROM observation AS o "
-# RAW_QUERY += "INNER JOIN plot "
-# RAW_QUERY += "WHERE (o.creation_time = (SELECT MAX(creation_time) FROM observation AS o2 WHERE o.plot_id=o2.plot_id AND o.trait_id=o2.trait_id)) "
-# RAW_QUERY += "AND (o.plot_id == plot.plot_id AND plot.project_id IN (SELECT p.project_id FROM project AS p WHERE p.project_set_id={}))"
 
 SQLITE3_QUERY = '''
-SELECT * FROM observation AS o
-INNER JOIN plant_part
-WHERE o.plant_part_id=plant_part.plant_part_id and plant_part.plant_part_id IN {} AND (o.creation_time = (SELECT MAX(creation_time)
-                                               FROM observation AS o2
-                                               WHERE o.plant_part_id=o2.plant_part_id AND o.trait_id=o2.trait_id))'''
+SELECT * FROM vavilov_observation AS o
+INNER JOIN vavilov_observation_entity AS oe
+WHERE o.obs_entity_id=oe.obs_entity_id and oe.obs_entity_id IN {}
+    AND (o.creation_time = (SELECT MAX(creation_time)
+                            FROM vavilov_observation AS o2
+                            WHERE o.obs_entity_id=o2.obs_entity_id AND o.trait_id=o2.trait_id))'''
+
 POSTGRES_QUERY = '''
-SELECT * FROM observation AS o
-INNER JOIN plant_part
-ON o.plant_part_id=plant_part.plant_part_id and plant_part.plant_part_id IN {} AND (o.creation_time = (SELECT MAX(creation_time)
-                                               FROM observation AS o2
-                                               WHERE o.plant_part_id=o2.plant_part_id AND o.trait_id=o2.trait_id))'''
+SELECT * FROM vavilov_observation AS o
+INNER JOIN vavilov_observation_entity AS oe
+ON o.obs_entity_id=oe.obs_entity_id and oe.obs_entity_id IN {}
+    AND (o.creation_time = (SELECT MAX(creation_time)
+                            FROM vavilov_observation AS o2
+                            WHERE o.obs_entity_id=o2.obs_entity_id AND o.trait_id=o2.trait_id))'''
 
 
 def _to_fieldbook_local_time(utf_datetime):
@@ -198,15 +190,15 @@ def _to_fieldbook_local_time(utf_datetime):
 #     return sqlized_plant_ids
 
 
-def _encode_plant_part_id_for_sql(plants, plant_part):
-    query = Q(plant__unique_id__in=plants) & Q(part__name=plant_part)
-    plantpartquery = PlantPart.objects.filter(query).values('plant_part_id')
-    plant_part_ids = [plant_part['plant_part_id'] for plant_part in plantpartquery]
-    if len(plant_part_ids) == 1:
-        sqlized_plant_part_ids = '({})'.format(plant_part_ids[0])
+def _encode_obs_entity_id_for_sql(plants, plant_part):
+    query = Q(observationentityplant__plant__plant_name__in=plants) & Q(part__name=plant_part)
+    plantpartquery = ObservationEntity.objects.filter(query).values('obs_entity_id')
+    obs_entity_ids = [plant_part['obs_entity_id'] for plant_part in plantpartquery]
+    if len(obs_entity_ids) == 1:
+        sqlized_obs_entity_ids = '({})'.format(obs_entity_ids[0])
     else:
-        sqlized_plant_part_ids = str(tuple(plant_part_ids))
-    return sqlized_plant_part_ids
+        sqlized_obs_entity_ids = str(tuple(obs_entity_ids))
+    return sqlized_obs_entity_ids
 
 
 def insert_newest_observations(fhand, plants, excluded_traits=None,
@@ -218,9 +210,9 @@ def insert_newest_observations(fhand, plants, excluded_traits=None,
     query = Observation.objects
 
     if engine == 'sqlite3':
-        query = query.raw(SQLITE3_QUERY.format(_encode_plant_part_id_for_sql(plants, plant_part)))
+        query = query.raw(SQLITE3_QUERY.format(_encode_obs_entity_id_for_sql(plants, plant_part)))
     elif engine == 'postgresql_psycopg2':
-        query = query.raw(POSTGRES_QUERY.format(_encode_plant_part_id_for_sql(plants, plant_part)))
+        query = query.raw(POSTGRES_QUERY.format(_encode_obs_entity_id_for_sql(plants, plant_part)))
     else:
         raise NotImplementedError('This raw query is not implemented yet using this engine')
 
@@ -229,9 +221,10 @@ def insert_newest_observations(fhand, plants, excluded_traits=None,
             continue
         local_creation_time = _to_fieldbook_local_time(observation.creation_time)
         fieldbook_trait_type = TraitProp.objects.get(trait=observation.trait,
-                                                     type=FIELBOOK_TRAIT_TYPE)
+                                                     type__name=FIELBOOK_TRAIT_TYPE)
+        plant_name = observation.plants[0].plant_name
         cur.execute('insert into user_traits (id, rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    (index + 1, observation.plant.unique_id, observation.trait.name, fieldbook_trait_type.value, observation.value,
+                    (index + 1, plant_name, observation.trait.name, fieldbook_trait_type.value, observation.value,
                      local_creation_time, observation.observer, '', '1', '', ''))
     cur.close()
     con.commit()
