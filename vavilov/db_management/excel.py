@@ -130,13 +130,13 @@ def write_excel_observations_skeleton(entries_fpath, traits_fpath,
             row_content = []
             for column_index, column in enumerate(columns):
                 if column == PLANT_ID:
-                    value = plant.name
+                    value = plant.plant_name
                     format_ = locked
                 elif accession_header and column == accession_header:
                     value = plant.accession.accession_number
                     format_ = locked
                 elif synonym_header and column == synonym_header:
-                    value = plant.accession.synonym
+                    value = plant.accession.collecting_accession
                     format_ = locked
                 elif row_header and column == row_header:
                     value = plant.row
