@@ -29,7 +29,7 @@ class Country(models.Model):
 
 class Db(models.Model):
     db_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=48, unique=True)
+    name = models.CharField(max_length=48, unique=True, db_index=True)
     description = models.CharField(max_length=255, null=True)
     urlprefix = models.CharField(max_length=255, null=True)
     url = models.CharField(max_length=255, null=True)
@@ -81,7 +81,7 @@ class Cvterm(models.Model):
 
 class Taxa(models.Model):
     taxa_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, db_index=True)
     rank = models.ForeignKey(Cvterm)
 
     class Meta:
@@ -101,7 +101,7 @@ class TaxaRelationship(models.Model):
 
 class Person(models.Model):
     person_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40, unique=True)
+    name = models.CharField(max_length=40, unique=True, db_index=True)
     description = models.CharField(max_length=255, null=True)
     type = models.ForeignKey(Cvterm)  # is Lab, person,...
 
@@ -137,10 +137,11 @@ class Accession(models.Model):
     accession_id = models.AutoField(primary_key=True)
 
     accession_number = models.CharField(max_length=40,
-                                        verbose_name='Accession number')  # BGV000094
+                                        verbose_name='Accession number',
+                                        db_index=True)  # BGV000094
     institute = models.ForeignKey(Person,
-                                  verbose_name='Institute_code')  # COMAV
-    type = models.ForeignKey(Cvterm, null=True)
+                                  verbose_name='Institute_code', db_index=True)  # COMAV
+    type = models.ForeignKey(Cvterm, null=True, db_index=True)
     dbxref = models.ForeignKey(Dbxref, null=True)
 
     class Meta:
@@ -425,8 +426,9 @@ class Location(models.Model):
 class Passport(models.Model):
     passport_id = models.AutoField(primary_key=True)
     accession = models.ForeignKey(Accession)
-    local_name = models.CharField(max_length=255, null=True)
-    traditional_location = models.CharField(max_length=255, null=True)
+    local_name = models.CharField(max_length=255, null=True, db_index=True)
+    traditional_location = models.CharField(max_length=255, null=True,
+                                            db_index=True)
     # location related_sites
     location = models.ForeignKey(Location, null=True)
     biological_status = models.ForeignKey(Cvterm, null=True,
@@ -550,7 +552,7 @@ class AccessionSynonym(models.Model):
 class Assay(models.Model):
     # entity that groups a serie of observations given a set of plants and traits
     assay_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, db_index=True)
     description = models.CharField(max_length=255, null=True)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
@@ -618,8 +620,8 @@ class AssayProp(models.Model):
 
 class Plant(models.Model):
     plant_id = models.AutoField(primary_key=True)
-    accession = models.ForeignKey(Accession)
-    plant_name = models.CharField(max_length=255, unique=True)
+    accession = models.ForeignKey(Accession, db_index=True)
+    plant_name = models.CharField(max_length=255, unique=True, db_index=True)
     experimental_field = models.CharField(max_length=255, null=True)
     row = models.CharField(max_length=10, null=True)
     column = models.CharField(max_length=10, null=True)
@@ -668,7 +670,7 @@ class AssayPlant(models.Model):
 
 class Trait(models.Model):
     trait_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, db_index=True)
     type = models.ForeignKey(Cvterm)
 
     class Meta:
@@ -727,7 +729,7 @@ class TraitProp(models.Model):
 
 class ObservationEntity(models.Model):
     obs_entity_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, db_index=True)
     part = models.ForeignKey(Cvterm)
 
     class Meta:
@@ -773,9 +775,9 @@ class ObservationEntityPlant(models.Model):
 
 class Observation(models.Model):
     observation_id = models.AutoField(primary_key=True)
-    obs_entity = models.ForeignKey(ObservationEntity)
-    assay = models.ForeignKey(Assay)
-    trait = models.ForeignKey(Trait)
+    obs_entity = models.ForeignKey(ObservationEntity, db_index=True)
+    assay = models.ForeignKey(Assay, db_index=True)
+    trait = models.ForeignKey(Trait, db_index=True)
     value = models.TextField(null=True)
     creation_time = models.DateTimeField(null=True)
     observer = models.CharField(max_length=255, null=True)
@@ -812,7 +814,7 @@ only_scan_storage = OnlyScanStorage(location=settings.MEDIA_ROOT,
 
 class ObservationImages(models.Model):
     observation_image_id = models.AutoField(primary_key=True)
-    observation = models.ForeignKey(Observation)
+    observation = models.ForeignKey(Observation, db_index=True)
     observation_image_uid = models.CharField(max_length=255, unique=True)
     image = models.ImageField(max_length=255, storage=only_scan_storage,
                               upload_to=get_photo_dir)
@@ -827,8 +829,10 @@ class ObservationImages(models.Model):
 
 class ObservationRelationship(models.Model):
     obs_relationship_id = models.AutoField(primary_key=True)
-    subject = models.ForeignKey(Observation, related_name='subject')
-    object = models.ForeignKey(Observation, related_name='object')
+    subject = models.ForeignKey(Observation, related_name='subject',
+                                db_index=True)
+    object = models.ForeignKey(Observation, related_name='object',
+                               db_index=True)
     type = models.ForeignKey(Cvterm)
 
     class Meta:
