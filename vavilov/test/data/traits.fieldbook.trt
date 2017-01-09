@@ -1,0 +1,3 @@
+trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
+Growth habit,numeric,,,,,,TRUE,34
+Area,numeric,,,,,,TRUE,35

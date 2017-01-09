@@ -136,7 +136,10 @@ def write_excel_observations_skeleton(entries_fpath, traits_fpath,
                     value = plant.accession.accession_number
                     format_ = locked
                 elif synonym_header and column == synonym_header:
-                    value = plant.accession.collecting_accession
+                    try:
+                        value = plant.accession.collecting_accession[-1]
+                    except TypeError:
+                        value = None
                     format_ = locked
                 elif row_header and column == row_header:
                     value = plant.row
