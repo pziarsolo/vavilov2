@@ -1,5 +1,7 @@
 {% if location.longitude and location.latitude and googlemapkey %}
-    <div id="googleMap" style="width:500px;height:400px;"></div>
+    <div id='map_container'>
+        <div id="googleMap" style="width:500px;height:400px;"></div>
+    </div>
     <script>
         function initialize() {
             var myLatLng = {lat: {{accession.passport.location.latitude}}, lng: {{accession.passport.location.longitude}}};

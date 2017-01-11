@@ -339,7 +339,7 @@ tr:hover {background-color:  rgba(89,111,41, 0.25)}
     width:100%;
 }
 .passport_table tr:first-child .key + td {
-     font-weight: 400;
+    font-weight: 400;
     font-family: 'Alegreya', serif;
     color: rgb(89, 111, 41);
     font-size: 24px;
@@ -349,15 +349,20 @@ tr:hover {background-color:  rgba(89,111,41, 0.25)}
     overflow:auto;
 }
 .passport_table{
-    float:left  
+    display: inline-block;  
+    vertical-align: top;
+    width: 66%;
 }
 #passport_data_map .passport_table table.data_table {
     color: #504050;
 }
-
+#map_container{
+	display: inline-block;
+	vertical-align: top;
+	width: 33%;
+}
 #googleMap {
-    float:right;  
-    width:400px;
+    width: 400px;
     height: 400px;
     border: 2px solid #596f29;
 }
@@ -365,6 +370,7 @@ tr:hover {background-color:  rgba(89,111,41, 0.25)}
     border: 0;
     height: 1px;
     background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    clear: both;
 }
 .pagination{
     color:#222222;
@@ -498,5 +504,9 @@ footer {
     text-align: center;
     font-size: 0.8em;
     font-weight: 500;
+}
+.clear {
+	clear: both;
+}
 }
 

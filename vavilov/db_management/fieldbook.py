@@ -228,4 +228,3 @@ def insert_newest_observations(fhand, plants, excluded_traits=None,
                      local_creation_time, observation.observer, '', '1', '', ''))
     cur.close()
     con.commit()
-

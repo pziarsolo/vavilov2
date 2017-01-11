@@ -9,7 +9,7 @@
 
 {% block title %}Accession {{accession.accession_number}} {% endblock title %}
 {% block content %}
-<section id=central_column>
+<section >
     <h2> Passport data for {{accession.accession_number }}</h2>
     <div class='accession_table'>
 	    <table class="data_table">
@@ -50,37 +50,40 @@
             </tr>
 	    {% endif %}
 	    </table>
-	 </div>
-	 <hr class='empty_line'>
+	</div>
+	<hr class='empty_line'>
     {% if accession.passport%}
-      {% with pass=accession.passport %}
-      <div id="passport_data_map">
-	      <div class='passport_table'>
-	        <table class="data_table">
-	            {% for shown_str, prop_content in pass.data_to_show.items %}
-	                {% if prop_content %}
-	                  <tr>
-	                    <td  class="key">{{shown_str}}</td>
-	                    <td>{{ prop_content}}</td>
-	                  </tr>
-	                {% endif %}     
-	            {% endfor %}
-	        </table>
-	      </div>
-	      {% with location=pass.location %}
-	          {% include 'vavilov/googlemap.html' %}
-	      {% endwith %}
-	   
-	  </div>
-	  {% endwith %}     	    
-    
-    {% endif %}
+        {% with pass=accession.passport %}
+	        <div id="passport_data_map">
+		        <div class='passport_table'>
+		            <table class="data_table">
+		            {% for shown_str, prop_content in pass.data_to_show.items %}
+		              {% if prop_content %}
+		                <tr>
+		                    <td  class="key">{{shown_str}}</td>
+		                    <td>{{ prop_content}}</td>
+		                </tr>
+		              {% endif %}     
+		            {% endfor %}
+		            </table>
+		        </div>
+		        {% with location=pass.location %}
+		            {% include 'vavilov/googlemap.html' %}
+		        {% endwith %}
+		    </div>
+        {% endwith %}
+    {% endif %}     	    
+</section>
+<section class='clear'>    
     {% if assays %}
         <hr class='empty_line'>
-	<h3> This Accession has been used in these assays</h3>
-	{% render_table assays %}
-	<span class="clear"></span>
+        <h3> This Accession has been used in these assays</h3>
+        {% render_table assays %}
+	   <span class="clear"></span>
     {% endif %}
+</section>
+
+<section class='clear'>
     {% if observations %}
         <hr class='empty_line'>
         <h3> Observations on this accession </h3>
@@ -88,8 +91,8 @@
         {% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
         <span class="clear"></span>
     {% endif %}
-
-    {% include 'vavilov/galleria_js.html' with images=obs_images %}
 </section>
+    {% include 'vavilov/galleria_js.html' with images=obs_images %}
+
     
 {% endblock %}
