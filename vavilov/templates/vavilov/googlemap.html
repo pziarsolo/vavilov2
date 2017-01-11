@@ -1,0 +1,19 @@
+{% if location.longitude and location.latitude and googlemapkey %}
+    <div id="googleMap" style="width:500px;height:400px;"></div>
+    <script>
+        function initialize() {
+            var myLatLng = {lat: {{accession.passport.location.latitude}}, lng: {{accession.passport.location.longitude}}};
+            var map = new google.maps.Map(document.getElementById('googleMap'), {
+                                zoom: 8,
+                                center: myLatLng
+            });   
+            var marker = new google.maps.Marker({
+                                position: myLatLng,
+                                map: map
+                          });
+            }
+       {# google.maps.event.addDomListener(window, 'load', initialize);   #}
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{googlemapkey}}&callback=initialize" ></script>
+{% endif %}
+  

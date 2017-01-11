@@ -10,6 +10,7 @@ PUBLIC_GROUP_NAME = 'public'
 # our timezone
 OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
+GOOGLEMAPKEY = getattr(settings, 'VAVILOV_GOOGLEMAPKEY', None)
 
 DB_CODE_PREFIX = getattr(settings, 'VAVILOV_DB_CODE_PREFIX', None)
 if DB_CODE_PREFIX is None:

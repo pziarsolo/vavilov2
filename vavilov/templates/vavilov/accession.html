@@ -59,27 +59,14 @@
 	                {% endif %}     
 	            {% endfor %}
 	        </table>
-	      </div>  
-	      {% endwith %} 
-		    {% if accession.passport.location.longitude and accession.passport.location.latitude %}
-		        <div id="googleMap" style="width:500px;height:400px;"></div>
-		        <script>
-		            function initialize() {
-		                var myLatLng = {lat: {{accession.passport.location.latitude}}, lng: {{accession.passport.location.longitude}}};
-		                var map = new google.maps.Map(document.getElementById('googleMap'), {
-		                                    zoom: 8,
-		                                    center: myLatLng
-		                });   
-		                var marker = new google.maps.Marker({
-		                                    position: myLatLng,
-		                                    map: map
-		                              });
-		                }
-		           {# google.maps.event.addDomListener(window, 'load', initialize);   #}
-		        </script>
-			<script async defer <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9POnisKiXih3_mmFz6otHjbR9YM1OhWw&callback=initialize" ></script>
-		    {% endif %}
-    </div>
+	      </div>
+	      {% with location=pass.location %}
+	          {% include 'vavilov/googlemap.html' %}
+	      {% endwith %}
+	   
+	  </div>
+	  {% endwith %}     	    
+    
     {% endif %}
 </section>
     

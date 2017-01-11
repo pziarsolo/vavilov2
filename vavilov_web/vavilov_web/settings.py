@@ -105,6 +105,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'vavilov.context_processors.googlemapkey'
             ],
         },
     },
@@ -143,7 +144,6 @@ VAVILOV_DB_CODE_PREFIX = 'BGV'
 VAVILOV_PHENO_PHOTO_DIR = 'pheno_photos'
 # GENEBANK_ACCESSION_FORM_FIELDS = ['accession', 'taxa', 'province']
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -152,3 +152,4 @@ REST_FRAMEWORK = {
         'vavilov.api.permissions.CustomObjectPermissions',
     )
 }
+
