@@ -29,6 +29,7 @@ SHARED_INITIAL_DATA_TO_LOAD = [('cv', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cv.
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_biological_status.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_collecting_source.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_person_types.csv')),
+                               ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_accession_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_accession_relationship_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_synonym_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_taxonomic_ranks.csv')),
