@@ -12,14 +12,6 @@ OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
 GOOGLEMAPKEY = getattr(settings, 'VAVILOV_GOOGLEMAPKEY', None)
 
-DB_CODE_PREFIX = getattr(settings, 'VAVILOV_DB_CODE_PREFIX', None)
-if DB_CODE_PREFIX is None:
-    raise ValueError('DB_CODE_PREFIX needs to be set for the database')
-
-GENEBANK_CODE = getattr(settings, 'VAVILOV_GENEBANK_CODE', None)
-if GENEBANK_CODE is None:
-    raise RuntimeError('settings.VAVILOV_GENEBANK_CODE must be setted in projects configuration')
-
 
 DEF_ACCESSION_SEARCH_FORM_FIELDS = ['accession', 'taxa', 'country', 'region',
                                     'biological_status', 'collecting_source']

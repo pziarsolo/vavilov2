@@ -10,15 +10,13 @@ from django.template.context_processors import csrf
 from django_tables2 import RequestConfig
 from guardian.decorators import permission_required
 
-from vavilov.conf.settings import (GENEBANK_CODE,
-                                   DB_CODE_PREFIX)
 from vavilov.forms.accession import SearchPassportForm
-from vavilov.models import (Accession, Person, AccessionRelationship, Cvterm,
-                            Country, Taxa, get_bottom_taxons)
+from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
+                            Taxa, get_bottom_taxons)
 from vavilov.utils.csv import return_csv_response
 from vavilov.utils.streams import return_excel_response
-from vavilov.views.tables import ObservationsTable, AssaysTable, PlantsTable, \
-    AccessionsTable
+from vavilov.views.tables import (ObservationsTable, AssaysTable, PlantsTable,
+                                  AccessionsTable)
 
 
 @permission_required('view_accession', (Accession, 'accession_number',
@@ -26,12 +24,14 @@ from vavilov.views.tables import ObservationsTable, AssaysTable, PlantsTable, \
 def accession(request, accession_number):
     user = request.user
     context = RequestContext(request)
-    institute = Person.objects.get(name=GENEBANK_CODE)
     try:
-        acc = Accession.objects.get(institute=institute,
-                                    accession_number=accession_number)
+        acc = Accession.objects.get(accession_number=accession_number)
     except Accession.DoesNotExist:
         return HttpResponseNotFound('<h1>Page not found</h1>')
+
+    if acc.type.name == 'external':
+        return HttpResponseNotFound('<h1>Page not found</h1>')
+
     context['accession'] = acc
 
     # assays
@@ -73,21 +73,20 @@ def accession(request, accession_number):
     return render_to_response(template, context)
 
 
-def _build_experiment_query(search_criteria, user=None):
+def _build_accession_query(search_criteria, user=None):
     query = Accession.objects
     if 'accession' in search_criteria:
         acc_code = search_criteria['accession']
-        if acc_code.startswith(DB_CODE_PREFIX):
-            query = query.filter(accession_number__icontains=acc_code)
-        else:
+        rels = AccessionRelationship.objects.filter(object__accession_number__icontains=acc_code)
 
-            rels = AccessionRelationship.objects.filter(object__accession_number__icontains=acc_code)
-            if rels:
-                accs = [rel.subject for rel in rels]
-                rel_query = reduce(operator.or_, [Q(accession_number=acc.accession_number) for acc in accs])
-                query = query.filter(rel_query | Q(accessionsynonym__synonym_code__icontains=acc_code))
-            else:
-                query = query.filter(accessionsynonym__synonym_code__icontains=acc_code)
+        if rels:
+            accs = [rel.subject for rel in rels]
+            rel_query = reduce(operator.or_, [Q(accession_number=acc.accession_number) for acc in accs])
+            query = query.filter(rel_query | Q(accessionsynonym__synonym_code__icontains=acc_code) |
+                                 Q(accession_number__icontains=acc_code))
+        else:
+            query = query.filter(Q(accessionsynonym__synonym_code__icontains=acc_code) |
+                                 Q(accession_number__icontains=acc_code))
 
     if 'collecting_source' in search_criteria and search_criteria['collecting_source']:
         col_source = Cvterm.objects.get(cvterm_id=search_criteria['collecting_source'])
@@ -110,7 +109,7 @@ def _build_experiment_query(search_criteria, user=None):
         bottom_taxas = get_bottom_taxons([taxa])
         query = query.filter(accessiontaxa__taxa__in=bottom_taxas)
 
-    query = query.filter(institute__name=GENEBANK_CODE)
+    query = query.filter(type__name='internal')
     return query
 
 
@@ -136,8 +135,8 @@ def search(request):
             search_criteria = dict([(key, value) for key, value in
                                     search_criteria.items() if value])
             context['search_criteria'] = search_criteria
-            queryset = _build_experiment_query(search_criteria,
-                                               user=request.user)
+            queryset = _build_accession_query(search_criteria,
+                                              user=request.user)
             download_search = request.GET.get('download_search', False)
             if download_search:
                 format_ = request.GET['format']

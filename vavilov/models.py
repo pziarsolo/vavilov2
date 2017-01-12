@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models import Q
 from guardian.shortcuts import get_objects_for_user
 
-from vavilov.conf.settings import GENEBANK_CODE, PHENO_PHOTO_DIR
+from vavilov.conf.settings import PHENO_PHOTO_DIR
 from vavilov.utils.storage import OnlyScanStorage
 
 
@@ -160,7 +160,7 @@ class Accession(models.Model):
 
     @property
     def holder_accession(self):
-        if self.institute.name == GENEBANK_CODE:
+        if self.type.name == 'internal':
             equivalents = self.equivalent_accessions
             if equivalents:
                 return equivalents[0]

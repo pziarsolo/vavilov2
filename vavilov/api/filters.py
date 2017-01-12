@@ -3,7 +3,6 @@ from django.db.models import Q
 from django_filters import filters
 import django_filters
 
-from vavilov.conf.settings import GENEBANK_CODE
 from vavilov.models import (Taxa, get_bottom_taxons, Accession, Cvterm, Cv,
                             Db, Country, Assay, Plant)
 
@@ -28,12 +27,12 @@ class AccessionFilter(django_filters.FilterSet):
                                     Q(accessionsynonym__synonym_code__icontains=value))
         accessions = []
         for accession in queryset2:
-            if accession.institute.name == GENEBANK_CODE:
+            if accession.type.name == 'internal':
                 accessions.append(accession)
             else:
                 equivalents = accession.duplicated_accessions_and_equivalents
                 equivalents = [equi for equi in equivalents
-                               if equi.institute.name == GENEBANK_CODE]
+                               if equi.type.name == 'internal']
                 accessions.extend(equivalents)
         # this is the real filtering of the query
         list_ids = [accession.accession_id for accession in accessions]

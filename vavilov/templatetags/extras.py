@@ -1,12 +1,12 @@
+import json
 import re
 
 from django import template
-from django.utils.safestring import mark_safe
-from django.utils.html import conditional_escape
-from django.template.defaultfilters import stringfilter
 from django.core.serializers import serialize
 from django.db.models.query import QuerySet
-import json
+from django.template.defaultfilters import stringfilter
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 
 
 register = template.Library()

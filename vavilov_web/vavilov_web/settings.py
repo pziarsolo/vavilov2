@@ -138,9 +138,8 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Genebank app settings
-VAVILOV_GENEBANK_CODE = 'ESP026'
-VAVILOV_DB_CODE_PREFIX = 'BGV'
 VAVILOV_PHENO_PHOTO_DIR = 'pheno_photos'
 # GENEBANK_ACCESSION_FORM_FIELDS = ['accession', 'taxa', 'province']
 
@@ -152,4 +151,3 @@ REST_FRAMEWORK = {
         'vavilov.api.permissions.CustomObjectPermissions',
     )
 }
-
