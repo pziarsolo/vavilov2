@@ -74,24 +74,24 @@
         {% endwith %}
     {% endif %}     	    
 </section>
-<section class='clear'>    
     {% if assays %}
-        <hr class='empty_line'>
-        <h3> This Accession has been used in these assays</h3>
-        {% render_table assays %}
-	   <span class="clear"></span>
+        <section class='clear'>    
+            <hr class='empty_line'>
+            <h3> This Accession has been used in these assays</h3>
+            {% render_table assays %}
+            <span class="clear"></span>
+	</section>
     {% endif %}
-</section>
 
-<section class='clear'>
     {% if observations %}
-        <hr class='empty_line'>
-        <h3> Observations on this accession </h3>
-        {% render_table observations %}
-        {% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
-        <span class="clear"></span>
+	<section class='clear'>
+        	<hr class='empty_line'>
+	        <h3> Observations on this accession </h3>
+	        {% render_table observations %}
+	        {% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
+	        <span class="clear"></span>
+	</section>
     {% endif %}
-</section>
     {% include 'vavilov/galleria_js.html' with images=obs_images %}
 
     

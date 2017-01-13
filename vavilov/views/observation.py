@@ -9,13 +9,18 @@ from guardian.shortcuts import get_objects_for_user
 
 
 from vavilov.forms.observations import SearchObservationForm
-from vavilov.models import Observation, Plant, ObservationEntity
+from vavilov.models import Observation, Plant, ObservationEntity, ObservationImages
 from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
 
 
 def _build_entry_query(search_criteria, user, search_images=False):
-    query = Observation.objects.all()
+    if search_images:
+        model = ObservationImages
+    else:
+        model = Observation
+
+    query = model.objects.all()
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
         acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
@@ -47,8 +52,8 @@ def _build_entry_query(search_criteria, user, search_images=False):
             query = query.filter(assay__name=search_criteria['assay'])
 
     if 'trait' in search_criteria and search_criteria['trait']:
-        trait_id = search_criteria['trait']
-        query = query.filter(trait=trait_id)
+        trait_ids = search_criteria['trait']
+        query = query.filter(trait__in=trait_ids)
 
     if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
         query = query.filter(plant__experimental_field__icontains=search_criteria['experimental_field'])
@@ -56,8 +61,12 @@ def _build_entry_query(search_criteria, user, search_images=False):
     if 'observer' in search_criteria and search_criteria['observer']:
         observer = search_criteria['observer']
         query = query.filter(user__icontains=observer)
-    query = get_objects_for_user(user, 'vavilov.view_observation',
-                                 klass=query)
+    if search_images:
+        perm = 'vavilov.view_observation_images'
+    else:
+        perm = 'vavilov.view_observation'
+   
+    query = get_objects_for_user(user, perm, klass=query)
 
     return query
 
