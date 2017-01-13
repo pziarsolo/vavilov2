@@ -47,7 +47,13 @@ def _build_entry_query(search_criteria, user):
 
     query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
 
-    return query
+    photoqueryset = ObservationImages.objects.filter(observation__in=query)
+    photoqueryset = get_objects_for_user(user,
+                                         'vavilov.view_observation_images',
+                                         klass=photoqueryset)
+    obs = [po.observation for po in photoqueryset]
+    query.exclude(observation_id__in=obs)
+    return query, photoqueryset
 
 
 def _search_criteria_to_get_parameters(search_criteria):
@@ -85,12 +91,8 @@ def search(request):
                                     search_criteria.items() if value])
             context['search_criteria'] = search_criteria
 
-            queryset = _build_entry_query(search_criteria, user=request.user)
-
-            photoqueryset = ObservationImages.objects.filter(observation__in=queryset)
-            photoqueryset = get_objects_for_user(request.user,
-                                                 'vavilov.view_observation_images',
-                                                 klass=photoqueryset)
+            queryset, photoqueryset = _build_entry_query(search_criteria,
+                                                         user=request.user)
 
             download_search = request.GET.get('download_search', False)
 
