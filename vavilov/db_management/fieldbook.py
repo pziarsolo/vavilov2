@@ -136,8 +136,11 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
                 ObservationEntityPlant.objects.create(obs_entity=obs_entity,
                                                       plant=plant)
 
-            add_or_load_observation(obs_entity, trait, assays[0], value,
-                                    creation_time, observer)
+            observation = add_or_load_observation(obs_entity, trait, assays[0],
+                                                  value, creation_time,
+                                                  observer)
+            group = Group.objects.get(name=assays[0])
+            assign_perm('view_observation', group, observation)
 
 
 # export db

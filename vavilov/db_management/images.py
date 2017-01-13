@@ -115,6 +115,7 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
                                              assay=assay,
                                              trait=trait,
                                              creation_time=creation_time)
+    assign_perm('vavilov.view_observation', group, observation)
     content_type = 'image/{}'.format(image_format)
 
     image_suf = SimpleUploadedFile(os.path.basename(image_fpath),
