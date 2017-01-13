@@ -51,8 +51,8 @@ def _build_entry_query(search_criteria, user):
     photoqueryset = get_objects_for_user(user,
                                          'vavilov.view_observation_images',
                                          klass=photoqueryset)
-    obs = [po.observation for po in photoqueryset]
-    query.exclude(observation_id__in=obs)
+    obs = [po.observation.observation_id for po in photoqueryset]
+    query = query.exclude(observation_id__in=obs)
     return query, photoqueryset
 
 
