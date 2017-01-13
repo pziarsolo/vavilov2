@@ -9,46 +9,34 @@ from guardian.shortcuts import get_objects_for_user
 
 
 from vavilov.forms.observations import SearchObservationForm
-from vavilov.models import Observation, Plant, ObservationEntity
+from vavilov.models import Observation, Plant, ObservationEntity, ObservationImages
 from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
 
 
-def _build_entry_query(search_criteria, user, search_images=False):
+def _build_entry_query(search_criteria, user):
     query = Observation.objects.all()
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
         acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
                                           Q(accession__accessionsynonym__synonym_code__icontains=accession_code))
 
-        if search_images:
-            query = query.filter(observation__obs_entity__observationentityplant__plant__in=acc_plants)
-        else:
-            query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
+        query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
 
     if 'plant' in search_criteria and search_criteria['plant'] != "":
         plant_code = search_criteria['plant']
-        if search_images:
-            query = query.filter(observation__plant_part__plant__unique_id__icontains=plant_code)
-        else:
-            query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
+        query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
 
     if 'plant_part' in search_criteria and search_criteria['plant_part'] != "":
         plant_part = search_criteria['plant_part']
-        if search_images:
-            query = query.filter(observation__obs_entity__part__name=plant_part)
-        else:
-            query = query.filter(obs_entity__part__name=plant_part)
+        query = query.filter(obs_entity__part__name=plant_part)
 
     if 'assay' in search_criteria and search_criteria['assay'] != "":
-        if search_images:
-            query = query.filter(observation__assay__name=search_criteria['assay'])
-        else:
-            query = query.filter(assay__name=search_criteria['assay'])
+        query = query.filter(assay__name=search_criteria['assay'])
 
-    if 'trait' in search_criteria and search_criteria['trait']:
-        trait_id = search_criteria['trait']
-        query = query.filter(trait=trait_id)
+    if 'traits' in search_criteria and search_criteria['traits']:
+        trait_ids = search_criteria['traits']
+        query = query.filter(trait__in=trait_ids)
 
     if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
         query = query.filter(plant__experimental_field__icontains=search_criteria['experimental_field'])
@@ -56,8 +44,8 @@ def _build_entry_query(search_criteria, user, search_images=False):
     if 'observer' in search_criteria and search_criteria['observer']:
         observer = search_criteria['observer']
         query = query.filter(user__icontains=observer)
-    query = get_objects_for_user(user, 'vavilov.view_observation',
-                                 klass=query)
+
+    query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
 
     return query
 
@@ -98,9 +86,12 @@ def search(request):
             context['search_criteria'] = search_criteria
 
             queryset = _build_entry_query(search_criteria, user=request.user)
-            photoqueryset = _build_entry_query(search_criteria,
-                                               user=request.user,
-                                               search_images=True)
+
+            photoqueryset = ObservationImages.objects.filter(observation__in=queryset)
+            photoqueryset = get_objects_for_user(request.user,
+                                                 'vavilov.view_observation_images',
+                                                 klass=photoqueryset)
+
             download_search = request.GET.get('download_search', False)
 
             if download_search:
