@@ -14,24 +14,37 @@ from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
 
 
-def _build_entry_query(search_criteria, user):
+def _build_entry_query(search_criteria, user, search_images=False):
     query = Observation.objects.all()
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
         acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
                                           Q(accession__accessionsynonym__synonym_code__icontains=accession_code))
-        query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
+
+        if search_images:
+            query = query.filter(observation__obs_entity__observationentityplant__plant__in=acc_plants)
+        else:
+            query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
 
     if 'plant' in search_criteria and search_criteria['plant'] != "":
         plant_code = search_criteria['plant']
-        query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
+        if search_images:
+            query = query.filter(observation__plant_part__plant__unique_id__icontains=plant_code)
+        else:
+            query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
 
     if 'plant_part' in search_criteria and search_criteria['plant_part'] != "":
         plant_part = search_criteria['plant_part']
-        query = query.filter(obs_entity__part__name=plant_part)
+        if search_images:
+            query = query.filter(observation__obs_entity__part__name=plant_part)
+        else:
+            query = query.filter(obs_entity__part__name=plant_part)
 
     if 'assay' in search_criteria and search_criteria['assay'] != "":
-        query = query.filter(assay__name=search_criteria['assay'])
+        if search_images:
+            query = query.filter(observation__assay__name=search_criteria['assay'])
+        else:
+            query = query.filter(assay__name=search_criteria['assay'])
 
     if 'trait' in search_criteria and search_criteria['trait']:
         trait_id = search_criteria['trait']
@@ -47,6 +60,17 @@ def _build_entry_query(search_criteria, user):
                                  klass=query)
 
     return query
+
+
+def _search_criteria_to_get_parameters(search_criteria):
+    get_params = ''
+    for key, value in search_criteria.items():
+        if isinstance(value, list):
+            for val in value:
+                get_params += "&{}={}".format(key, val)
+        else:
+            get_params += "&{}={}".format(key, value)
+    return get_params
 
 
 def search(request):
@@ -74,6 +98,9 @@ def search(request):
             context['search_criteria'] = search_criteria
 
             queryset = _build_entry_query(search_criteria, user=request.user)
+            photoqueryset = _build_entry_query(search_criteria,
+                                               user=request.user,
+                                               search_images=True)
             download_search = request.GET.get('download_search', False)
 
             if download_search:
@@ -83,15 +110,21 @@ def search(request):
                 elif format_ == 'excel':
                     return return_excel_response(queryset, ObservationsTable)
 
-            elif queryset and not download_search:
-                entries_table = ObservationsTable(queryset,
-                                                  template='table.html')
-                RequestConfig(request).configure(entries_table)
-                context['entries'] = entries_table
+            elif (queryset or photoqueryset) and not download_search:
+                if queryset:
+                    entries_table = ObservationsTable(queryset,
+                                                      template='table.html')
+                    RequestConfig(request).configure(entries_table)
+                    context['entries'] = entries_table
+                else:
+                    context['entries'] = None
+                if photoqueryset:
+                    context['photo_entries'] = photoqueryset
+                else:
+                    context['photo_entries'] = None
                 # we only have to write the criteria in the form the first
                 if not getdata:
-                    context['criteria'] = ''.join(["&{}={}".format(k, v)
-                                                  for k, v in search_criteria.items()])
+                    context['criteria'] = _search_criteria_to_get_parameters(search_criteria)
             else:
                 context['entries'] = None
     else:
