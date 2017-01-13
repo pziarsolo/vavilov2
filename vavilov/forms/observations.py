@@ -1,7 +1,7 @@
 from operator import itemgetter
 
 from django import forms
-from django.forms.widgets import Select
+from django.forms.widgets import Select, SelectMultiple
 
 from vavilov.forms.widgets import AutocompleteTextInput
 from vavilov.models import Trait, Assay, Cvterm
@@ -54,8 +54,9 @@ class SearchObservationForm(forms.Form):
 
     trait_choices = [('', '')]
     trait_choices.extend(grouped_trait_choices())
-    trait = forms.ChoiceField(required=False, label='Trait', widget=Select,
-                              choices=trait_choices)
+    traits = forms.MultipleChoiceField(required=False, label='Trait',
+                                       widget=SelectMultiple,
+                                       choices=trait_choices)
 
     experimental_field = forms.CharField(required=False,
                                          label='Experimental field')
