@@ -157,6 +157,7 @@ def observation_entity(request, name):
             observations_table = None
 
         context['observations'] = observations_table
+        context['obs_images'] = obs_entity.obs_images(user)
 
     template = 'vavilov/obs_entity.html'
     content_type = None

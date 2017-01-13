@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 {% load extras %}
+{% block page_spec_js %}
+    <script src="/static/vavilov/js/galleria/galleria-1.4.2.min.js"></script>
+    <script src="/static/vavilov/js/jQueryRotate.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/vavilov/style/galleria.css">
+{% endblock page_spec_js %}
+
 {% load staticfiles %}
 {% load render_table from django_tables2 %}
 {% block title %}Observation entity {{obs_entity.name}} {% endblock title %}
@@ -26,4 +32,5 @@
     {% render_table plants %}
     <span class="clear"></span>
 {% endif %}
+{% include 'vavilov/galleria_js.html' with images=obs_images %}
 {% endblock %}
