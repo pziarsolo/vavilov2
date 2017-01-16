@@ -4,7 +4,7 @@ import re
 from django.http.response import HttpResponse
 
 from vavilov.caches import get_taxons
-from vavilov.models import Accession, AccessionSynonym, Plant
+from vavilov.models import Accession, AccessionSynonym, Plant, Trait
 
 
 def accession_numbers(request):
@@ -68,5 +68,24 @@ def plants(request):
                 pass
 
     ids = set([row['plant_name'] for row in query.values('plant_name')])
+    return HttpResponse(json.dumps(sorted(list(ids))),
+                        content_type='application/json')
+
+
+def traits(request):
+    query = Trait.objects.all()
+    if request.method == 'GET':
+        if u'term' in request.GET:
+            term = request.GET['term']
+            query = query.filter(name__icontains=term)
+
+        if u'limit' in request.GET:
+            try:
+                limit = int(request.GET[u'limit'])
+                query = query[:limit]
+            except ValueError:
+                pass
+
+    ids = set([row['name'] for row in query.values('name')])
     return HttpResponse(json.dumps(sorted(list(ids))),
                         content_type='application/json')

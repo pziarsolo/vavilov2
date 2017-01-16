@@ -9,7 +9,8 @@ from guardian.shortcuts import get_objects_for_user
 
 
 from vavilov.forms.observations import SearchObservationForm
-from vavilov.models import Observation, Plant, ObservationEntity, ObservationImages
+from vavilov.models import Observation, Plant, ObservationEntity, ObservationImages, \
+    Trait
 from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
 
@@ -36,7 +37,9 @@ def _build_entry_query(search_criteria, user):
 
     if 'traits' in search_criteria and search_criteria['traits']:
         trait_ids = search_criteria['traits']
-        query = query.filter(trait__in=trait_ids)
+        trait_names = [t.strip() for t in trait_ids.split(',') if t]
+        traits = Trait.objects.filter(name__in=trait_names)
+        query = query.filter(trait__in=traits)
 
     if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
         query = query.filter(plant__experimental_field__icontains=search_criteria['experimental_field'])

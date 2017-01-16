@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^apis/accession_numbers/$', 'vavilov.views.api.accession_numbers', name='api_accession_numbers'),
     url(r'^apis/taxons/$', 'vavilov.views.api.taxons', name='api_taxons'),
     url(r'^apis/plants/$', 'vavilov.views.api.plants', name='api_plants'),
+    url(r'^apis/traits/$', 'vavilov.views.api.traits', name='api_traits'),
 ]
 
 if settings.EXPOSE_API:
