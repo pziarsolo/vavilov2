@@ -1,9 +1,10 @@
 /**
- * Galleria v 1.4.2 2014-08-07
+ * Galleria v1.5.1 2016-12-08
  * http://galleria.io
  *
+ * Copyright (c) 2010 - 2016 worse is better UG
  * Licensed under the MIT license
- * https://raw.github.com/aino/galleria/master/LICENSE
+ * https://raw.github.com/worseisbetter/galleria/master/LICENSE
  *
  */
 
@@ -20,13 +21,13 @@ var doc    = window.document,
     protoArray = Array.prototype,
 
 // internal constants
-    VERSION = 1.41,
+    VERSION = 1.51,
     DEBUG = true,
     TIMEOUT = 30000,
     DUMMY = false,
     NAV = navigator.userAgent.toLowerCase(),
     HASH = window.location.hash.replace(/#\//, ''),
-    PROT = window.location.protocol,
+    PROT = window.location.protocol == "file:" ? "http:" : window.location.protocol,
     M = Math,
     F = function(){},
     FALSE = function() { return false; },
@@ -117,25 +118,18 @@ var doc    = window.document,
         youtube: {
             reg: /https?:\/\/(?:[a-zA_Z]{2,3}.)?(?:youtube\.com\/watch\?)((?:[\w\d\-\_\=]+&amp;(?:amp;)?)*v(?:&lt;[A-Z]+&gt;)?=([0-9a-zA-Z\-\_]+))/i,
             embed: function() {
-                return 'http://www.youtube.com/embed/' + this.id;
+                return PROT + '//www.youtube.com/embed/' + this.id;
             },
-            getUrl: function() {
-                return PROT + '//gdata.youtube.com/feeds/api/videos/' + this.id + '?v=2&alt=json-in-script&callback=?';
+            get_thumb: function( data ) {
+                return PROT + '//img.youtube.com/vi/'+this.id+'/default.jpg';
             },
-            get_thumb: function(data) {
-                return data.entry.media$group.media$thumbnail[2].url;
-            },
-            get_image: function(data) {
-                if ( data.entry.yt$hd ) {
-                    return PROT + '//img.youtube.com/vi/'+this.id+'/maxresdefault.jpg';
-                }
-                return data.entry.media$group.media$thumbnail[3].url;
-            }
+            get_image: function( data ) {
+                return PROT + '//img.youtube.com/vi/'+this.id+'/hqdefault.jpg';            }
         },
         vimeo: {
             reg: /https?:\/\/(?:www\.)?(vimeo\.com)\/(?:hd#)?([0-9]+)/i,
             embed: function() {
-                return 'http://player.vimeo.com/video/' + this.id;
+                return PROT + '//player.vimeo.com/video/' + this.id;
             },
             getUrl: function() {
                 return PROT + '//vimeo.com/api/v2/video/' + this.id + '.json?callback=?';
@@ -182,13 +176,19 @@ var doc    = window.document,
 
         $.extend( this, _video[type] );
 
-        $.getJSON( this.getUrl(), function(data) {
+        _videoThumbs = function(data) {
             self.data = data;
             $.each( self.readys, function( i, fn ) {
                 fn( self.data );
             });
             self.readys = [];
-        });
+        };
+
+        if ( this.hasOwnProperty('getUrl') ) {
+            $.getJSON( this.getUrl(), _videoThumbs);
+        } else {
+            window.setTimeout(_videoThumbs, 400);
+        }
 
         this.getMedia = function( type, callback, fail ) {
             fail = fail || F;
@@ -869,7 +869,7 @@ var doc    = window.document,
 
                     Utils.wait({
                         until: function() {
-                            return $loader.height() == 1;
+                            return $loader.height() > 0;
                         },
                         success: function() {
                             $loader.remove();
@@ -1141,7 +1141,7 @@ $win.on( 'orientationchange', function() {
 
     @example var gallery = new Galleria();
 
-    @author http://aino.se
+    @author http://wib.io
 
     @requires jQuery
 
@@ -5690,7 +5690,7 @@ Galleria.addTheme = function( theme ) {
     }
 
     var css = false,
-        reg;
+        reg, reg2;
 
     if ( typeof theme.css === 'string' ) {
 
@@ -5724,8 +5724,8 @@ Galleria.addTheme = function( theme ) {
                     $('script').each(function (i, script) {
                         // look for the theme script
                         reg = new RegExp('galleria\\.' + theme.name.toLowerCase() + '\\.');
-                        if (reg.test(script.src)) {
-
+                        reg2 = new RegExp('galleria\\.io\\/theme\\/' + theme.name.toLowerCase() + '\\/(\\d*\\.*)?(\\d*\\.*)?(\\d*\\/)?js');
+                        if (reg.test(script.src) || reg2.test(script.src)) {
                             // we have a match
                             css = script.src.replace(/[^\/]*$/, '') + theme.css;
 
@@ -5780,7 +5780,7 @@ Galleria.loadTheme = function( src, options ) {
         err;
 
     // start listening for the timeout onload
-    $( window ).load( function() {
+    $( window ).on('load', function() {
         if ( !loaded ) {
             // give it another 20 seconds
             err = window.setTimeout(function() {
@@ -6157,7 +6157,7 @@ Galleria.Picture.prototype = {
     */
 
     preload: function( src ) {
-        $( new Image() ).load((function(src, cache) {
+        $( new Image() ).on( 'load', (function(src, cache) {
             return function() {
                 cache[ src ] = src;
             };
@@ -6201,7 +6201,7 @@ Galleria.Picture.prototype = {
 
             this.container.appendChild( this.image );
 
-            $('#'+id).load( (function( self, callback ) {
+            $('#'+id).on( 'load', (function( self, callback ) {
                 return function() {
                     window.setTimeout(function() {
                         $( self.image ).css( 'visibility', 'visible' );
@@ -6298,7 +6298,7 @@ Galleria.Picture.prototype = {
                                 },
                                 error: function() {
                                     if ( !resort ) {
-                                        $(new Image()).load( onload ).attr( 'src', img.src );
+                                        $(new Image()).on( 'load', onload ).attr( 'src', img.src );
                                         resort = true;
                                     } else {
                                         Galleria.raise('Could not extract width/height from image: ' + img.src +
@@ -6329,7 +6329,7 @@ Galleria.Picture.prototype = {
         });
 
         // begin load and insert in cache when done
-        $image.load( onload ).on( 'error', onerror ).attr( 'src', src );
+        $image.on( 'load', onload ).on( 'error', onerror ).attr( 'src', src );
 
         // return the container
         return this.container;

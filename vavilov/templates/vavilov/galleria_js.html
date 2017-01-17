@@ -4,7 +4,7 @@
 	    <h3> Observation Images </h3>
 		 <div class='galleria' style="margin:auto;">
 		    {% for obs_image  in images %}
-		        <a href="{{obs_image.image.url}}"><img src="{{obs_image.thumbnail.url}}" data-title="Assay={{obs_image.assay.name}}" ></a>
+		        <a href="{{obs_image.image.url}}"><img src="{{obs_image.thumbnail.url}}" data-title="Assay={{obs_image.observation.assay.name}}" ></a>
 		    {% endfor %}
 		
 		<script>

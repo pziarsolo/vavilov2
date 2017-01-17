@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% load render_table from django_tables2 %}
-{% block page_spec_js %}
-    <script src="/static/vavilov/js/galleria/galleria-1.4.2.min.js"></script>
-    <script src="/static/vavilov/js/jQueryRotate.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/vavilov/style/galleria.css">
-{% endblock %}
+{% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
 {% block title %}Search Observations {% endblock title %}
 {% block content %}
 	{% if entries or photo_entries%}
@@ -19,8 +15,11 @@
 	   {% endif%}
 	
 	{% else %}
-        {% if search_criteria and not entries or not photo_entries%}
-           <p>No observations found</p>
+	    {{request.method}}
+        {% if request.method == "POST"%}
+            {% if not entries or not photo_entries%}
+              <p>No observations found</p>
+            {% endif %}
         {% endif %}
 	    <h3> Search Observations</h3>
         <form action="{% url 'search_observation' %}" method="post">{% csrf_token %}
