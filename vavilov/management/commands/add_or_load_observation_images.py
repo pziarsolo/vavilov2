@@ -4,9 +4,8 @@ from django.conf import settings as site_settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
 
-from imagetools.utils import get_all_image_fpaths
 from vavilov.conf.settings import PHENO_PHOTO_DIR
-from vavilov.db_management.images import add_or_load_image_to_db
+from vavilov.db_management.images import add_or_load_images
 
 
 class Command(BaseCommand):
@@ -39,9 +38,6 @@ with PHENO_MANAGER_PHENE_PHOTOS
 
         pheno_photo_dir = os.path.join(site_settings.MEDIA_ROOT,
                                        PHENO_PHOTO_DIR)
-        for image_path in get_all_image_fpaths(pheno_photo_dir,
-                                               thumbnails=False):
-            add_or_load_image_to_db(image_path,
-                                    view_perm_group=view_perm_group,
-                                    create_plant=create_plant,
-                                    use_image_id_as_plant_id=use_image_id_as_plant_id)
+        add_or_load_images(pheno_photo_dir, view_perm_group=view_perm_group,
+                           create_plant=create_plant,
+                           use_image_id_as_plant_id=use_image_id_as_plant_id)

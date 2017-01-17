@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from guardian.shortcuts import assign_perm
 
 from imagetools.exif import get_exif_comments, get_exif_metadata
-from imagetools.utils import get_image_format
+from imagetools.utils import get_image_format, get_all_image_fpaths
 from vavilov.conf.settings import OUR_TIMEZONE
 from vavilov.db_management.phenotype import suggest_obs_entity_name
 from vavilov.models import (Plant, Assay, Trait, ObservationImages,
@@ -133,3 +133,11 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     assign_perm('vavilov.view_observation_images', group, obs_image)
 
     return obs_image
+
+
+def add_or_load_images(pheno_photo_dir, view_perm_group=None,
+                       create_plant=False, use_image_id_as_plant_id=False):
+    for image_path in get_all_image_fpaths(pheno_photo_dir, thumbnails=False):
+        add_or_load_image_to_db(image_path, view_perm_group=view_perm_group,
+                                create_plant=create_plant,
+                                use_image_id_as_plant_id=use_image_id_as_plant_id)
