@@ -7,4 +7,3 @@ django-tables2
 openpyxl
 pytz
 pillow
-

@@ -4,7 +4,8 @@ import re
 from django.http.response import HttpResponse
 
 from vavilov.caches import get_taxons
-from vavilov.models import Accession, AccessionSynonym, Plant, Trait
+from vavilov.models import Accession, AccessionSynonym, Plant, Trait, \
+    Observation
 
 
 def accession_numbers(request):
@@ -73,7 +74,9 @@ def plants(request):
 
 
 def traits(request):
-    query = Trait.objects.all()
+    traits = Observation.objects.values('trait').distinct()
+    query = Trait.objects.filter(trait_id__in=traits)
+
     if request.method == 'GET':
         if u'term' in request.GET:
             term = request.GET['term']
