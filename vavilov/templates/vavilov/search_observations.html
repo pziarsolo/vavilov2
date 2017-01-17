@@ -15,7 +15,6 @@
 	   {% endif%}
 	
 	{% else %}
-	    {{request.method}}
         {% if request.method == "POST"%}
             {% if not entries or not photo_entries%}
               <p>No observations found</p>
