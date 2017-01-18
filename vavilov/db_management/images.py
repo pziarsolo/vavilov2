@@ -104,6 +104,7 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                   part=part_type)
     if created:
+        assign_perm('vavilov.view_obs_entity', group, obs_entity)
         ObservationEntityPlant.objects.create(obs_entity=obs_entity,
                                               plant=plant)
 
