@@ -94,7 +94,11 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
             raise ValueError('Plant from image not loaded to db yet: {}'.format(plant_id))
 
     part_name = exif_data[PLANT_PART].lower()
-    part_type = Cvterm.objects.get(cv__name='plant_parts', name=part_name)
+    try:
+        part_type = Cvterm.objects.get(cv__name='plant_parts', name=part_name)
+    except Cvterm.DoesNotExist:
+        print('{} plant part not in db'.format(part_name))
+        raise
 
     obs_entity_name = suggest_obs_entity_name(plant_id, part_name)
     obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
