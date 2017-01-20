@@ -51,10 +51,10 @@ class LoginRequiredMiddleware:
         path_in_urls = any(url.match(path) for url in self._urls)
 
         if (path_in_urls and self._policy_if_match == ALLOW or
-            not path_in_urls and self._policy_if_match == RESTRICT):
+                not path_in_urls and self._policy_if_match == RESTRICT):
             pass
         elif (not path_in_urls and self._policy_if_match == ALLOW or
-             path_in_urls and self._policy_if_match == RESTRICT):
+              path_in_urls and self._policy_if_match == RESTRICT):
             if not request.user.is_authenticated():
                 return HttpResponseRedirect('%s?next=%s' % (settings.UNAUTHORIZED_URL, request.path))
         else:
