@@ -13,9 +13,9 @@ TEST_DATA_DIR = join(dirname(vavilov_pedigree.__file__), 'test', 'data')
 
 def add_or_load_accessions(fpath):
     for row in excel_dict_reader(fpath):
-        accession = row['Accession']
-        collecting_number = row['CollectingNumber']
-        if accession and collecting_number:
+        accession = row['CODE']
+        collecting_number = row['COLLECTING CODE']
+        if accession:
             Accession.objects.get_or_create(accession_number=accession,
                                             collecting_number=collecting_number)
 
