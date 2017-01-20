@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% load extras %}
+{% block title %}Seedlot {{seedlot.name}} {% endblock title %}
+{% block content %}
+<section >
+    <div class='accession_table'>
+	    <table class="data_table">
+		    <tr>
+	            <td class="key">Name :</td>
+	            <td class="value">{{seedlot.name}}</td>
+	        </tr>
+	        <tr>
+                <td class="key">Description :</td>
+                <td class="value">{{seedlot.description}}</td>
+            </tr>
+		    <tr>
+		        <td class="key">Accession :</td>
+		        <td class="value"><a href='{% url 'pedigree_accession_view' seedlot.accession.accession_number %}'>{{seedlot.accession.accession_number}}</a></td>
+		    </tr>
+		    {% if seedlot.num_seeds %}
+                <tr>
+                    <td class="key">num Seeds :</td>
+                    <td class="value">{{seedlot.num_seeds}}</td>
+                </tr>
+            {% endif %}
+		    {% if seedlot.father.plant_name %}
+			    <tr>
+	                <td class="key">Father :</td>
+	                {% with seedlot.father as plant %} 
+	                   <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
+	                {% endwith %}
+	            </tr>
+	        {% endif %}
+	        {% if seedlot.mother.plant_name %}
+	            <tr>
+	                <td class="key">Mother :</td>
+	                {% with seedlot.mother as plant %} 
+                       <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
+                    {% endwith %}
+	            </tr>
+	        {% endif %}
+		</table>
+	</div>
+</section>
+
+
+{% if accession.seed_lots %}
+<ul>{{ variable }}
+{% for seed_lot in accession.seed_lots %}
+    <li><a href='/pedigree/seedlot/{{seed_lot}}'>{{seed_lot}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
+    
+{% endblock %}

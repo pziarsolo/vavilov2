@@ -1,0 +1,5 @@
+<a href='{% url 'pedigree_plant_view' plant.plant_name %}'>{{seedlot.father.plant_name}}</a>
+    (Comming from seedlot:<a href='{% url 'pedigree_seedlot_view' plant.seed_lot.name %}'>{{plant.seed_lot.name}}</a>
+    {% if plant.seed_lot.accession %}
+        (That belongs to accession: <a href='{% url 'pedigree_accession_view' plant.seed_lot.accession.accession_number %}'>{{plant.seed_lot.accession.accession_number}}</a>)
+    {% endif %})

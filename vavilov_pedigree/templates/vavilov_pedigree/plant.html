@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load extras %}
+{% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
+{% load render_table from django_tables2 %}
+{% block title %}Plant {{ plant.plant_name}} {% endblock title %}
+{% block content %}
+<h1> Plant {{ plant.plant_name}} </h1>
+<div class="table-container">
+	<table class="data_table">
+	    <tr>
+	        <td class="key">Accession number :</td>
+	        <td class="value"><a href='{% url 'pedigree_accession_view' plant.seed_lot.accession.accession_number %}'>{{plant.seed_lot.accession.accession_number}}</a></td>
+	    </tr>
+	    {% if plant.experimental_field %}
+	    <tr>
+	        <td class="key">Experimental field :</td>
+	        <td class="value">{{plant.experimental_field}}</td>
+	    </tr>
+	    {% endif %}
+	    {% if plant.row %}
+	    <tr>
+	        <td class="key">Row :</td>
+	        <td class="value">{{plant.row}}</td>
+	    </tr>
+	    {% endif %}
+	    {% if plant.column %}
+	    <tr>
+	        <td class="key">Column :</td>
+	        <td class="value">{{plant.column}}</td>
+	    </tr>
+	    {% endif %}
+	    {% if plant.pot_number %}
+	    <tr>
+	        <td class="key">Pot number :</td>
+	        <td class="value">{{plant.pot_number}}</td>
+	    </tr>
+	    {% endif %}
+	    <tr>
+            <td class="key">Seed_lot :</td>
+            <td class="value"><a href='{% url 'pedigree_seedlot_view' plant.seed_lot.name %}'>{{plant.seed_lot.name}}</a></td>
+        </tr>
+	</table>
+</div>
+{% if clones %}
+    <h3> Clones of this plant </h3>
+    {% render_table clones %}
+{% endif %}
+
+{% if assays %}
+    <hr class='empty_line'>
+	<h3> This plant has been used in these assays</h3>
+	{% render_table assays %}
+{% endif %}
+<span class="clear"></span>
+
+
+{% endblock %}

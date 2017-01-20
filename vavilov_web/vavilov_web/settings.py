@@ -46,18 +46,24 @@ if DEVELOPMENT_MACHINE:
     DATABASE = {'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': os.path.join(BASE_DIR, 'dev_default.sqlite3')}
     ALLOWED_HOSTS = ['*']
+    PEDIGREE_DB = {'ENGINE': 'django.db.backends.sqlite3',
+                   'NAME': os.path.join(BASE_DIR, 'dev_pedigree.sqlite3')}
 else:
     DEBUG = False
     DATABASE = {'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': os.path.join(BASE_DIR, 'db.sqlite3')}
+    PEDIGREE_DB = {'ENGINE': 'django.db.backends.sqlite3',
+                   'NAME': os.path.join(BASE_DIR, 'pedigree.sqlite3')}
 
     ALLOWED_HOSTS = [HOST_IP]
 
 DATABASES = {
-    'default': DATABASE
+    'default': DATABASE,
 }
+PEDIGREE_DATABASE = 'vavilov_pedigree'
+DATABASES[PEDIGREE_DATABASE] = PEDIGREE_DB
 
-
+DATABASE_ROUTERS = ['vavilov_pedigree.db_router.VavilovPedigreeRouter']
 # Application definition
 
 INSTALLED_APPS = (
@@ -68,6 +74,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'vavilov.apps.VavilovAppConfig',
+    'vavilov_pedigree.apps.VavilovPedigreeAppConfig',
     'django_tables2',
     'rest_framework',
     'guardian',

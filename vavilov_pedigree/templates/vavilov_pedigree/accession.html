@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% load extras %}
+{% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
+{% block title %}Accession {{accession.accession_number}} {% endblock title %}
+{% block content %}
+<section >
+    <h2> Passport data for {{accession.accession_number }}</h2>
+    <div class='accession_table'>
+	    <table class="data_table">
+	    <tr>
+	        <td class="key">Accession number :</td>
+	        <td class="value">{{accession.accession_number}}</td>
+	    </tr>
+	    {% if accession.donor_accession %}
+	        <tr>
+	          <td class="key">Donor</td>
+	          <td class="value">{{ accession.donor_accession|link_if_url:accession.donor_accession}}}</td>
+	        </tr>
+	    {% endif %}
+	    {%if accession.collecting_number %}
+	        <tr>
+	          <td class="key">Collecting number</td>
+	          <td class="value">{{ accession.collecting_number}}</td>
+	        </tr>
+	    {% endif %}
+	    {% if accession.duplicated_accessions %}
+	      {% with dup_accs=accession.duplicated_accessions%}
+	        <tr>
+	            <td class="key">Duplicated accessions in other databases</td>
+	            <td class="value"></td>
+	        </tr>
+	                {% for dup_acc in dup_accs %}
+	                <tr>
+	                    <td></td>
+	                    <td>{{dup_acc|link_if_url:dup_acc}}</td>
+	                 </tr>
+	                 {% endfor %}
+	      {% endwith %}
+	    {% endif %}
+	    {% if accession.organism %}
+	       <tr>
+                <td class="key">Organism</td>
+                <td class="value">{{ accession.organism }}</td>
+            </tr>
+	    {% endif %}
+	    </table>
+	</div>
+	<hr class='empty_line'>
+    {% if accession.passport%}
+        {% with pass=accession.passport %}
+	        <div id="passport_data_map">
+		        <div class='passport_table'>
+		            <table class="data_table">
+		            {% for shown_str, prop_content in pass.data_to_show.items %}
+		              {% if prop_content %}
+		                <tr>
+		                    <td  class="key">{{shown_str}}</td>
+		                    <td>{{ prop_content}}</td>
+		                </tr>
+		              {% endif %}     
+		            {% endfor %}
+		            </table>
+		        </div>
+		        {% with location=pass.location %}
+		            {% include 'vavilov/googlemap.html' %}
+		        {% endwith %}
+		    </div>
+        {% endwith %}
+    {% endif %}     	    
+</section>
+    {% if assays %}
+        <section class='clear'>    
+            <hr class='empty_line'>
+            <h3> This Accession has been used in these assays</h3>
+            {% render_table assays %}
+            <span class="clear"></span>
+	</section>
+    {% endif %}
+
+    {% if observations %}
+	<section class='clear'>
+        	<hr class='empty_line'>
+	        <h3> Observations on this accession </h3>
+	        {% render_table observations %}
+	        {% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
+	        <span class="clear"></span>
+	</section>
+    {% endif %}
+    {% include 'vavilov/galleria_js.html' with images=obs_images %}
+    {% if seedlots %}
+        <H3> Seed lots belongint to this accession</h3>
+        {% render_table seedlots %}
+    
+    {% endif %}
+
+    
+{% endblock %}
