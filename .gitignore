@@ -1,3 +1,4 @@
 .settings*
 .*project
 *.pyc
+vavilov_web/*.sqlite3
