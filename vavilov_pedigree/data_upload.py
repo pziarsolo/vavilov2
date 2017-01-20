@@ -85,9 +85,13 @@ def add_or_load_cross_experiments(fpath):
                                                          seed_lot=offspring)
 
 
+def load_data(dirpath):
+    add_or_load_accessions(join(dirpath, 'accessions.xlsx'))
+    add_or_load_seedlot(join(dirpath, 'seed_lots.xlsx'))
+    add_or_load_plants(join(dirpath, 'plants.xlsx'))
+    add_or_load_cross_experiments(join(dirpath, 'cross_exps.xlsx'))
+    add_or_load_plant_relationship(join(dirpath, 'plant_clones.xlsx'))
+
+
 def load_test_data():
-    add_or_load_accessions(join(TEST_DATA_DIR, 'accessions.xlsx'))
-    add_or_load_seedlot(join(TEST_DATA_DIR, 'seed_lots.xlsx'))
-    add_or_load_plants(join(TEST_DATA_DIR, 'plants.xlsx'))
-    add_or_load_cross_experiments(join(TEST_DATA_DIR, 'cross_exps.xlsx'))
-    add_or_load_plant_relationship(join(TEST_DATA_DIR, 'plant_clones.xlsx'))
+    load_data(TEST_DATA_DIR)
