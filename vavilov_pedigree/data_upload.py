@@ -25,12 +25,12 @@ def add_or_load_seedlot(fpath):
         accession = row['Accession']
         seed_lot = row['SeedLot']
         description = row['Description']
-        num_seeds = row['NumSeeds']
+        seeds_weight = row['SeedsWeight']
         if accession and seed_lot:
             accession = Accession.objects.get_or_create(accession_number=accession)[0]
             SeedLot.objects.get_or_create(accession=accession, name=seed_lot,
                                           description=description,
-                                          num_seeds=num_seeds)
+                                          seeds_weight=seeds_weight)
 
 
 def add_or_load_plants(fpath):

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('accession_id', models.AutoField(primary_key=True, serialize=False)),
                 ('accession_number', models.CharField(max_length=255)),
-                ('collecting_number', models.CharField(null=True, max_length=255)),
+                ('collecting_number', models.CharField(max_length=255, null=True)),
             ],
             options={
                 'db_table': 'vavilov_pedigree_accession',
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             name='Assay',
             fields=[
                 ('assay_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255, unique=True)),
+                ('name', models.CharField(unique=True, max_length=255)),
             ],
             options={
                 'db_table': 'vavilov_pedigree_assay',
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
             name='CrossExperiment',
             fields=[
                 ('cross_experiment_id', models.AutoField(primary_key=True, serialize=False)),
-                ('description', models.CharField(max_length=255, unique=True)),
+                ('description', models.CharField(unique=True, max_length=255)),
                 ('assay', models.ForeignKey(to='vavilov_pedigree.Assay')),
             ],
             options={
@@ -57,10 +57,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('plant_id', models.AutoField(primary_key=True, serialize=False)),
                 ('plant_name', models.CharField(max_length=255)),
-                ('experimental_field', models.CharField(null=True, max_length=255)),
-                ('row', models.CharField(null=True, max_length=10)),
-                ('column', models.CharField(null=True, max_length=10)),
-                ('pot_number', models.CharField(null=True, max_length=10)),
+                ('experimental_field', models.CharField(max_length=255, null=True)),
+                ('row', models.CharField(max_length=10, null=True)),
+                ('column', models.CharField(max_length=10, null=True)),
+                ('pot_number', models.CharField(max_length=10, null=True)),
             ],
             options={
                 'db_table': 'vavilov_pedigree_plant',
@@ -82,9 +82,9 @@ class Migration(migrations.Migration):
             name='SeedLot',
             fields=[
                 ('seed_lot_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('description', models.CharField(null=True, max_length=255)),
-                ('num_seeds', models.IntegerField(null=True)),
+                ('name', models.CharField(unique=True, max_length=255)),
+                ('description', models.CharField(max_length=255, null=True)),
+                ('seeds_weight', models.FloatField(null=True)),
                 ('accession', models.ForeignKey(to='vavilov_pedigree.Accession')),
             ],
             options={
