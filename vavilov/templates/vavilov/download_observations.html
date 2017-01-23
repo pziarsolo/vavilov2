@@ -5,6 +5,7 @@
 <div class=download_csv>
     <ul> 
         <li>Download</li>
+        {% url 'search_observation' as base_url %}
         <li><a href='{% build_url base_url search_criteria download_search=True,format=csv%}' download><img src="{% static "vavilov/style/images/csv_icon.png"%}"/></a></li>
         <li><a href='{% build_url base_url search_criteria download_search=True,format=excel%}' download><img src="{% static "vavilov/style/images/xls_icon.png"%}"/></a></li>
     </ul>
