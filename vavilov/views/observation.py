@@ -25,8 +25,8 @@ def _build_entry_query(search_criteria, user):
         query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
 
     if 'plant' in search_criteria and search_criteria['plant'] != "":
-        plant_code = search_criteria['plant']
-        query = query.filter(plant_part__plant__unique_id__icontains=plant_code)
+        plant_name = search_criteria['plant']
+        query = query.filter(obs_entity__observationentityplant__plant__plant_name__icontains=plant_name)
 
     if 'plant_part' in search_criteria and search_criteria['plant_part'] != "":
         plant_part = search_criteria['plant_part']
