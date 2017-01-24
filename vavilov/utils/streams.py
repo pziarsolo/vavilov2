@@ -1,8 +1,9 @@
 import csv
-from django.utils.html import strip_tags
-from django.http.response import StreamingHttpResponse, HttpResponse
 
+from django.http.response import StreamingHttpResponse, HttpResponse
+from django.utils.html import strip_tags
 from xlsxwriter.workbook import Workbook
+from vavilov.conf.settings import MAX_OBS_TO_EXCEL
 
 
 class Echo(object):
@@ -14,7 +15,16 @@ class Echo(object):
         return value
 
 
+MSG = """<script>
+    alert('To much observations( more than {}). Please contact with the admin to obtain the excel file :)');
+    window.history.back();
+</script>""".format(MAX_OBS_TO_EXCEL)
+
+
 def return_csv_response(queryset, table_class):
+    if queryset.count() > MAX_OBS_TO_EXCEL:
+        return HttpResponse(MSG, content_type="text/html")
+
     rows = queryset_to_row(queryset, table_class)
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter=',',
@@ -26,6 +36,9 @@ def return_csv_response(queryset, table_class):
 
 
 def return_excel_response(queryset, table_class):
+    if queryset.count() > MAX_OBS_TO_EXCEL:
+        return HttpResponse(MSG, content_type="text/html")
+
     content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     response = HttpResponse(content_type=content_type)
     create_excel_from_queryset(response, queryset, table_class, in_memory=True)

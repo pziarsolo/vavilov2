@@ -12,6 +12,9 @@ OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
 GOOGLEMAPKEY = getattr(settings, 'VAVILOV_GOOGLEMAPKEY', None)
 
+# Limit of observations in a search to convert to excel
+MAX_OBS_TO_EXCEL = 1000
+
 
 DEF_ACCESSION_SEARCH_FORM_FIELDS = ['accession', 'taxa', 'country', 'region',
                                     'biological_status', 'collecting_source']
