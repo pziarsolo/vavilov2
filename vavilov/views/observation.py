@@ -114,7 +114,7 @@ def search(request):
                     context['entries'] = entries_table
                 else:
                     context['entries'] = None
-                if photoqueryset:
+                if photoqueryset and photoqueryset.count() < 100:
                     context['photo_entries'] = photoqueryset
                 else:
                     context['photo_entries'] = None
