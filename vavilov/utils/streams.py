@@ -2,7 +2,9 @@ import csv
 
 from django.http.response import StreamingHttpResponse, HttpResponse
 from django.utils.html import strip_tags
-from xlsxwriter.workbook import Workbook
+from openpyxl import Workbook
+from openpyxl.utils.cell import get_column_letter
+
 from vavilov.conf.settings import MAX_OBS_TO_EXCEL
 
 
@@ -35,14 +37,15 @@ def return_csv_response(queryset, table_class):
     return response
 
 
-def return_excel_response(queryset, table_class):
+def return_excel_response(queryset, table_class, column_length=None):
     if queryset.count() > MAX_OBS_TO_EXCEL:
         return HttpResponse(MSG, content_type="text/html")
 
     content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     response = HttpResponse(content_type=content_type)
-    create_excel_from_queryset(response, queryset, table_class, in_memory=True)
+    wb = create_workbook_from_queryset(queryset, table_class, column_length)
     response['Content-Disposition'] = 'attachment; filename="somefilename.xlsx"'
+    wb.save(response)
     return response
 
 
@@ -62,19 +65,26 @@ def queryset_to_row(queryset, table_class):
         yield row_cells
 
 
-def create_excel_from_queryset(out_fhand, queryset, table, in_memory=False):
-    workbook = Workbook(out_fhand, {'in_memory': in_memory})
+def create_excel_from_queryset(out_fpath, queryset, table, column_length=None):
+    wb = create_workbook_from_queryset(queryset, table,
+                                       column_length=column_length)
+    wb.save(out_fpath)
 
-    worksheet = workbook.add_worksheet()
-    max_lengths = {}
-    for idx, row in enumerate(queryset_to_row(queryset, table)):
-        for col_idx, cell in enumerate(row):
-            if col_idx not in max_lengths:
-                max_lengths[col_idx] = []
-            max_lengths[col_idx].append(len(cell))
-        worksheet.write_row(idx, 0, row)
-    for col_index, lengths in max_lengths.items():
-        length = max(lengths)
-        worksheet.set_column(col_index, col_index, length + 2)
-    workbook.close()
-    return out_fhand
+
+def create_workbook_from_queryset(queryset, table, column_length=None):
+    wb = Workbook(write_only=True)
+    ws = wb.create_sheet()
+
+    if column_length is None:
+        column_length = 13
+    first = True
+    for row in queryset_to_row(queryset, table):
+        if first:
+            first = False
+            for col_index in range(len(row)):
+                column = get_column_letter(col_index + 1)
+                ws.column_dimensions[column].width = column_length
+        ws.append(row)
+
+    return wb
+
