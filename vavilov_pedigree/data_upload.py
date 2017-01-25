@@ -37,10 +37,16 @@ def add_or_load_plants(fpath):
     for row in excel_dict_reader(fpath):
         plant_name = row['PlantName']
         seedlot_name = row['SeedLot']
+        glasshouse = row.get('glasshouse', None)
+        row_num = row.get('row', None)
+        pot_number = row.get('pot_number', None)
+
         if plant_name and seedlot_name:
             seed_lot = SeedLot.objects.get(name=seedlot_name)
             Plant.objects.get_or_create(seed_lot=seed_lot,
-                                        plant_name=plant_name)
+                                        plant_name=plant_name,
+                                        experimentl_field=glasshouse,
+                                        row=row_num, pot_number=pot_number)
 
 
 def add_or_load_plant_relationship(fpath):
