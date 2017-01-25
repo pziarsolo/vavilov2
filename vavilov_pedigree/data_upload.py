@@ -45,7 +45,7 @@ def add_or_load_plants(fpath):
             seed_lot = SeedLot.objects.get(name=seedlot_name)
             Plant.objects.get_or_create(seed_lot=seed_lot,
                                         plant_name=plant_name,
-                                        experimentl_field=glasshouse,
+                                        experimental_field=glasshouse,
                                         row=row_num, pot_number=pot_number)
 
 
