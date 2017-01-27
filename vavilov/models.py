@@ -483,6 +483,8 @@ class Passport(models.Model):
 
     @property
     def collecting_date_str(self):
+        if self.collecting_date.month == 1 and self.collecting_date.day == 1:
+            return  self.collecting_date.year
         return self.collecting_date
 
     @property

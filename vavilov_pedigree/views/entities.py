@@ -18,7 +18,7 @@ def accession(request, accession_number):
 
     context['accession'] = acc
     # Seedlots
-    seedlot_table = SeesLotTable(acc.seed_lots, template='table.html',
+    seedlot_table = SeedLotTable(acc.seed_lots, template='table.html',
                                  prefix='seed_lot-')
     RequestConfig(request).configure(seedlot_table)
     context['seedlots'] = seedlot_table
@@ -56,7 +56,7 @@ class PlantsTable(tables.Table):
         attrs = {"class": "searchresult"}
 
 
-class SeesLotTable(tables.Table):
+class SeedLotTable(tables.Table):
     Seedlot = tables.LinkColumn('pedigree_seedlot_view', args=[A('name')],
                                 accessor=A('name'),
                                 orderable=True, verbose_name='SeedLot')
@@ -101,3 +101,11 @@ def seed_lot(request, name):
     template = 'vavilov_pedigree/seedlot.html'
     content_type = None
     return render_to_response(template, context, content_type=content_type)
+
+
+def search_cross(request):
+    pass
+
+def search_seedlot(request):
+    pass
+
