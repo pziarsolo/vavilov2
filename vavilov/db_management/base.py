@@ -63,16 +63,17 @@ def add_or_load_users(fpath):
     for entry in csv.DictReader(open(fpath), dialect=comma_dialect):
         username = entry['username']
         try:
-            User.objects.get(username=username)
+            user = User.objects.get(username=username)
         except User.DoesNotExist:
             if username == 'admin':
-                User.objects.create_superuser(username=username,
-                                              email=entry['email'],
-                                              password=entry['password'])
+                user = User.objects.create_superuser(username=username,
+                                                     email=entry['email'],
+                                                     password=entry['password'])
             else:
-                User.objects.create_user(username=username,
-                                         email=entry['email'],
-                                         password=entry['password'])
+                user = User.objects.create_user(username=username,
+                                                email=entry['email'],
+                                                password=entry['password'])
+        PUBLIC_GROUP.user_set.add(user)
 
 
 def add_or_load_persons(fhand):
