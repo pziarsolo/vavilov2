@@ -67,7 +67,7 @@ def accession(request, accession_number):
 
     context['obs_images'] = acc.obs_images(user)
     # search_criteria
-    context['obs_search_criteria'] = {'accession': acc}
+    context['obs_search_criteria'] = {'accession': acc.accession_number}
 
     template = 'vavilov/accession.html'
     return render_to_response(template, context)
