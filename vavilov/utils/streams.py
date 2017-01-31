@@ -1,7 +1,9 @@
 import csv
+import functools
 
 from django.http.response import StreamingHttpResponse, HttpResponse
 from django.utils.html import strip_tags
+
 from openpyxl import Workbook
 from openpyxl.utils.cell import get_column_letter
 
@@ -49,9 +51,27 @@ def return_excel_response(queryset, table_class, column_length=None):
     return response
 
 
-def queryset_to_row(queryset, table_class):
-    entries = table_class(queryset)
+sentinel = object()
+def rgetattr(obj, attr, default=sentinel):
+    if default is sentinel:
+        _getattr = getattr
+    else:
+        def _getattr(obj, name):
+            return getattr(obj, name, default)
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
 
+
+def queryset_to_row(queryset, table_class):
+    # print(table_class.attrs())
+    header = [field.verbose_name for field in table_class.base_columns.values()]
+    yield header
+    accessors = [col.accessor for col in table_class.base_columns.values()]
+    for entry in queryset:
+        yield [rgetattr(entry, accessor) for accessor in accessors]
+
+
+def queryset_to_row_old(queryset, table_class):
+    entries = table_class(queryset)
     header = [field.verbose_name for field in entries.base_columns.values()]
     yield(header)
     for row in entries.rows:
