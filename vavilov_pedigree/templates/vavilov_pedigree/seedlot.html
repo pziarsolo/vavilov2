@@ -25,22 +25,38 @@
                     <td class="value">{{seedlot.num_seeds}}</td>
                 </tr>
             {% endif %}
-		    {% if seedlot.father.plant_name %}
-			    <tr>
-	                <td class="key">Father :</td>
-	                {% with seedlot.father as plant %} 
-	                   <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
-	                {% endwith %}
-	            </tr>
-	        {% endif %}
-	        {% if seedlot.mother.plant_name %}
-	            <tr>
-	                <td class="key">Mother :</td>
-	                {% with seedlot.mother as plant %} 
-                       <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
+            
+            {% if seedlot.mothers %}
+                <tr>
+                    <td class="key"> Mothers :</td>
+                    {% with seedlot.mothers|first as plant%}
+                        <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
                     {% endwith %}
-	            </tr>
+                    {% for plant in seedlot.mothers|slice:"1:" %}
+                       <tr>
+                        <td></td>  
+                        <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
+                       </tr>
+                    {% endfor %}
+                </tr>
+            {% endif %}
+            
+		    {% if seedlot.fathers %}
+			    <tr>
+                    <td class="key"> Fathers :</td>
+                    {% with seedlot.fathers|first as plant%}
+                        <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
+                    {% endwith %}
+                    {% for plant in seedlot.fathers|slice:"1:" %}
+                       <tr>
+                        <td></td>  
+                        <td class="value">{% include 'vavilov_pedigree/plant_pedigree.html'%}</td>
+                       </tr>
+                    {% endfor %}
+                </tr>
 	        {% endif %}
+	        
+	        
 		</table>
 	</div>
 </section>

@@ -68,7 +68,6 @@ def add_or_load_cross_experiments(fpath):
 
         father_accession = row['Father(Accession)']
         mother_accession = row['Mother(Accession)']
-        replica = row['replicate']
         father_plant = row['Father(plant)']
         mother_plant = row['Mother(plant)']
         offspring = row['Offspring(seedlot)']
@@ -89,8 +88,18 @@ def add_or_load_cross_experiments(fpath):
             mother_plant = Plant.objects.get_or_create(plant_name=mother_plant)[0]
 
             # plant/accession codes must match
-            assert father_plant.seed_lot.accession.accession_number == father_accession
-            assert mother_plant.seed_lot.accession.accession_number == mother_accession
+            error = False
+            if father_plant.seed_lot.accession.accession_number != father_accession:
+                msg = '{} and {} not match'.format(father_accession, father_plant.plant_name)
+                print(msg + ' father')
+                error = True
+
+            if mother_plant.seed_lot.accession.accession_number != mother_accession:
+                msg = '{} and {} not match'.format(mother_accession, mother_plant.plant_name)
+                print(msg + ' mother')
+                error = True
+            if error:
+                continue
 
 
             assay = Assay.objects.get_or_create(name=assay_name)[0]

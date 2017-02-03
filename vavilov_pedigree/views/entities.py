@@ -73,18 +73,21 @@ class SeedLotTable(tables.Table):
 
 def plant(request, plant_name):
     context = RequestContext(request)
+
     try:
         plant = Plant.objects.get(plant_name=plant_name)
     except Plant.DoesNotExist:
         plant = None
+    print(plant.clones)
     context['plant'] = plant
 
-    # Clones
-    clones_table = PlantsTable(plant.clones, template='table.html',
-                               prefix='clones-')
-    RequestConfig(request).configure(clones_table)
-    context['clones'] = clones_table
-
+    if plant.clones:
+        clones_table = PlantsTable(plant.clones, template='table.html',
+                                   prefix='clones-')
+        RequestConfig(request).configure(clones_table)
+        context['clones'] = clones_table
+    else:
+        context['clones'] = None
     template = 'vavilov_pedigree/plant.html'
     content_type = None
     return render_to_response(template, context, content_type=content_type)
@@ -94,7 +97,7 @@ def seed_lot(request, name):
     context = RequestContext(request)
     try:
         seedlot = SeedLot.objects.get(name=name)
-    except Plant.DoesNotExist:
+    except SeedLot.DoesNotExist:
         seedlot = None
     context['seedlot'] = seedlot
 
