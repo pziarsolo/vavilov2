@@ -30,10 +30,13 @@ class ModelTest(TestCase):
     def test_seed_lot(self):
         seed_lot = SeedLot.objects.first()
         assert seed_lot.description == 'desc1'
-        assert seed_lot.father is None
+        assert seed_lot.fathers is None
         seed_lot = SeedLot.objects.last()
-        assert seed_lot.father.plant_name == 'plant1'
+        assert seed_lot.fathers
         assert seed_lot.description is None
+        assert seed_lot.fathers.count() == 3
+        assert seed_lot.mothers.count() == 3
+
 
     def test_assay(self):
         assert Assay.objects.first().cross_experiments.count() == 3

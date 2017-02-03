@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models import Q
+
+FATHER = 'father'
+MOTHER = 'mother'
 
 
 class Accession(models.Model):
@@ -38,6 +42,7 @@ class SeedLot(models.Model):
     description = models.CharField(max_length=255, null=True)
     accession = models.ForeignKey(Accession)
     seeds_weight = models.FloatField(null=True)
+    fruit = models.IntegerField(null=True)
 
     class Meta:
         db_table = 'vavilov_pedigree_seed_lot'
@@ -53,12 +58,12 @@ class SeedLot(models.Model):
             return None
 
     @property
-    def mother(self):
-        return self._parent(type_='mother')
+    def mothers(self):
+        return self._parent(type_='mothers')
 
     @property
-    def father(self):
-        return self._parent(type_='father')
+    def fathers(self):
+        return self._parent(type_='fathers')
 
 
 class Plant(models.Model):
@@ -79,12 +84,6 @@ class Plant(models.Model):
     @property
     def clones(self):
         return self._get_recursively_related_accessions([self])
-        clones = []
-        for plat_rels in PlantRelationship.objects.filter(subject=self):
-            clones.append(plat_rels.object)
-        for plat_rels in PlantRelationship.objects.filter(object=self):
-            clones.append(plat_rels.subject)
-        return clones
 
     def _get_recursively_related_accessions(self, plants):
         new_plants = self._get_symetric_related_accessions(plants)
@@ -126,8 +125,6 @@ class CrossExperiment(models.Model):
     cross_experiment_id = models.AutoField(primary_key=True)
     description = models.CharField(max_length=255, unique=True)
     assay = models.ForeignKey(Assay)
-    father = models.ForeignKey(Plant, related_name='father')
-    mother = models.ForeignKey(Plant, related_name='mother')
 
     class Meta:
         db_table = 'vavilov_pedigree_cross_experiment'
@@ -135,9 +132,30 @@ class CrossExperiment(models.Model):
     def __str__(self):
         return self.description
 
+    def _parents(self, type_):
+        return Plant.objects.filter(Q(crossplant__cross=self) &
+                             Q(crossplant__type=type_))
+    @property
+    def fathers(self):
+        return self._parents(FATHER)
+
+    @property
+    def mothers(self):
+        return self._parents(MOTHER)
+
     @property
     def offspring(self):
         return SeedLot.objects.filter(crossexperimentseedlot__cross_experiment=self)
+
+
+class CrossPlant(models.Model):
+    cross_plant_id = models.AutoField(primary_key=True)
+    cross = models.ForeignKey(CrossExperiment)
+    plant = models.ForeignKey(Plant)
+    type = models.CharField(max_length=10)
+
+    class Meta:
+        db_table = 'vavilov_pedigree_cross_plant'
 
 
 class CrossExperimentSeedLot(models.Model):

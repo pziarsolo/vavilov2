@@ -5,10 +5,13 @@ from vavilov.db_management.excel import excel_dict_reader
 import vavilov_pedigree
 from vavilov_pedigree.models import (Accession, SeedLot, Plant, Assay,
                                      CrossExperiment, CrossExperimentSeedLot,
-                                     PlantRelationship)
+                                     PlantRelationship, CrossPlant, FATHER,
+    MOTHER)
+from collections import Counter
 
 
 TEST_DATA_DIR = join(dirname(vavilov_pedigree.__file__), 'test', 'data')
+
 
 
 def add_or_load_accessions(fpath):
@@ -60,24 +63,54 @@ def add_or_load_plant_relationship(fpath):
 
 
 def add_or_load_cross_experiments(fpath):
+    counter = Counter()
     for row in excel_dict_reader(fpath):
 
-        father = row['Father(plant)']
-        mother = row['Mother(plant)']
+        father_accession = row['Father(Accession)']
+        mother_accession = row['Mother(Accession)']
+        replica = row['replicate']
+        father_plant = row['Father(plant)']
+        mother_plant = row['Mother(plant)']
         offspring = row['Offspring(seedlot)']
+        offspring_fruit = row['Fruit #']
         assay_name = row['Assay']
-        cross_exp_desc = row['CrossExperiment']
+
+        cross_exp_desc = '{}x{}'.format(mother_accession, father_accession)
+        counter[cross_exp_desc] += 1
+        cross_exp_desc += '-{}'.format(counter[cross_exp_desc])
+
         offspring_accession = row['OffspringAccession']
         offspring_description = row['OffspringDescription']
 
-        if father and mother and offspring and assay_name and cross_exp_desc:
+
+        if father_plant and mother_plant and offspring and assay_name and cross_exp_desc:
+
+            father_plant = Plant.objects.get_or_create(plant_name=father_plant)[0]
+            mother_plant = Plant.objects.get_or_create(plant_name=mother_plant)[0]
+
+            # plant/accession codes must match
+            assert father_plant.seed_lot.accession.accession_number == father_accession
+            assert mother_plant.seed_lot.accession.accession_number == mother_accession
+
+
             assay = Assay.objects.get_or_create(name=assay_name)[0]
-            father = Plant.objects.get_or_create(plant_name=father)[0]
-            mother = Plant.objects.get_or_create(plant_name=mother)[0]
-            cross_exp = CrossExperiment.objects.get_or_create(description=cross_exp_desc,
-                                                              assay=assay,
-                                                              father=father,
-                                                              mother=mother)[0]
+            cross_exp, created = CrossExperiment.objects.get_or_create(description=cross_exp_desc,
+                                                                       assay=assay)
+            if created:
+                CrossPlant.objects.get_or_create(cross=cross_exp, plant=father_plant,
+                                                 type=FATHER)
+                for father_clones in father_plant.clones:
+                    CrossPlant.objects.get_or_create(cross=cross_exp,
+                                                     plant=father_clones,
+                                                     type=FATHER)
+
+                CrossPlant.objects.get_or_create(cross=cross_exp,
+                                                 plant=mother_plant,
+                                                 type=MOTHER)
+                for mother_clones in mother_plant.clones:
+                    CrossPlant.objects.get_or_create(cross=cross_exp,
+                                                     plant=mother_clones,
+                                                     type=MOTHER)
             # seed:
             if offspring_accession:
                 accession = Accession.objects.get_or_create(accession_number=offspring_accession)[0]
@@ -85,7 +118,8 @@ def add_or_load_cross_experiments(fpath):
                 accession = None
             offspring = SeedLot.objects.get_or_create(name=offspring,
                                                       accession=accession,
-                                                      description=offspring_description)[0]
+                                                      description=offspring_description,
+                                                      fruit=offspring_fruit)[0]
 
             CrossExperimentSeedLot.objects.get_or_create(cross_experiment=cross_exp,
                                                          seed_lot=offspring)
@@ -95,8 +129,9 @@ def load_data(dirpath):
     add_or_load_accessions(join(dirpath, 'accessions.xlsx'))
     add_or_load_seedlot(join(dirpath, 'seed_lots.xlsx'))
     add_or_load_plants(join(dirpath, 'plants.xlsx'))
-    add_or_load_cross_experiments(join(dirpath, 'cross_exps.xlsx'))
     add_or_load_plant_relationship(join(dirpath, 'plant_clones.xlsx'))
+    add_or_load_cross_experiments(join(dirpath, 'cross_exps.xlsx'))
+
 
 
 def load_test_data():
