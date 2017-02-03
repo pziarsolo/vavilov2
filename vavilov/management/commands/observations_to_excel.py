@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
 from vavilov.utils.streams import create_excel_from_queryset
-from vavilov.views.observation import _build_entry_query
+from vavilov.views.observation import filter_observations
 from vavilov.views.tables import ObservationsTable
 
 
@@ -34,5 +34,5 @@ class Command(BaseCommand):
         if options['traits']:
             search_criteria['traits'] = options['traits']
 
-        queryset = _build_entry_query(search_criteria, user)[0]
+        queryset = filter_observations(search_criteria, user)[0]
         create_excel_from_queryset(out_fhand.name, queryset, ObservationsTable)

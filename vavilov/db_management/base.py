@@ -152,7 +152,8 @@ def _add_main_accession(accession_data, silent, view_perm_group):
     # Accession
     seed_holder_code = accession_data['Accession number']
     seed_holder_institute = accession_data['Istitute code']
-    accession = add_accession(seed_holder_code, seed_holder_institute)
+    accession = add_accession(seed_holder_code, seed_holder_institute,
+                              acc_type='internal')
 
     assign_perm('view_accession', view_perm_group, accession)
     # taxonomy
@@ -399,11 +400,17 @@ def add_accession(accession, institute_name, acc_type=None, make_link=True):
                                       name=acc_type)
 
     institute = Person.objects.get(name=institute_name)
-    accession = Accession.objects.get_or_create(accession_number=accession,
-                                                institute=institute,
-                                                type=acc_type,
-                                                dbxref=dbxref)
-    return accession[0]
+    try:
+        accession = Accession.objects.get(accession_number=accession,
+                                          institute=institute)
+    except Accession.DoesNotExist:
+        accession = Accession.objects.create(accession_number=accession,
+                                             institute=institute,
+                                             type=acc_type,
+                                             dbxref=dbxref)
+
+
+    return accession
 
 
 def _strtime_to_date(str_date):

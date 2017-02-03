@@ -145,7 +145,11 @@ def add_or_load_plants(fpath, assay, experimental_field_header=None,
                 new_plant = True
 
             if new_plant:
-                accession = Accession.objects.get(accession_number=accession_code)
+                try:
+                    accession = Accession.objects.get(accession_number=accession_code)
+                except:
+                    print(accession_code)
+                    raise
 
                 plant = Plant.objects.create(plant_name=plant_name,
                                              accession=accession,

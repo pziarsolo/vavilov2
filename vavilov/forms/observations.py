@@ -5,7 +5,7 @@ from django.forms.widgets import Select
 
 from vavilov.forms.widgets import (AutocompleteTextInput,
                                    AutocompleteTextMultiInput)
-from vavilov.models import Trait, Assay, Cvterm
+from vavilov.models import Trait, Assay, Cvterm, Accession
 
 
 def grouped_trait_choices_old():
@@ -36,6 +36,9 @@ class SearchObservationForm(forms.Form):
     accession = forms.CharField(max_length=100, required=False,
                                 label='Accession and synonyms', widget=widget)
 
+    acc_list = forms.CharField(max_length=10000, required=False,
+                               label='List of accessions(one per line)', widget=forms.Textarea())
+
     widget = AutocompleteTextInput(source='/apis/plants/', min_length=1,
                                    force_check=False)
     plant = forms.CharField(max_length=100, required=False,
@@ -60,3 +63,18 @@ class SearchObservationForm(forms.Form):
 
     experimental_field = forms.CharField(required=False,
                                          label='Experimental field')
+
+    all_label = 'Check this if you want all data, not just last value'
+    all_data = forms.BooleanField(required=False, label=all_label)
+
+    def clean_acc_list(self):
+        acc_list_text = self.cleaned_data['acc_list']
+        accessions_numbers = [acc.strip() for acc in  acc_list_text.split('\n')]
+        accs = []
+        for accession_number in accessions_numbers:
+            try:
+                acc = Accession.objects.get(accession_number=accession_number)
+                accs.append(acc)
+            except Accession.DoesNotExist:
+                pass
+        return accs

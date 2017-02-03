@@ -1,62 +1,14 @@
-from django.db.models import Q
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.template.context_processors import csrf
 from django_tables2 import RequestConfig
 
 from guardian.decorators import permission_required
-from guardian.shortcuts import get_objects_for_user
-
 
 from vavilov.forms.observations import SearchObservationForm
-from vavilov.models import Observation, Plant, ObservationEntity, ObservationImages, \
-    Trait
+from vavilov.models import ObservationEntity, filter_observations
 from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
-
-
-def _build_entry_query(search_criteria, user):
-    query = Observation.objects.all()
-    if 'accession' in search_criteria and search_criteria['accession'] != "":
-        accession_code = search_criteria['accession']
-        acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
-                                          Q(accession__accessionsynonym__synonym_code__icontains=accession_code))
-
-        query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
-
-    if 'plant' in search_criteria and search_criteria['plant'] != "":
-        plant_name = search_criteria['plant']
-        query = query.filter(obs_entity__observationentityplant__plant__plant_name__icontains=plant_name)
-
-    if 'plant_part' in search_criteria and search_criteria['plant_part'] != "":
-        plant_part = search_criteria['plant_part']
-        query = query.filter(obs_entity__part__name=plant_part)
-
-    if 'assay' in search_criteria and search_criteria['assay'] != "":
-        query = query.filter(assay__name=search_criteria['assay'])
-
-    if 'traits' in search_criteria and search_criteria['traits']:
-        trait_ids = search_criteria['traits']
-        trait_names = [t.strip() for t in trait_ids.split(',') if t]
-        traits = Trait.objects.filter(name__in=trait_names)
-        query = query.filter(trait__in=traits)
-
-    if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
-        query = query.filter(plant__experimental_field__icontains=search_criteria['experimental_field'])
-
-    if 'observer' in search_criteria and search_criteria['observer']:
-        observer = search_criteria['observer']
-        query = query.filter(user__icontains=observer)
-
-    query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
-
-    photoqueryset = ObservationImages.objects.filter(observation__in=query)
-    photoqueryset = get_objects_for_user(user,
-                                         'vavilov.view_observation_images',
-                                         klass=photoqueryset)
-    obs = [po.observation.observation_id for po in photoqueryset]
-    query = query.exclude(observation_id__in=obs)
-    return query, photoqueryset
 
 
 def _search_criteria_to_get_parameters(search_criteria):
@@ -94,8 +46,9 @@ def search(request):
                                     search_criteria.items() if value])
             context['search_criteria'] = search_criteria
 
-            queryset, photoqueryset = _build_entry_query(search_criteria,
-                                                         user=request.user)
+            queryset = filter_observations(search_criteria, user=request.user)
+            photoqueryset = filter_observations(search_criteria, user=request.user,
+                                                images=True)
 
             download_search = request.GET.get('download_search', False)
 

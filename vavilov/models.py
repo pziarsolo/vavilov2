@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
+from django.db.models.aggregates import Max
 from guardian.shortcuts import get_objects_for_user
 
 from vavilov.conf.settings import PHENO_PHOTO_DIR
@@ -355,20 +356,12 @@ class Accession(models.Model):
         return assays
 
     def observations(self, user):
-        obs = Observation.objects.filter(obs_entity__observationentityplant__plant__in=self.plants(user))
-        obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs, accept_global_perms=False)
-        if self.obs_images(user):
-            obs_ids = [po.observation.observation_id for po in self.obs_images(user)]
-            obs = obs.exclude(observation_id__in=obs_ids)
-        return obs
+        return filter_observations({'accession': self.accession_number},
+                                   user=user)
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(observation__obs_entity__observationentityplant__plant__in=self.plants(user))
-        obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                          klass=obs_images,
-                                          accept_global_perms=False)
-        return obs_images
+        return filter_observations({'accession': self.accession_number},
+                                   user=user, images=True)
 
 
 def get_top_taxons(taxon):
@@ -595,20 +588,11 @@ class Assay(models.Model):
         return plants
 
     def observations(self, user):
-        obs = Observation.objects.filter(assay=self)
-        obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs, accept_global_perms=False)
-        if self.obs_images(user):
-            obs_ids = [po.observation.observation_id for po in self.obs_images(user)]
-            obs = obs.exclude(observation_id__in=obs_ids)
-        return obs
+        return filter_observations({'assay': self.name}, user=user)
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(observation__assay=self)
-        obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                          klass=obs_images,
-                                          accept_global_perms=False)
-        return obs_images
+        return filter_observations({'assay': self.name}, user=user,
+                                   images=True)
 
 
 class AssayProp(models.Model):
@@ -652,20 +636,11 @@ class Plant(models.Model):
         return assays
 
     def observations(self, user):
-        obs = Observation.objects.filter(obs_entity__observationentityplant__plant=self)
-        obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs, accept_global_perms=False)
-        if self.obs_images(user):
-            obs_ids = [po.observation.observation_id for po in self.obs_images(user)]
-            obs = obs.exclude(observation_id__in=obs_ids)
-        return obs
+        return filter_observations({'plant': self.plant_name}, user=user)
 
     def obs_images(self, user):
-        obs_images = ObservationImages.objects.filter(observation__obs_entity__observationentityplant__plant=self)
-        obs_images = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                          klass=obs_images,
-                                          accept_global_perms=False)
-        return obs_images
+        return filter_observations({'plant': self.plant_name}, user=user,
+                                   images=True)
 
 
 class AssayPlant(models.Model):
@@ -695,19 +670,11 @@ class Trait(models.Model):
         return reverse('trait_view', kwargs={'trait_id': self.trait_id})
 
     def observations(self, user):
-        obs = Observation.objects.filter(trait=self)
-        obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs)
-        if self.obs_images(user):
-            obs_ids = [po.observation.observation_id for po in self.obs_images(user)]
-            obs = obs.exclude(observation_id__in=obs_ids)
-        return obs
+        return filter_observations({'traits': self.name}, user=user)
 
     def obs_images(self, user):
-        obs = ObservationImages.objects.filter(observation__trait=self)
-        obs = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                   klass=obs, accept_global_perms=False)
-        return obs
+        return filter_observations({'traits': self.name}, user=user,
+                                   images=True)
 
     @property
     def description(self):
@@ -763,19 +730,11 @@ class ObservationEntity(models.Model):
         return plants
 
     def observations(self, user):
-        obs = Observation.objects.filter(obs_entity=self)
-        obs = get_objects_for_user(user, 'vavilov.view_observation',
-                                   klass=obs, accept_global_perms=False)
-        if self.obs_images(user):
-            obs_ids = [po.observation.observation_id for po in self.obs_images(user)]
-            obs = obs.exclude(observation_id__in=obs_ids)
-        return obs
+        return filter_observations({'obs_emtity': self.name}, user=user)
 
     def obs_images(self, user):
-        obs = ObservationImages.objects.filter(observation__obs_entity=self)
-        obs = get_objects_for_user(user, 'vavilov.view_observation_images',
-                                   klass=obs, accept_global_perms=False)
-        return obs
+        return filter_observations({'obs_entity': self.name}, user=user,
+                                   images=True)
 
     @property
     def accession(self):
@@ -815,6 +774,20 @@ class Observation(models.Model):
     @property
     def accession(self):
         return self.obs_entity.accession
+
+    @property
+    def image(self):
+        try:
+            return ObservationImages.objects.get(observation=self).image
+        except ObservationImages.DoesNotExist:
+            return None
+
+    @property
+    def thumbnail(self):
+        try:
+            return ObservationImages.objects.get(observation=self).thumbnail
+        except ObservationImages.DoesNotExist:
+            return None
 
 
 def get_photo_dir(instance, filename):
@@ -861,3 +834,72 @@ class ObservationRelationship(models.Model):
         db_table = 'vavilov_observation_relationship'
         permissions = (('view_observationrelationship',
                         'View Observation Relationship'),)
+
+
+# # Filters
+def filter_observations(search_criteria, user, images=False):
+    query = Observation.objects.all()
+
+    if 'accession' in search_criteria and search_criteria['accession'] != "":
+        accession_code = search_criteria['accession']
+#         acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
+#                                           Q(accession__accessionsynonym__synonym_code__icontains=accession_code))
+#
+#         query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
+        query = query.filter(Q(obs_entity__observationentityplant__plant__accession__accession_number__icontains=accession_code) |
+                             Q(obs_entity__observationentityplant__plant__accession__accessionsynonym__synonym_code__icontains=accession_code))
+        query = query.distinct()
+
+    if 'acc_list' in search_criteria and search_criteria['acc_list']:
+        accessions = search_criteria['acc_list']
+        query = query.filter(obs_entity__observationentityplant__plant__accession__in=accessions)
+
+    if 'plant' in search_criteria and search_criteria['plant'] != "":
+        plant_name = search_criteria['plant']
+        query = query.filter(obs_entity__observationentityplant__plant__plant_name__icontains=plant_name)
+
+    if 'plant_part' in search_criteria and search_criteria['plant_part'] != "":
+        plant_part = search_criteria['plant_part']
+        query = query.filter(obs_entity__part__name=plant_part)
+
+    if 'assay' in search_criteria and search_criteria['assay'] != "":
+        query = query.filter(assay__name=search_criteria['assay'])
+
+    if 'traits' in search_criteria and search_criteria['traits']:
+        trait_ids = search_criteria['traits']
+        trait_names = [t.strip() for t in trait_ids.split(',') if t]
+        traits = Trait.objects.filter(name__in=trait_names)
+        query = query.filter(trait__in=traits)
+
+    if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
+        query = query.filter(plant__experimental_field__icontains=search_criteria['experimental_field'])
+
+    if 'observer' in search_criteria and search_criteria['observer']:
+        observer = search_criteria['observer']
+        query = query.filter(user__icontains=observer)
+
+    if 'obs_entity' in search_criteria and search_criteria['obs_entity'] != '':
+        query = query.filter(obs_entity__name=search_criteria['obs_entity'])
+
+    # with this we remove observation images
+    if not images:
+        query = query.exclude(value=None)
+        if ('all_data' not in search_criteria or
+            ('all_data' is search_criteria and not search_criteria['all_data'])):
+            query = keep_only_last_observation(query)
+    else:
+        query = query.filter(value=None)
+
+    query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
+
+    return query
+
+
+def keep_only_last_observation(query):
+    obs = query.values('trait', 'obs_entity').annotate(latest=Max('creation_time'))
+    q_statement = Q()
+    for pair in obs:
+        q_statement |= (Q(trait__exact=pair['trait']) & Q(creation_time=pair['latest']) & Q(obs_entity=pair['obs_entity']))
+
+    return query.filter(q_statement)
+
