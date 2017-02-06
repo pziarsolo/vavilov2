@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
-from django.db.models.aggregates import Max
 from guardian.shortcuts import get_objects_for_user
 
 from vavilov.conf.settings import PHENO_PHOTO_DIR
@@ -838,7 +837,10 @@ class ObservationRelationship(models.Model):
 
 # # Filters
 def filter_observations(search_criteria, user, images=False):
-    query = Observation.objects.all()
+    if 'all_data' in search_criteria and search_criteria['all_data']:
+        query = Observation.objects
+    else:
+        query = keep_only_last_observation()
 
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
@@ -884,9 +886,7 @@ def filter_observations(search_criteria, user, images=False):
     # with this we remove observation images
     if not images:
         query = query.exclude(value=None)
-        if ('all_data' not in search_criteria or
-            ('all_data' is search_criteria and not search_criteria['all_data'])):
-            query = keep_only_last_observation(query)
+
     else:
         query = query.filter(value=None)
 
@@ -895,11 +895,12 @@ def filter_observations(search_criteria, user, images=False):
     return query
 
 
-def keep_only_last_observation(query):
-    obs = query.values('trait', 'obs_entity').annotate(latest=Max('creation_time'))
-    q_statement = Q()
-    for pair in obs:
-        q_statement |= (Q(trait__exact=pair['trait']) & Q(creation_time=pair['latest']) & Q(obs_entity=pair['obs_entity']))
+def keep_only_last_observation():
+    query = Observation.objects
+    RAW_QUERY = """SELECT * FROM vavilov_observation AS o
+WHERE o.creation_time = (SELECT MAX(creation_time)
+                         FROM vavilov_observation AS o2
+                         WHERE o.obs_entity_id=o2.obs_entity_id AND o.trait_id=o2.trait_id)"""
 
-    return query.filter(q_statement)
-
+    obs_ids = [o.observation_id for o in query.raw(RAW_QUERY)]
+    return query.filter(observation_id__in=obs_ids)
