@@ -65,6 +65,19 @@ class SeedLot(models.Model):
     def fathers(self):
         return self._parent(type_='fathers')
 
+    @property
+    def mother(self):
+        if len(self.mothers) == 1:
+            return self.mothers[0].plant_name
+        else:
+            return 'various'
+
+    @property
+    def father(self):
+        if len(self.fathers) == 1:
+            return self.fathers[0].plant_name
+        else:
+            return 'various'
 
 class Plant(models.Model):
     plant_id = models.AutoField(primary_key=True)

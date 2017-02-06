@@ -60,12 +60,8 @@ class SeedLotTable(tables.Table):
     Seedlot = tables.LinkColumn('pedigree_seedlot_view', args=[A('name')],
                                 accessor=A('name'),
                                 orderable=True, verbose_name='SeedLot')
-    father = tables.LinkColumn('pedigree_plant_view', args=[A('father.plant_name')],
-                               accessor=A('father.plant_name'), orderable=True,
-                               verbose_name='Father')
-    mother = tables.LinkColumn('pedigree_plant_view', args=[A('mother.plant_name')],
-                               accessor=A('mother.plant_name'), orderable=True,
-                               verbose_name='mother')
+    father = tables.Column('Father', accessor=A('father'), orderable=True)
+    mother = tables.Column('Mother', accessor=A('mother'), orderable=True)
 
     class Meta:
         attrs = {"class": "searchresult"}
