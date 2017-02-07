@@ -18,6 +18,7 @@
     <hr class='empty_line'>
 	<h3> Observations </h3>
 	{% render_table observations %}
+	{% include 'vavilov/download_observations.html' with search_criteria=obs_search_criteria %}
 	<span class="clear"></span>
 {% endif %}
 

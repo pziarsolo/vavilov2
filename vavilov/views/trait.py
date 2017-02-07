@@ -23,6 +23,7 @@ def trait(request, trait_id):
                                            prefix='observations-')
     RequestConfig(request).configure(observations_table)
     context['observations'] = observations_table
+    context['obs_search_criteria'] = {'traits': trait.name}
 
     template = 'vavilov/trait.html'
     content_type = None
