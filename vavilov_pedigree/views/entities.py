@@ -74,7 +74,6 @@ def plant(request, plant_name):
         plant = Plant.objects.get(plant_name=plant_name)
     except Plant.DoesNotExist:
         plant = None
-    print(plant.clones)
     context['plant'] = plant
 
     if plant.clones:
