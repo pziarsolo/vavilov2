@@ -67,8 +67,7 @@ class SearchObservationForm(forms.Form):
     if OBSERVATIONS_HAVE_TIME:
         all_label = 'Check this if you want all data, not just last value'
         all_data = forms.BooleanField(required=False, label=all_label)
-    else:
-        all_data = forms.BooleanField(widget=forms.HiddenInput(), initial=True)
+
 
     def clean_acc_list(self):
         acc_list_text = self.cleaned_data['acc_list']

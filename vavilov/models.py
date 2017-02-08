@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models import Q
 from guardian.shortcuts import get_objects_for_user
 
-from vavilov.conf.settings import PHENO_PHOTO_DIR
+from vavilov.conf.settings import PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME
 from vavilov.utils.storage import OnlyScanStorage
 
 
@@ -837,10 +837,13 @@ class ObservationRelationship(models.Model):
 
 # # Filters
 def filter_observations(search_criteria, user, images=False):
-    if 'all_data' in search_criteria and search_criteria['all_data']:
-        query = Observation.objects
+    if OBSERVATIONS_HAVE_TIME:
+        if 'all_data' in search_criteria and search_criteria['all_data']:
+            query = Observation.objects
+        else:
+            query = keep_only_last_observation()
     else:
-        query = keep_only_last_observation()
+        query = Observation.objects
 
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
