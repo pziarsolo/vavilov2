@@ -9,6 +9,7 @@ from vavilov.forms.observations import SearchObservationForm
 from vavilov.models import ObservationEntity, filter_observations
 from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
+from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY
 
 
 def _search_criteria_to_get_parameters(search_criteria):
@@ -50,6 +51,9 @@ def search(request):
             photoqueryset = filter_observations(search_criteria, user=request.user,
                                                 images=True)
 
+            have_obs = True if queryset.exists() else False
+            num_photos = photoqueryset.count()
+
             download_search = request.GET.get('download_search', False)
 
             if download_search:
@@ -59,15 +63,15 @@ def search(request):
                 elif format_ == 'excel':
                     return return_excel_response(queryset, ObservationsTable)
 
-            elif (queryset or photoqueryset) and not download_search:
-                if queryset:
+            elif (have_obs or num_photos > 1) and not download_search:
+                if have_obs:
                     entries_table = ObservationsTable(queryset,
                                                       template='table.html')
                     RequestConfig(request).configure(entries_table)
                     context['entries'] = entries_table
                 else:
                     context['entries'] = None
-                if photoqueryset and photoqueryset.count() < 100:
+                if num_photos < MAX_PHOTO_IN_GALLERY:
                     context['photo_entries'] = photoqueryset
                 else:
                     context['photo_entries'] = None

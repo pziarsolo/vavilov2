@@ -6,6 +6,7 @@ from django.forms.widgets import Select
 from vavilov.forms.widgets import (AutocompleteTextInput,
                                    AutocompleteTextMultiInput)
 from vavilov.models import Trait, Assay, Cvterm, Accession
+from vavilov.conf.settings import OBSERVATIONS_HAVE_TIME
 
 
 def grouped_trait_choices_old():
@@ -63,9 +64,11 @@ class SearchObservationForm(forms.Form):
 
     experimental_field = forms.CharField(required=False,
                                          label='Experimental field')
-
-    all_label = 'Check this if you want all data, not just last value'
-    all_data = forms.BooleanField(required=False, label=all_label)
+    if OBSERVATIONS_HAVE_TIME:
+        all_label = 'Check this if you want all data, not just last value'
+        all_data = forms.BooleanField(required=False, label=all_label)
+    else:
+        all_data = forms.BooleanField(widget=forms.HiddenInput(), initial=True)
 
     def clean_acc_list(self):
         acc_list_text = self.cleaned_data['acc_list']

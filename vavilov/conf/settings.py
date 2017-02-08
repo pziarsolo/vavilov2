@@ -10,6 +10,12 @@ PUBLIC_GROUP_NAME = 'public'
 # our timezone
 OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
+OBSERVATIONS_HAVE_TIME = getattr(settings, 'VAVILOV_OBSERVATIONS_HAVE_TIME',
+                                 True)
+
+# Max number of photos to show in gallery
+MAX_PHOTO_IN_GALLERY = getattr(settings, 'VAVILOV_MAX_PHOTO_IN_GALLERY', 100)
+
 GOOGLEMAPKEY = getattr(settings, 'VAVILOV_GOOGLEMAPKEY', None)
 
 # Limit of observations in a search to convert to excel
