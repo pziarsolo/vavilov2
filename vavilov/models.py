@@ -560,6 +560,9 @@ class Assay(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('assay-detail', kwargs={'name': self.name})
+
     def traits(self, user):
         traits = Trait.objects.filter(assaytrait__assay=self)
         return get_objects_for_user(user, 'vavilov.view_trait',
@@ -571,10 +574,6 @@ class Assay(models.Model):
         for assay_prop in AssayProp.objects.filter(assay=self):
             props_[assay_prop.type.name] = assay_prop.value
         return props_
-
-    @property
-    def get_absolute_url(self):
-        return reverse('assay_view', kwargs={'name': self.name})
 
     def plants(self, user):
         plants = Plant.objects.filter(assayplant__assay=self).distinct()
@@ -622,7 +621,7 @@ class Plant(models.Model):
         return self.plant_name
 
     def get_absolute_url(self):
-        return reverse('plant_view', kwargs={'plant_name': self.plant_name})
+        return reverse('plant-detail', kwargs={'plant_name': self.plant_name})
 
     def assays(self, user):
         assays = Assay.objects.filter(assayplant__plant=self).distinct()
@@ -660,9 +659,8 @@ class Trait(models.Model):
     def __str__(self):
         return self.name
 
-    @property
     def get_absolute_url(self):
-        return reverse('trait_view', kwargs={'trait_id': self.trait_id})
+        return reverse('trait-detail', kwargs={'trait_id': self.trait_id})
 
     def observations(self, user):
         return filter_observations({'traits': self.name}, user=user)
@@ -716,6 +714,9 @@ class ObservationEntity(models.Model):
     class Meta:
         db_table = 'vavilov_observation_entity'
         permissions = (('view_obs_entity', 'View Observation entity'),)
+
+    def get_absolute_url(self):
+        return reverse('obs_entity-detail', kwargs={'name': self.name})
 
     def plants(self, user=None):
         plants = Plant.objects.filter(observationentityplant__obs_entity=self)

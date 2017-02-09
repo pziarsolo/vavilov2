@@ -1,79 +1,22 @@
 from functools import reduce
 import operator
 
-from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http.response import HttpResponseNotFound
-from django.shortcuts import render_to_response, redirect
-from django.template.context import RequestContext
-from django.template.context_processors import csrf
+from django.views.generic.detail import DetailView
+
 from django_tables2 import RequestConfig
-from guardian.decorators import permission_required
+from guardian.mixins import PermissionRequiredMixin
 
 from vavilov.forms.accession import SearchPassportForm
 from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
                             Taxa, get_bottom_taxons)
-from vavilov.utils.csv import return_csv_response
-from vavilov.utils.streams import return_excel_response
+
 from vavilov.views.tables import (ObservationsTable, AssaysTable, PlantsTable,
                                   AccessionsTable)
+from vavilov.views.generic import SearchListView
 
 
-@permission_required('view_accession', (Accession, 'accession_number',
-                                        'accession_number'))
-def accession(request, accession_number):
-    user = request.user
-    context = RequestContext(request)
-    try:
-        acc = Accession.objects.get(accession_number=accession_number)
-    except Accession.DoesNotExist:
-        return HttpResponseNotFound('<h1>Page not found</h1>')
-
-    if acc.type.name == 'external':
-        return HttpResponseNotFound('<h1>Page not found</h1>')
-
-    context['accession'] = acc
-
-    # assays
-    assays = acc.assays(user)
-    if assays:
-        assay_table = AssaysTable(assays, template='table.html',
-                                  prefix='assays-')
-        RequestConfig(request).configure(assay_table)
-    else:
-        assay_table = None
-    context['assays'] = assay_table
-
-    # plants
-    plants = acc.plants(user)
-    if plants:
-        plant_table = PlantsTable(acc.plants(user), template='table.html',
-                                  prefix='plant-')
-        RequestConfig(request).configure(plant_table)
-    else:
-        plant_table = None
-    context['plants'] = plant_table
-
-    # Observations
-    obs = acc.observations(user)
-    if obs:
-        observations_table = ObservationsTable(obs, template='table.html',
-                                               prefix='observations-')
-        RequestConfig(request).configure(observations_table)
-    else:
-        observations_table = None
-
-    context['observations'] = observations_table
-
-    context['obs_images'] = acc.obs_images(user)
-    # search_criteria
-    context['obs_search_criteria'] = {'accession': acc.accession_number}
-
-    template = 'vavilov/accession.html'
-    return render_to_response(template, context)
-
-
-def _build_accession_query(search_criteria, user=None):
+def filter_accessions(search_criteria, user=None):
     query = Accession.objects
     if 'accession' in search_criteria:
         acc_code = search_criteria['accession']
@@ -113,57 +56,64 @@ def _build_accession_query(search_criteria, user=None):
     return query
 
 
-def search(request):
-    context = RequestContext(request)
-    context.update(csrf(request))
+class AccessionDetail(PermissionRequiredMixin, DetailView):
+    model = Accession
+    slug_url_kwarg = 'accession_number'
+    slug_field = 'accession_number'
+    permission_required = 'view_accession'
 
-    getdata = False
-    if request.method == 'POST':
-        request_data = request.POST
-    elif request.method == 'GET':
-        request_data = request.GET
-        getdata = True
-    else:
-        request_data = None
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(AccessionDetail, self).get_context_data(**kwargs)
+        print(self.object)
+        user = self.request.user
+        # Add in a QuerySet of all the books
+        # assays
+        assays = self.object.assays(user)
+        if assays:
+            assay_table = AssaysTable(assays, template='table.html',
+                                      prefix='assays-')
+            RequestConfig(self.request).configure(assay_table)
+        else:
+            assay_table = None
+        context['assays'] = assay_table
 
-    template = 'vavilov/search_accession.html'
-    content_type = None  # default
-    if request_data:
-        form = SearchPassportForm(request_data)
-        if form.is_valid():
-            search_criteria = form.cleaned_data
-            search_criteria = dict([(key, value) for key, value in
-                                    search_criteria.items() if value])
-            context['search_criteria'] = search_criteria
-            queryset = _build_accession_query(search_criteria,
-                                              user=request.user)
-            download_search = request.GET.get('download_search', False)
-            if download_search:
-                format_ = request.GET['format']
-                if format_ == 'csv':
-                    return return_csv_response(queryset, AccessionsTable)
-                elif format_ == 'excel':
-                    return return_excel_response(queryset, AccessionsTable)
+        # plants
+        plants = self.object.plants(user)
+        if plants:
+            plant_table = PlantsTable(self.object.plants(user), template='table.html',
+                                      prefix='plant-')
+            RequestConfig(self.request).configure(plant_table)
+        else:
+            plant_table = None
+        context['plants'] = plant_table
 
-            elif queryset and not download_search:
-                if len(queryset) == 1:
-                    return redirect(reverse('accession-detail',
-                                            kwargs={'accession_number': queryset[0].accession_number}))
+        # Observations
+        obs = self.object.observations(user)
+        if obs:
+            observations_table = ObservationsTable(obs, template='table.html',
+                                                   prefix='observations-')
+            RequestConfig(self.request).configure(observations_table)
+        else:
+            observations_table = None
 
-                accession_table = AccessionsTable(queryset,
-                                                  template='table.html')
-                RequestConfig(request).configure(accession_table)
+        context['observations'] = observations_table
 
-                context['accessions'] = accession_table
-                # we only have to write the criteria in the form the first
-                # time we search
-                if not getdata:
-                    context['criteria'] = ''.join([";{}={}".format(k, v)
-                                                   for k, v in search_criteria.items()])
-            else:
-                context['accessions'] = None
-    else:
-        form = SearchPassportForm()
+        context['obs_images'] = self.object.obs_images(user)
+        # search_criteria
+        context['obs_search_criteria'] = {'accession': self.object.accession_number}
 
-    context['form'] = form
-    return render_to_response(template, context, content_type=content_type)
+        return context
+
+
+class AccessionList(SearchListView):
+    model = Accession
+    template_name = 'vavilov/accession-list.html'
+    form_class = SearchPassportForm
+    table = AccessionsTable
+    redirect_in_one = True
+    detail_view_name = 'accession_view'
+
+    def get_queryset(self, **kwargs):
+        return filter_accessions(kwargs['search_criteria'],
+                                      user=kwargs['user'])

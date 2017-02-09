@@ -2,30 +2,30 @@
 {% load render_table from django_tables2 %}
 {% load extras %}
 {% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
-{% block title %}Accession {{accession.accession_number}} {% endblock title %}
+{% block title %}Accession {{object.accession_number}} {% endblock title %}
 {% block content %}
 <section >
-    <h2> Passport data for {{accession.accession_number }}</h2>
+    <h2> Passport data for {{object.accession_number }}</h2>
     <div class='accession_table'>
 	    <table class="data_table">
 	    <tr>
 	        <td class="key">Accession number :</td>
-	        <td class="value">{{accession.accession_number}}</td>
+	        <td class="value">{{object.accession_number}}</td>
 	    </tr>
 	    {% if accession.donor_accession %}
 	        <tr>
 	          <td class="key">Donor</td>
-	          <td class="value">{{ accession.donor_accession|link_if_url:accession.donor_accession}}</td>
+	          <td class="value">{{ object.donor_accession|link_if_url:object.donor_accession}}</td>
 	        </tr>
 	    {% endif %}
 	    {%if accession.collecting_accession %}
 	        <tr>
 	          <td class="key">Collecting number</td>
-	          <td class="value">{{ accession.collecting_accession|last}}</td>
+	          <td class="value">{{ object.collecting_accession|last}}</td>
 	        </tr>
 	    {% endif %}
-	    {% if accession.duplicated_accessions %}
-	      {% with dup_accs=accession.duplicated_accessions%}
+	    {% if object.duplicated_accessions %}
+	      {% with dup_accs=object.duplicated_accessions%}
 	        <tr>
 	            <td class="key">Duplicated accessions in other databases</td>
 	            <td class="value"></td>
@@ -38,17 +38,17 @@
 	                 {% endfor %}
 	      {% endwith %}
 	    {% endif %}
-	    {% if accession.organism %}
+	    {% if object.organism %}
 	       <tr>
                 <td class="key">Organism</td>
-                <td class="value">{{ accession.organism }}</td>
+                <td class="value">{{ object.organism }}</td>
             </tr>
 	    {% endif %}
 	    </table>
 	</div>
 	<hr class='empty_line'>
-    {% if accession.passport%}
-        {% with pass=accession.passport %}
+    {% if object.passport%}
+        {% with pass=object.passport %}
 	        <div id="passport_data_map">
 		        <div class='passport_table'>
 		            <table class="data_table">

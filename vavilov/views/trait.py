@@ -1,30 +1,30 @@
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
 from django_tables2.config import RequestConfig
-from guardian.decorators import permission_required
 
 from vavilov.models import Trait
 from vavilov.views.tables import ObservationsTable
+from django.views.generic.detail import DetailView
+from guardian.mixins import PermissionRequiredMixin
 
 
-@permission_required('view_trait', (Trait, 'trait_id', 'trait_id'))
-def trait(request, trait_id):
-    user = request.user
-    context = RequestContext(request)
-    try:
-        trait = Trait.objects.get(trait_id=trait_id)
-    except trait.DoesNotExist:
-        trait = None
-    context['trait'] = trait
+class TraitDetail(PermissionRequiredMixin, DetailView):
+    model = Trait
+    slug_url_kwarg = 'trait_id'
+    slug_field = 'trait_id'
+    permission_required = 'view_trait'
 
-    # Observations
-    observations_table = ObservationsTable(trait.observations(user),
-                                           template='table.html',
-                                           prefix='observations-')
-    RequestConfig(request).configure(observations_table)
-    context['observations'] = observations_table
-    context['obs_search_criteria'] = {'traits': trait.name}
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(TraitDetail, self).get_context_data(**kwargs)
+        user = self.request.user
 
-    template = 'vavilov/trait.html'
-    content_type = None
-    return render_to_response(template, context, content_type=content_type)
+        context['trait'] = self.object
+
+        # Observations
+        observations_table = ObservationsTable(self.object.observations(user),
+                                               template='table.html',
+                                               prefix='observations-')
+        RequestConfig(self.request).configure(observations_table)
+        context['observations'] = observations_table
+        context['obs_search_criteria'] = {'traits': self.object.name}
+
+        return context

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
+{% block title %}Search Observations {% endblock title %}
+{% block content %}
+    {% if search_criteria and not object_list%}
+        <p> No observation image found</p>
+    {% endif %}
+    {% if object_list%} 
+        <h3> Search result</h3>
+        {% include 'vavilov/galleria_js.html' with images=object_list %}
+    {% else %}
+        <h3> Search Observation images </h3>
+        <form action="" method="post">{% csrf_token %}
+           <div class='search_form'>
+               {{ form.as_table }}
+           </div>
+           <input type="submit" value="Search" />
+       </form>
+    {% endif %}
+{% endblock %}

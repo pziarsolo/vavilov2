@@ -4,17 +4,28 @@ from django.conf.urls.static import static
 from django.core.exceptions import ImproperlyConfigured
 
 from vavilov.conf import settings
+from vavilov.views.observation import ObservationImageList, ObservationList, \
+    ObservationEntityDetail
+from vavilov.views.accession import AccessionList, AccessionDetail
+from vavilov.views.plant import PlantDetail
+from vavilov.views.assay import AssayDetail
+from vavilov.views.trait import TraitDetail
 
 
 urlpatterns = [
-    url(r'^plant/(?P<plant_name>.+)/$', 'vavilov.views.plant.plant', name='plant_view'),
-    url(r'^assay/(?P<name>.+)/$', 'vavilov.views.assay.assay', name='assay_view'),
-    url(r'^trait/(?P<trait_id>.+)/$', 'vavilov.views.trait.trait', name='trait_view'),
-    url(r'^accession/(?P<accession_number>.+)/$', 'vavilov.views.accession.accession', name='accession-detail'),
-    url(r'^obs_entity/(?P<name>.+)/$', 'vavilov.views.observation.observation_entity', name='obs_entity_view'),
+    url(r'^plant/(?P<plant_name>.+)/$', PlantDetail.as_view(), name='plant-detail'),
+    url(r'^assay/(?P<name>.+)/$', AssayDetail.as_view(), name='assay-detail'),
+    url(r'^trait/(?P<trait_id>.+)/$', TraitDetail.as_view(), name='trait-detail'),
+    # url(r'^accession/(?P<accession_number>.+)/$', 'vavilov.views.accession.accession', name='accession-detail'),
+    url(r'^obs_entity/(?P<name>.+)/$', ObservationEntityDetail.as_view(), name='obs_entity-detail'),
 
-    url(r'^search/accession/$', 'vavilov.views.accession.search', name='search_accession'),
-    url(r'^search/observation/$', 'vavilov.views.observation.search', name='search_observation'),
+    url(r'^observation_images/$', ObservationImageList.as_view(), name='observation-listimage'),
+    url(r'^observations/$', ObservationList.as_view(), name='observation-list'),
+
+    url(r'^accessions/(?P<accession_number>.+)/$', AccessionDetail.as_view(),
+        name='accession-detail'),
+    url(r'^accessions/$', AccessionList.as_view(), name='accession-list'),
+
     url(r'^apis/accession_numbers/$', 'vavilov.views.api.accession_numbers', name='api_accession_numbers'),
     url(r'^apis/taxons/$', 'vavilov.views.api.taxons', name='api_taxons'),
     url(r'^apis/plants/$', 'vavilov.views.api.plants', name='api_plants'),

@@ -8,16 +8,16 @@ class ObservationsTable(tables.Table):
     Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
                                   accessor=A('accession.accession_number'),
                                   orderable=False, verbose_name='Accession')
-    Obs_entity = tables.LinkColumn('obs_entity_view', args=[A('obs_entity.name')],
+    Obs_entity = tables.LinkColumn('obs_entity-detail', args=[A('obs_entity.name')],
                                    accessor=A('obs_entity.name'),
                                    orderable=True,
                                    verbose_name='Observation entity')
     plant_part = tables.Column('Plant part', accessor=A('obs_entity.part.name'),
                                default='', orderable=True)
-    assay = tables.LinkColumn('assay_view', args=[A('assay.name')],
+    assay = tables.LinkColumn('assay-detail', args=[A('assay.name')],
                               accessor=A('assay.name'),
                               orderable=True, verbose_name='Assay')
-    trait = tables.LinkColumn('trait_view', args=[A('trait.trait_id')],
+    trait = tables.LinkColumn('trait-detail', args=[A('trait.trait_id')],
                               accessor=A('trait.name'),
                               orderable=True, verbose_name='Trait')
     value = tables.Column('Value', accessor=A('value'),
@@ -81,10 +81,10 @@ class AccessionsTable(tables.Table):
 
 
 class PlantsTable(tables.Table):
-    plant = tables.LinkColumn('plant_view', args=[A('plant_name')],
+    plant = tables.LinkColumn('plant-detail', args=[A('plant_name')],
                               accessor=A('plant_name'), orderable=True,
                               verbose_name='Plant')
-    Accession = tables.LinkColumn('accession_view', args=[A('accession.accession_number')],
+    Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
                                   accessor=A('accession.accession_number'),
                                   orderable=True, verbose_name='Accession')
     Exp_field = tables.Column('Experimentalfield',
@@ -98,7 +98,7 @@ class PlantsTable(tables.Table):
 
 
 class AssaysTable(tables.Table):
-    assay = tables.LinkColumn('assay_view', args=[A('name')],
+    assay = tables.LinkColumn('assay-detail', args=[A('name')],
                               accessor=A('name'),
                               orderable=True, verbose_name='Assay')
     description = tables.Column('Description', accessor=A('description'))

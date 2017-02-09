@@ -18,8 +18,9 @@
         <li><a href='/'> Home</a></li>
         <li class="dropdown"><a href='/'>Search</a>
           <ul>
-            <li><a href={% url 'search_accession' %}>Accessions</a></li>
-            <li><a href={% url 'search_observation' %}>Observations</a></li>
+            <li><a href={% url 'accession-list' %}>Accessions</a></li>
+            <li><a href={% url 'observation-list' %}>Observations</a></li>
+            <li><a href={% url 'observation-listimage' %}>Observation Images</a></li>
           </ul>
         </li>
         {% if user.is_authenticated %}

@@ -201,7 +201,7 @@ LOGGING = {
         },
         'vavilov.prod': {
             'handlers': ['file'],
-            'level': 'ERROR'
+            'level': 'DEBUG'
 
         }
     }
