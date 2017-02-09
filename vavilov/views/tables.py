@@ -5,7 +5,7 @@ from vavilov.conf.settings import ACCESSION_SEARCH_RESULT_FIELDS
 
 
 class ObservationsTable(tables.Table):
-    Accession = tables.LinkColumn('accession_view', args=[A('accession.accession_number')],
+    Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
                                   accessor=A('accession.accession_number'),
                                   orderable=False, verbose_name='Accession')
     Obs_entity = tables.LinkColumn('obs_entity_view', args=[A('obs_entity.name')],
@@ -35,7 +35,7 @@ class ObservationsTable(tables.Table):
 class AccessionsTable(tables.Table):
     search_fields = ACCESSION_SEARCH_RESULT_FIELDS
     if 'accession_number' in search_fields:
-        accession_number = tables.LinkColumn('accession_view',
+        accession_number = tables.LinkColumn('accession-detail',
                                              args=[A('accession_number')],
                                              verbose_name='Accession')
 

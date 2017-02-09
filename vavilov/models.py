@@ -151,12 +151,8 @@ class Accession(models.Model):
     def __str__(self):
         return '{}: {}'.format(self.institute, self.accession_number)
 
-    @property
-    def url(self):
-        if self.dbxref:
-            urlprefix = self.dbxref.db.urlprefix
-            accession = self.dbxref.accession_name
-            return '{}{}'.format(urlprefix, accession)
+    def get_absolute_url(self):
+        return reverse('accession-detail', kwargs={'accession_number': self.accession_number})
 
     @property
     def holder_accession(self):

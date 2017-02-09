@@ -147,7 +147,7 @@ def search(request):
 
             elif queryset and not download_search:
                 if len(queryset) == 1:
-                    return redirect(reverse('accession_view',
+                    return redirect(reverse('accession-detail',
                                             kwargs={'accession_number': queryset[0].accession_number}))
 
                 accession_table = AccessionsTable(queryset,
