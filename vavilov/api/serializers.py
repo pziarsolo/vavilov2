@@ -75,7 +75,7 @@ class DbxrefSerializer(serializers.ModelSerializer):
 
 
 class CvtermSerializer(serializers.HyperlinkedModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='cvterm-detail',
+    url = serializers.HyperlinkedIdentityField(view_name='api:cvterm-detail',
                                                lookup_field='pk')
 
     class Meta:
@@ -126,9 +126,9 @@ class AccessionSerializer(serializers.ModelSerializer):
     duplicated_accessions = serializers.HyperlinkedRelatedField(read_only=True,
                                                                 many=True,
                                                                 lookup_field='accession_number',
-                                                                view_name='accession-detail')
+                                                                view_name='api:accession-detail')
     passport = serializers.HyperlinkedRelatedField(read_only=True,
-                                                   view_name='passport-detail')
+                                                   view_name='api:passport-detail')
     collecting_province = serializers.StringRelatedField(read_only=True)
     collecting_country = serializers.StringRelatedField(read_only=True)
     collecting_region = serializers.StringRelatedField(read_only=True)
@@ -155,7 +155,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class PassportSerializer(serializers.ModelSerializer):
     location = serializers.HyperlinkedRelatedField(read_only=True,
-                                                   view_name='location-detail')
+                                                   view_name='api:location-detail')
 
     class Meta:
         model = Passport
