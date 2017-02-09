@@ -1,3 +1,6 @@
+import logging
+
+from time import time
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.template.context_processors import csrf
@@ -9,8 +12,10 @@ from vavilov.forms.observations import SearchObservationForm
 from vavilov.models import ObservationEntity, filter_observations
 from vavilov.utils.streams import return_csv_response, return_excel_response
 from vavilov.views.tables import ObservationsTable, PlantsTable
-from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY
+from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY, APP_LOGGER
 
+
+logger = logging.getLogger(APP_LOGGER)
 
 def _search_criteria_to_get_parameters(search_criteria):
     get_params = ''
@@ -21,6 +26,12 @@ def _search_criteria_to_get_parameters(search_criteria):
         else:
             get_params += "&{}={}".format(key, value)
     return get_params
+
+
+def calc_duration(action, prev_time):
+    now = time()
+    logger.info('{}: Took {} secs'.format(action, round(now - prev_time, 2)))
+    return now
 
 
 def search(request):
@@ -46,13 +57,19 @@ def search(request):
             search_criteria = dict([(key, value) for key, value in
                                     search_criteria.items() if value])
             context['search_criteria'] = search_criteria
-
+            prev_time = time()
             queryset = filter_observations(search_criteria, user=request.user)
+            prev_time = calc_duration('Obs query', prev_time)
+
             photoqueryset = filter_observations(search_criteria, user=request.user,
                                                 images=True)
+            prev_time = calc_duration('Photo query', prev_time)
 
             have_obs = True if queryset.exists() else False
+            prev_time = calc_duration('Check query', prev_time)
+
             num_photos = photoqueryset.count()
+            prev_time = calc_duration('Count photos', prev_time)
 
             download_search = request.GET.get('download_search', False)
 
@@ -67,7 +84,10 @@ def search(request):
                 if have_obs:
                     entries_table = ObservationsTable(queryset,
                                                       template='table.html')
+                    prev_time = calc_duration('create table2', prev_time)
                     RequestConfig(request).configure(entries_table)
+                    prev_time = calc_duration('RequestConfig configure', prev_time)
+
                     context['entries'] = entries_table
                 else:
                     context['entries'] = None

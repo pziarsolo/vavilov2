@@ -12,6 +12,7 @@ OUR_TIMEZONE = timezone(settings.TIME_ZONE)
 
 OBSERVATIONS_HAVE_TIME = getattr(settings, 'VAVILOV_OBSERVATIONS_HAVE_TIME',
                                  True)
+APP_LOGGER = getattr(settings, 'VAVILOV_APP_LOGGER', 'vavilov.debug')
 
 # Max number of photos to show in gallery
 MAX_PHOTO_IN_GALLERY = getattr(settings, 'VAVILOV_MAX_PHOTO_IN_GALLERY', 100)

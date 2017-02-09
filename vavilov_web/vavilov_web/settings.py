@@ -48,13 +48,14 @@ if DEVELOPMENT_MACHINE:
     ALLOWED_HOSTS = ['*']
     PEDIGREE_DB = {'ENGINE': 'django.db.backends.sqlite3',
                    'NAME': os.path.join(BASE_DIR, 'dev_pedigree.sqlite3')}
+    VAVILOV_APP_LOGGER = 'vavilov.debug'
 else:
     DEBUG = False
     DATABASE = {'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': os.path.join(BASE_DIR, 'db.sqlite3')}
     PEDIGREE_DB = {'ENGINE': 'django.db.backends.sqlite3',
                    'NAME': os.path.join(BASE_DIR, 'pedigree.sqlite3')}
-
+    VAVILOV_APP_LOGGER = 'vavilov.prod'
     ALLOWED_HOSTS = [HOST_IP]
 
 DATABASES = {
@@ -157,4 +158,51 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'vavilov.api.permissions.CustomObjectPermissions',
     )
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'vavilov.log'),
+        }
+    },
+    'loggers': {
+        'vavilov.debug': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+        },
+        'vavilov.prod': {
+            'handlers': ['file'],
+            'level': 'ERROR'
+
+        }
+    }
 }
