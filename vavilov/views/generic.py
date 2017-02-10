@@ -61,7 +61,7 @@ class SearchListView(View):
             prev_time = time()
             self.object_list = self.get_queryset(search_criteria=search_criteria,
                                                  user=request.user)
-            prev_time = calc_duration('Query', prev_time)
+            prev_time = calc_duration('Query ' + str(self.model.__name__), prev_time)
         else:
             self.object_list = self.model.objects.none()
             search_criteria = None
