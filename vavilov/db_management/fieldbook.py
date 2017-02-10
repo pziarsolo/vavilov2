@@ -113,6 +113,7 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
 
     conn = sqlite3.connect(fhand.name)
     cursor = conn.cursor()
+    group = Group.objects.get(name=assays[0])
 
     with transaction.atomic():
         for entry in cursor.execute("select * from user_traits"):
@@ -135,11 +136,12 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
             if created:
                 ObservationEntityPlant.objects.create(obs_entity=obs_entity,
                                                       plant=plant)
+                assign_perm('view_obs_entity', group, obs_entity)
 
             observation = add_or_load_observation(obs_entity, trait, assays[0],
                                                   value, creation_time,
                                                   observer)
-            group = Group.objects.get(name=assays[0])
+
             assign_perm('view_observation', group, observation)
 
 
