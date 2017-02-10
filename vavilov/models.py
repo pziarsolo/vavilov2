@@ -11,7 +11,8 @@ from django.db import models
 from django.db.models import Q
 from guardian.shortcuts import get_objects_for_user
 
-from vavilov.conf.settings import PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME, APP_LOGGER
+from vavilov.conf.settings import PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME, APP_LOGGER, \
+    BY_OBJECT_OBS_PERM
 from vavilov.utils.storage import OnlyScanStorage
 
 
@@ -886,11 +887,14 @@ def filter_observations(search_criteria, user, images=False):
     # with this we remove observation images
     if images:
         query = query.filter(value=None)
-
     else:
         query = query.exclude(value=None)
 
-    query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
+    if BY_OBJECT_OBS_PERM:
+        query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
+    else:
+        if not user.has_perm('vavilov.view_observation'):
+            query = query.none()
     return query
 
 
