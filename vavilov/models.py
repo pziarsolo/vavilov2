@@ -2,6 +2,7 @@ from collections import OrderedDict
 from functools import reduce
 import operator
 from os.path import join
+import logging
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -10,8 +11,11 @@ from django.db import models
 from django.db.models import Q
 from guardian.shortcuts import get_objects_for_user
 
-from vavilov.conf.settings import PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME
+from vavilov.conf.settings import PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME, APP_LOGGER
 from vavilov.utils.storage import OnlyScanStorage
+
+
+logger = logging.getLogger(APP_LOGGER)
 
 
 class Country(models.Model):
@@ -844,10 +848,6 @@ def filter_observations(search_criteria, user, images=False):
 
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
-#         acc_plants = Plant.objects.filter(Q(accession__accession_number__icontains=accession_code) |
-#                                           Q(accession__accessionsynonym__synonym_code__icontains=accession_code))
-#
-#         query = query.filter(obs_entity__observationentityplant__plant__in=acc_plants)
         query = query.filter(Q(obs_entity__observationentityplant__plant__accession__accession_number__icontains=accession_code) |
                              Q(obs_entity__observationentityplant__plant__accession__accessionsynonym__synonym_code__icontains=accession_code))
         query = query.distinct()
@@ -884,14 +884,13 @@ def filter_observations(search_criteria, user, images=False):
         query = query.filter(obs_entity__name=search_criteria['obs_entity'])
 
     # with this we remove observation images
-    if not images:
-        query = query.exclude(value=None)
-
-    else:
+    if images:
         query = query.filter(value=None)
 
-    query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
+    else:
+        query = query.exclude(value=None)
 
+    query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
     return query
 
 
