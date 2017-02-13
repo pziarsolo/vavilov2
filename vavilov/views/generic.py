@@ -29,7 +29,7 @@ def _search_criteria_to_get_parameters(search_criteria):
 
 def calc_duration(action, prev_time):
     now = time()
-    logger.info('{}: Took {} secs'.format(action, round(now - prev_time, 2)))
+    logger.debug('{}: Took {} secs'.format(action, round(now - prev_time, 2)))
     return now
 
 
@@ -58,10 +58,8 @@ class SearchListView(View):
             search_criteria = form.cleaned_data
             search_criteria = dict([(key, value) for key, value in
                                     search_criteria.items() if value])
-            prev_time = time()
             self.object_list = self.get_queryset(search_criteria=search_criteria,
                                                  user=request.user)
-            prev_time = calc_duration('Query ' + str(self.model.__name__), prev_time)
         else:
             self.object_list = self.model.objects.none()
             search_criteria = None
@@ -82,18 +80,22 @@ class SearchListView(View):
             return redirect(self.object_list.first().get_absolute_url())
 
         return render_to_response(self.template_name,
-                                  self.get_context_data(object_list=self.object_list,
-                                                        form=form,
+                                  self.get_context_data(form=form,
                                                         criteria=criteria,
                                                         search_criteria=search_criteria,
                                                         getdata=getdata))
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, form, criteria, search_criteria, getdata):
         context = RequestContext(self.request)
-        context.update(kwargs)
+        if criteria is not None:
+            context['criteria'] = criteria
+        context['search_criteria'] = search_criteria
+        context['form'] = form
+        context['getdata'] = getdata
         context.update(csrf(self.request))
+
         prev_time = time()
-        if self.object_list.exists():
+        if self.object_list:
             prev_time = calc_duration('Check Query exists', prev_time)
             table = self.table(self.object_list, template='table.html')
             prev_time = calc_duration('Table creation', prev_time)
@@ -102,9 +104,8 @@ class SearchListView(View):
             object_list = table
         else:
             object_list = None
-        context.update({
-            'object_list': object_list
-        })
+        context['object_list'] = object_list
+
         return context
 
     def get_queryset(self, **kwargs):
