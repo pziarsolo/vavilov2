@@ -1,5 +1,6 @@
 from functools import reduce
 import operator
+from time import time
 
 from django.db.models import Q
 from django.views.generic.detail import DetailView
@@ -13,7 +14,7 @@ from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
 
 from vavilov.views.tables import (ObservationsTable, AssaysTable, PlantsTable,
                                   AccessionsTable)
-from vavilov.views.generic import SearchListView
+from vavilov.views.generic import SearchListView, calc_duration
 
 
 def filter_accessions(search_criteria, user=None):
@@ -65,7 +66,6 @@ class AccessionDetail(PermissionRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super(AccessionDetail, self).get_context_data(**kwargs)
-        print(self.object)
         user = self.request.user
         # Add in a QuerySet of all the books
         # assays
@@ -89,11 +89,14 @@ class AccessionDetail(PermissionRequiredMixin, DetailView):
         context['plants'] = plant_table
 
         # Observations
+        prev_time = time()
         obs = self.object.observations(user)
         if obs:
             observations_table = ObservationsTable(obs, template='table.html',
                                                    prefix='observations-')
+            prev_time = calc_duration('Table creation', prev_time)
             RequestConfig(self.request).configure(observations_table)
+            prev_time = calc_duration('RequestConfig configure', prev_time)
         else:
             observations_table = None
 
