@@ -7,7 +7,8 @@ from guardian.mixins import PermissionRequiredMixin
 
 from vavilov.forms.observations import SearchObservationForm
 from vavilov.models import ObservationEntity, filter_observations, Observation
-from vavilov.views.tables import ObservationsTable, PlantsTable
+from vavilov.views.tables import ObservationsTable, PlantsTable, \
+    plants_to_table, obs_to_table
 from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY
 from vavilov.views.generic import SearchListView
 
@@ -62,22 +63,9 @@ class ObservationEntityDetail(PermissionRequiredMixin, DetailView):
 
         if self.object:
             plants = self.object.plants(user)
-            if plants:
-                plant_table = PlantsTable(plants, template='table.html',
-                                          prefix='plant-')
-                RequestConfig(self.request).configure(plant_table)
-            else:
-                plant_table = None
-            context['plants'] = plant_table
+            context['plants'] = plants_to_table(plants, self.request) if plants else None
 
             obs = self.object.observations(user)
-            if obs:
-                observations_table = ObservationsTable(obs, template='table.html',
-                                                       prefix='observations-')
-                RequestConfig(self.request).configure(observations_table)
-            else:
-                observations_table = None
-
-            context['observations'] = observations_table
+            context['observations'] = obs_to_table(obs, self.request) if obs else None
             context['obs_images'] = self.object.obs_images(user)
         return context

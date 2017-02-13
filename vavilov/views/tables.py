@@ -1,7 +1,12 @@
+from time import time
 from django_tables2.utils import A
-
 import django_tables2 as tables
+from django_tables2.config import RequestConfig
+
+
 from vavilov.conf.settings import ACCESSION_SEARCH_RESULT_FIELDS
+from vavilov.views.generic import calc_duration
+
 
 
 class ObservationsTable(tables.Table):
@@ -111,3 +116,32 @@ class AssaysTable(tables.Table):
 
     class Meta:
         attrs = {"class": "searchresult"}
+
+
+def obs_to_table(observations, request):
+    prev_time = time()
+    observations_table = ObservationsTable(observations, template='table.html',
+                                           prefix='observations-')
+    prev_time = calc_duration('Observation: table creation', prev_time)
+    RequestConfig(request).configure(observations_table)
+    prev_time = calc_duration('Observation_ RequestConfig.configure', prev_time)
+    return observations_table
+
+
+
+def plants_to_table(plants, request):
+    prev_time = time()
+    plant_table = PlantsTable(plants, template='table.html', prefix='plant-')
+    prev_time = calc_duration('Plant: table creation', prev_time)
+    RequestConfig(request).configure(plant_table)
+    prev_time = calc_duration('Plant: RequestConfig.configure', prev_time)
+    return plant_table
+
+
+def assays_to_table(assays, request):
+    prev_time = time()
+    assay_table = AssaysTable(assays, template='table.html', prefix='assay-')
+    prev_time = calc_duration('Assay: table creation', prev_time)
+    RequestConfig(request).configure(assay_table)
+    prev_time = calc_duration('Assay: RequestConfig.configure', prev_time)
+    return assay_table

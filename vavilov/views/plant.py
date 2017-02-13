@@ -1,9 +1,8 @@
-from django_tables2 import RequestConfig
+from django.views.generic.detail import DetailView
+from guardian.mixins import PermissionRequiredMixin
 
 from vavilov.models import Plant
-from vavilov.views.tables import AssaysTable, ObservationsTable
-from guardian.mixins import PermissionRequiredMixin
-from django.views.generic.detail import DetailView
+from vavilov.views.tables import assays_to_table, obs_to_table
 
 
 class PlantDetail(PermissionRequiredMixin, DetailView):
@@ -18,18 +17,13 @@ class PlantDetail(PermissionRequiredMixin, DetailView):
         user = self.request.user
 
         context['plant'] = self.object
-        # Assays
-        assay_table = AssaysTable(self.object.assays(user), template='table.html',
-                                  prefix='assays-')
-        RequestConfig(self.request).configure(assay_table)
-        context['assays'] = assay_table
+        # assays
+        assays = self.object.assays(user)
+        context['assays'] = assays_to_table(assays, self.request) if assays else None
 
         # Observations
-        observations_table = ObservationsTable(self.object.observations(user),
-                                               template='table.html',
-                                               prefix='observations-')
-        RequestConfig(self.request).configure(observations_table)
-        context['observations'] = observations_table
+        obs = self.object.observations(user)
+        context['observations'] = obs_to_table(obs, self.request) if obs else None
 
         context['obs_images'] = self.object.obs_images(user)
         # search_criteria

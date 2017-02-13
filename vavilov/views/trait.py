@@ -1,7 +1,6 @@
-from django_tables2.config import RequestConfig
 
 from vavilov.models import Trait
-from vavilov.views.tables import ObservationsTable
+from vavilov.views.tables import obs_to_table
 from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionRequiredMixin
 
@@ -20,11 +19,8 @@ class TraitDetail(PermissionRequiredMixin, DetailView):
         context['trait'] = self.object
 
         # Observations
-        observations_table = ObservationsTable(self.object.observations(user),
-                                               template='table.html',
-                                               prefix='observations-')
-        RequestConfig(self.request).configure(observations_table)
-        context['observations'] = observations_table
+        obs = self.object.observations(user)
+        context['observations'] = obs_to_table(obs, self.request) if obs else None
         context['obs_search_criteria'] = {'traits': self.object.name}
 
         return context

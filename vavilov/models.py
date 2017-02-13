@@ -887,12 +887,14 @@ def filter_observations(search_criteria, user, images=False):
     # with this we remove observation images
     if images:
         query = query.filter(value=None)
+        msg = 'Observation: ImageQuery: {} secs'
     else:
+        msg = 'Observation: Query: {} secs'
         query = query.exclude(value=None)
         if OBSERVATIONS_HAVE_TIME and not ('all_data' in search_criteria and search_criteria['all_data']):
             query = keep_only_last_observation(query)
 
-    logger.debug('QUERY OBSERVATIONS: {} secs'.format(round(time() - prev_time, 2)))
+    logger.debug(msg.format(round(time() - prev_time, 2)))
     return query
 
 

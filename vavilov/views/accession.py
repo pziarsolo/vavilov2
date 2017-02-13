@@ -1,20 +1,18 @@
 from functools import reduce
 import operator
-from time import time
 
 from django.db.models import Q
 from django.views.generic.detail import DetailView
 
-from django_tables2 import RequestConfig
 from guardian.mixins import PermissionRequiredMixin
 
 from vavilov.forms.accession import SearchPassportForm
 from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
                             Taxa, get_bottom_taxons)
 
-from vavilov.views.tables import (ObservationsTable, AssaysTable, PlantsTable,
-                                  AccessionsTable)
-from vavilov.views.generic import SearchListView, calc_duration
+from vavilov.views.tables import (AccessionsTable, assays_to_table,
+                                  plants_to_table, obs_to_table)
+from vavilov.views.generic import SearchListView
 
 
 def filter_accessions(search_criteria, user=None):
@@ -68,39 +66,18 @@ class AccessionDetail(PermissionRequiredMixin, DetailView):
         context = super(AccessionDetail, self).get_context_data(**kwargs)
         user = self.request.user
         # Add in a QuerySet of all the books
+
         # assays
         assays = self.object.assays(user)
-        if assays:
-            assay_table = AssaysTable(assays, template='table.html',
-                                      prefix='assays-')
-            RequestConfig(self.request).configure(assay_table)
-        else:
-            assay_table = None
-        context['assays'] = assay_table
+        context['assays'] = assays_to_table(assays, self.request) if assays else None
 
         # plants
         plants = self.object.plants(user)
-        if plants:
-            plant_table = PlantsTable(self.object.plants(user), template='table.html',
-                                      prefix='plant-')
-            RequestConfig(self.request).configure(plant_table)
-        else:
-            plant_table = None
-        context['plants'] = plant_table
+        context['plants'] = plants_to_table(plants, self.request) if plants else None
 
         # Observations
-        prev_time = time()
         obs = self.object.observations(user)
-        if obs:
-            observations_table = ObservationsTable(obs, template='table.html',
-                                                   prefix='observations-')
-            prev_time = calc_duration('Table creation', prev_time)
-            RequestConfig(self.request).configure(observations_table)
-            prev_time = calc_duration('RequestConfig configure', prev_time)
-        else:
-            observations_table = None
-
-        context['observations'] = observations_table
+        context['observations'] = obs_to_table(obs, self.request) if obs else None
 
         context['obs_images'] = self.object.obs_images(user)
         # search_criteria

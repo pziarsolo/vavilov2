@@ -1,9 +1,8 @@
 from guardian.mixins import PermissionRequiredMixin
 from django.views.generic.detail import DetailView
-from django_tables2.config import RequestConfig
 
 from vavilov.models import Assay
-from vavilov.views.tables import PlantsTable, ObservationsTable
+from vavilov.views.tables import plants_to_table, obs_to_table
 
 
 class AssayDetail(PermissionRequiredMixin, DetailView):
@@ -21,23 +20,11 @@ class AssayDetail(PermissionRequiredMixin, DetailView):
 
         # plants
         plants = self.object.plants(user)
-        if plants:
-            plant_table = PlantsTable(plants, template='table.html',
-                                      prefix='plant-')
-            RequestConfig(self.request).configure(plant_table)
-        else:
-            plant_table = None
-        context['plants'] = plant_table
+        context['plants'] = plants_to_table(plants, self.request) if plants else None
 
         # Observations
         obs = self.object.observations(user)
-        if obs:
-            observations_table = ObservationsTable(obs, template='table.html',
-                                                   prefix='observations-')
-            RequestConfig(self.request).configure(observations_table)
-        else:
-            observations_table = None
-        context['observations'] = observations_table
+        context['observations'] = obs_to_table(obs, self.request) if obs else None
 
         context['obs_images'] = self.object.obs_images(user)
         # search criteria
