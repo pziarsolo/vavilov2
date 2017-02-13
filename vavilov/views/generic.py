@@ -72,9 +72,9 @@ class SearchListView(View):
         if method == 'get' and download_search:
             format_ = request.GET['format']
             if format_ == 'csv':
-                return return_csv_response(self.objects_list, self.table)
+                return return_csv_response(self.object_list, self.table)
             elif format_ == 'excel':
-                return return_excel_response(self.objects_list, self.table)
+                return return_excel_response(self.object_list, self.table)
 
         if self.detail_view_name and self.object_list.count() == 1:
             return redirect(self.object_list.first().get_absolute_url())
