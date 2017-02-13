@@ -840,13 +840,16 @@ class ObservationRelationship(models.Model):
 # # Filters
 def filter_observations(search_criteria, user, images=False):
     prev_time = time()
-    if not images or OBSERVATIONS_HAVE_TIME:
-        if 'all_data' in search_criteria and search_criteria['all_data']:
-            query = Observation.objects
-        else:
-            query = keep_only_last_observation()
-    else:
+    if images:
         query = Observation.objects
+    else:
+        if  OBSERVATIONS_HAVE_TIME:
+            if 'all_data' in search_criteria and search_criteria['all_data']:
+                query = Observation.objects
+            else:
+                query = keep_only_last_observation()
+        else:
+            query = Observation.objects
 
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
