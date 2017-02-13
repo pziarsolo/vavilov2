@@ -12,11 +12,9 @@ from django.db import models
 from django.db.models import Q
 from guardian.shortcuts import get_objects_for_user
 
-from vavilov.conf.settings import PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME, APP_LOGGER, \
-    BY_OBJECT_OBS_PERM
+from vavilov.conf.settings import (PHENO_PHOTO_DIR, OBSERVATIONS_HAVE_TIME,
+                                   APP_LOGGER, BY_OBJECT_OBS_PERM)
 from vavilov.utils.storage import OnlyScanStorage
-from vavilov.views.generic import calc_duration
-
 
 logger = logging.getLogger(APP_LOGGER)
 
@@ -894,7 +892,7 @@ def filter_observations(search_criteria, user, images=False):
         if OBSERVATIONS_HAVE_TIME and not ('all_data' in search_criteria and search_criteria['all_data']):
             query = keep_only_last_observation(query)
 
-    prev_time = calc_duration('Query Observation', prev_time)
+    logger.debug('QUERY OBSERVATIONS: {} secs'.format(round(time() - prev_time, 2)))
     return query
 
 
