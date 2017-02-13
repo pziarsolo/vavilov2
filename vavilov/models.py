@@ -840,7 +840,14 @@ class ObservationRelationship(models.Model):
 # # Filters
 def filter_observations(search_criteria, user, images=False):
     prev_time = time()
-    query = Observation.objects
+    if OBSERVATIONS_HAVE_TIME:
+        if 'all_data' in search_criteria and search_criteria['all_data']:
+            query = Observation.objects
+        else:
+            query = keep_only_last_observation()
+    else:
+        query = Observation.objects
+
     if 'accession' in search_criteria and search_criteria['accession'] != "":
         accession_code = search_criteria['accession']
         query = query.filter(Q(obs_entity__observationentityplant__plant__accession__accession_number__icontains=accession_code) |
@@ -878,12 +885,6 @@ def filter_observations(search_criteria, user, images=False):
     if 'obs_entity' in search_criteria and search_criteria['obs_entity'] != '':
         query = query.filter(obs_entity__name=search_criteria['obs_entity'])
 
-    if BY_OBJECT_OBS_PERM:
-        query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
-    else:
-        if not user.has_perm('vavilov.view_observation'):
-            query = query.none()
-
     # with this we remove observation images
     if images:
         query = query.filter(value=None)
@@ -891,20 +892,22 @@ def filter_observations(search_criteria, user, images=False):
     else:
         msg = 'Observation: Query: {} secs'
         query = query.exclude(value=None)
-        if OBSERVATIONS_HAVE_TIME and not ('all_data' in search_criteria and search_criteria['all_data']):
-            query = keep_only_last_observation(query)
 
+    if BY_OBJECT_OBS_PERM:
+        query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
+    else:
+        if not user.has_perm('vavilov.view_observation'):
+            query = query.none()
     logger.debug(msg.format(round(time() - prev_time, 2)))
     return query
 
 
-def keep_only_last_observation(query):
-    obs_ids = tuple(o['observation_id'] for o in query.values('observation_id'))
+def keep_only_last_observation():
     query = Observation.objects
     RAW_QUERY = """SELECT * FROM vavilov_observation AS o
-WHERE o.creation_time = (SELECT MAX(creation_time)
-                         FROM vavilov_observation AS o2
-                         WHERE o.observation_id IN {}
-                         AND o.obs_entity_id=o2.obs_entity_id AND o.trait_id=o2.trait_id)"""
-    query = query.raw(RAW_QUERY.format(obs_ids))
-    return query
+                   WHERE o.creation_time = (SELECT MAX(creation_time)
+                   FROM vavilov_observation AS o2
+                   WHERE o.obs_entity_id=o2.obs_entity_id AND o.trait_id=o2.trait_id)"""
+
+    obs_ids = [o.observation_id for o in query.raw(RAW_QUERY)]
+    return query.filter(observation_id__in=obs_ids)
