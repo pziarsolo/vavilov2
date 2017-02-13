@@ -840,7 +840,7 @@ class ObservationRelationship(models.Model):
 # # Filters
 def filter_observations(search_criteria, user, images=False):
     prev_time = time()
-    if OBSERVATIONS_HAVE_TIME:
+    if not images or OBSERVATIONS_HAVE_TIME:
         if 'all_data' in search_criteria and search_criteria['all_data']:
             query = Observation.objects
         else:
