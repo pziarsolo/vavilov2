@@ -1,104 +1,55 @@
-from django.http.response import HttpResponseNotFound
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
-from django_tables2.config import RequestConfig
-
-from django_tables2.utils import A
-import django_tables2 as tables
+from django.views.generic.detail import DetailView
 
 from vavilov_pedigree.models import Accession, Assay, Plant, SeedLot
+from vavilov_pedigree.views.tables import seedlot_to_table, plant_to_table
+from django.views.generic.edit import DeleteView, UpdateView, CreateView
 
 
-def accession(request, accession_number):
-    context = RequestContext(request)
-    try:
-        acc = Accession.objects.get(accession_number=accession_number)
-    except Accession.DoesNotExist:
-        return HttpResponseNotFound('<h1>Page not found</h1>')
+class AccessionDetail(DetailView):
+    model = Accession
+    slug_url_kwarg = 'accession_number'
+    slug_field = 'accession_number'
 
-    context['accession'] = acc
-    # Seedlots
-    seedlot_table = SeedLotTable(acc.seed_lots, template='table.html',
-                                 prefix='seed_lot-')
-    RequestConfig(request).configure(seedlot_table)
-    context['seedlots'] = seedlot_table
-    template = 'vavilov_pedigree/accession.html'
-    return render_to_response(template, context)
+    def get_context_data(self, **kwargs):
+        context = super(AccessionDetail, self).get_context_data(**kwargs)
+        context['accession'] = self.object
+        context['seedlots'] = seedlot_to_table(self.object.seed_lots,
+                                               self.request)
+        return context
 
 
-def assay(request, name):
-    context = RequestContext(request)
-    try:
-        assay = Assay.objects.get(name=name)
-    except Assay.DoesNotExist:
-        assay = None
-    context['assay'] = assay
+class AssayDetail(DetailView):
+    model = Assay
+    slug_url_kwarg = 'name'
+    slug_field = 'name'
 
-    template = 'vavilov_pedigree/assay.html'
-    content_type = None
-    return render_to_response(template, context, content_type=content_type)
+    def get_context_data(self, **kwargs):
+        context = super(AssayDetail, self).get_context_data(**kwargs)
+        context['assay'] = self.object
+        return context
 
 
-class PlantsTable(tables.Table):
-    plant = tables.LinkColumn('pedigree_plant_view', args=[A('plant_name')],
-                              accessor=A('plant_name'), orderable=True,
-                              verbose_name='Plant')
-    Seedlot = tables.LinkColumn('pedigree_seedlot_view', args=[A('seed_lot.name')],
-                                accessor=A('seed_lot.name'),
-                                orderable=True, verbose_name='SeedLot')
-    Exp_field = tables.Column('Experimentalfield',
-                              accessor=A('experimental_field'))
-    row = tables.Column('Row', accessor=A('row'))
-    column = tables.Column('Column', accessor=A('column'))
-    pot_number = tables.Column('Pot number', accessor=A('pot_number'))
+class PlantDetail(DetailView):
+    model = Plant
+    slug_url_kwarg = 'plant_name'
+    slug_field = 'plant_name'
 
-    class Meta:
-        attrs = {"class": "searchresult"}
+    def get_context_data(self, **kwargs):
+        context = super(PlantDetail, self).get_context_data(**kwargs)
+        context['plant'] = self.object
+        context['clones'] = plant_to_table(self.object.clones, self.request)
+        return context
 
 
-class SeedLotTable(tables.Table):
-    Seedlot = tables.LinkColumn('pedigree_seedlot_view', args=[A('name')],
-                                accessor=A('name'),
-                                orderable=True, verbose_name='SeedLot')
-    father = tables.Column('Father', accessor=A('father'), orderable=True)
-    mother = tables.Column('Mother', accessor=A('mother'), orderable=True)
+class SeedLotDetail(DetailView):
+    model = SeedLot
+    slug_url_kwarg = 'name'
+    slug_field = 'name'
 
-    class Meta:
-        attrs = {"class": "searchresult"}
-
-
-def plant(request, plant_name):
-    context = RequestContext(request)
-
-    try:
-        plant = Plant.objects.get(plant_name=plant_name)
-    except Plant.DoesNotExist:
-        plant = None
-    context['plant'] = plant
-
-    if plant.clones:
-        clones_table = PlantsTable(plant.clones, template='table.html',
-                                   prefix='clones-')
-        RequestConfig(request).configure(clones_table)
-        context['clones'] = clones_table
-    else:
-        context['clones'] = None
-    template = 'vavilov_pedigree/plant.html'
-    content_type = None
-    return render_to_response(template, context, content_type=content_type)
-
-
-def seed_lot(request, name):
-    context = RequestContext(request)
-    try:
-        seedlot = SeedLot.objects.get(name=name)
-    except SeedLot.DoesNotExist:
-        seedlot = None
-    context['seedlot'] = seedlot
-
-    template = 'vavilov_pedigree/seedlot.html'
-    content_type = None
-    return render_to_response(template, context, content_type=content_type)
+    def get_context_data(self, **kwargs):
+        context = super(SeedLotDetail, self).get_context_data(**kwargs)
+        context['seedlot'] = self.object
+        return context
 
 
 def search_cross(request):
@@ -106,4 +57,3 @@ def search_cross(request):
 
 def search_seedlot(request):
     pass
-

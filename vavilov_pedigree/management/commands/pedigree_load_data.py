@@ -1,3 +1,4 @@
+from time import time
 from django.core.management.base import BaseCommand
 
 from vavilov_pedigree.data_upload import (add_or_load_accessions,
@@ -8,6 +9,11 @@ from vavilov_pedigree.data_upload import (add_or_load_accessions,
 from os.path import join
 
 
+def print_duration(msg, prev_time):
+    now = time()
+    print(msg + ': ' + str(round(now - prev_time, 2)))
+    return now
+
 class Command(BaseCommand):
     help = 'load initial data into database'
 
@@ -16,12 +22,31 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dirpath = options['dir_fpath']
+        prev_time = time()
+
         add_or_load_accessions(join(dirpath, 'varitome_passport.xlsx'))
+        prev_time = print_duration('varitome_passport.xlsx', prev_time)
+
         add_or_load_seedlot(join(dirpath, 'SeedLots_originals.xlsx'))
+        prev_time = print_duration('SeedLots_originals.xlsx', prev_time)
+
         add_or_load_plants(join(dirpath, 'NSF2_PA01_Sep_2016_plants.xlsx'))
+        prev_time = print_duration('NSF2_PA01_Sep_2016_plants.xlsx', prev_time)
+
         add_or_load_plants(join(dirpath, 'NSF2_CN0X_Feb_2016_plants.xlsx'))
+        prev_time = print_duration('NSF2_CN0X_Feb_2016_plants.xlsx', prev_time)
+
+        add_or_load_plants(join(dirpath, 'NSF1_CN0X_Feb_2016_plants.xlsx'))
+        prev_time = print_duration('NSF1_CN0X_Feb_2016_plants.xlsx', prev_time)
 
         add_or_load_plant_relationship(join(dirpath, 'NSF2_PA01_Sep_2016_plant_clones.xlsx'))
-        add_or_load_plant_relationship(join(dirpath, 'NSF2_CN0X_Feb_2016_plant_clones.xlsx'))
+        prev_time = print_duration('NSF2_PA01_Sep_2016_plant_clones.xlsx', prev_time)
 
-        add_or_load_cross_experiments(join(dirpath, 'cross_exps.xlsx'))
+        add_or_load_plant_relationship(join(dirpath, 'NSF2_CN0X_Feb_2016_plant_clones.xlsx'))
+        prev_time = print_duration('NSF2_CN0X_Feb_2016_plant_clones.xlsx', prev_time)
+
+        add_or_load_cross_experiments(join(dirpath, 'Crosses_F16NSF2.xlsx'))
+        prev_time = print_duration('Crosses_F16NSF2.xlsx', prev_time)
+
+        add_or_load_cross_experiments(join(dirpath, 'Crosses_F16NSF3_upv.xlsx'))
+        prev_time = print_duration('Crosses_F16NSF3_upv.xlsx', prev_time)

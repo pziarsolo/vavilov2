@@ -10,7 +10,7 @@
 	<table class="data_table">
 	    <tr>
 	        <td class="key">Accession number :</td>
-	        <td class="value"><a href='{% url 'pedigree_accession_view' plant.seed_lot.accession.accession_number %}'>{{plant.seed_lot.accession.accession_number}}</a></td>
+	        <td class="value"><a href='{% url 'pedigree:accession-detail' plant.seed_lot.accession.accession_number %}'>{{plant.seed_lot.accession.accession_number}}</a></td>
 	    </tr>
 	    {% if plant.experimental_field %}
 	    <tr>
@@ -38,7 +38,7 @@
 	    {% endif %}
 	    <tr>
             <td class="key">Seed_lot :</td>
-            <td class="value"><a href='{% url 'pedigree_seedlot_view' plant.seed_lot.name %}'>{{plant.seed_lot.name}}</a></td>
+            <td class="value"><a href='{% url 'pedigree:seedlot-detail' plant.seed_lot.name %}'>{{plant.seed_lot.name}}</a></td>
         </tr>
 	</table>
 </div>

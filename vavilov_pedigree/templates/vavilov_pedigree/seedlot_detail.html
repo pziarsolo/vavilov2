@@ -17,7 +17,7 @@
             </tr>
 		    <tr>
 		        <td class="key">Accession :</td>
-		        <td class="value"><a href='{% url 'pedigree_accession_view' seedlot.accession.accession_number %}'>{{seedlot.accession.accession_number}}</a></td>
+		        <td class="value"><a href='{% url 'pedigree:accession-detail' seedlot.accession.accession_number %}'>{{seedlot.accession.accession_number}}</a></td>
 		    </tr>
 		    {% if seedlot.num_seeds %}
                 <tr>
@@ -55,7 +55,6 @@
                     {% endfor %}
                 </tr>
 	        {% endif %}
-	        
 	        
 		</table>
 	</div>

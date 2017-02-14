@@ -42,7 +42,7 @@ class SeedLot(models.Model):
     description = models.CharField(max_length=255, null=True)
     accession = models.ForeignKey(Accession)
     seeds_weight = models.FloatField(null=True)
-    fruit = models.IntegerField(null=True)
+    fruit = models.CharField(null=True, max_length=10)
 
     class Meta:
         db_table = 'vavilov_pedigree_seed_lot'

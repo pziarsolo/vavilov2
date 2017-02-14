@@ -83,9 +83,16 @@ def add_or_load_cross_experiments(fpath):
 
 
         if father_plant and mother_plant and offspring and assay_name and cross_exp_desc:
-
-            father_plant = Plant.objects.get_or_create(plant_name=father_plant)[0]
-            mother_plant = Plant.objects.get_or_create(plant_name=mother_plant)[0]
+            try:
+                father_plant = Plant.objects.get(plant_name=father_plant)
+            except Plant.DoesNotExist:
+                print(father_plant + ' does not exist')
+                continue
+            try:
+                mother_plant = Plant.objects.get(plant_name=mother_plant)
+            except Plant.DoesNotExist:
+                print(mother_plant + ' does not exist')
+                continue
 
             # plant/accession codes must match
             error = False
