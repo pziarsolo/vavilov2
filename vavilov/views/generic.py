@@ -16,7 +16,7 @@ from vavilov.conf.settings import APP_LOGGER
 logger = logging.getLogger(APP_LOGGER)
 
 
-def _search_criteria_to_get_parameters(search_criteria):
+def search_criteria_to_get_parameters(search_criteria):
     get_params = ''
     for key, value in search_criteria.items():
         if isinstance(value, list):
@@ -64,7 +64,7 @@ class SearchListView(View):
             self.object_list = self.model.objects.none()
             search_criteria = None
         if getdata:
-            criteria = _search_criteria_to_get_parameters(search_criteria)
+            criteria = search_criteria_to_get_parameters(search_criteria)
         else:
             criteria = None
 
