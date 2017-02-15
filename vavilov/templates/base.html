@@ -23,6 +23,11 @@
             <li><a href={% url 'observation-listimage' %}>Observation Images</a></li>
           </ul>
         </li>
+         <li class="dropdown">Pedigree
+            <ul>
+            <li><a href={% url 'pedigree:search' %}>Search</a></li>
+          </ul>
+        </li>
         {% if user.is_authenticated %}
             <li><a href='/logout/' >Logout ({{ user.username}})</a></li>
         {% else %}

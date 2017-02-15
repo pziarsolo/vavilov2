@@ -2,7 +2,6 @@ from django.views.generic.detail import DetailView
 
 from vavilov_pedigree.models import Accession, Assay, Plant, SeedLot
 from vavilov_pedigree.views.tables import seedlot_to_table, plant_to_table
-from django.views.generic.edit import DeleteView, UpdateView, CreateView
 
 
 class AccessionDetail(DetailView):
@@ -22,11 +21,7 @@ class AssayDetail(DetailView):
     model = Assay
     slug_url_kwarg = 'name'
     slug_field = 'name'
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayDetail, self).get_context_data(**kwargs)
-        context['assay'] = self.object
-        return context
+    context_object_name = 'assay'
 
 
 class PlantDetail(DetailView):
@@ -45,11 +40,7 @@ class SeedLotDetail(DetailView):
     model = SeedLot
     slug_url_kwarg = 'name'
     slug_field = 'name'
-
-    def get_context_data(self, **kwargs):
-        context = super(SeedLotDetail, self).get_context_data(**kwargs)
-        context['seedlot'] = self.object
-        return context
+    context_object_name = 'seedlot'
 
 
 def search_cross(request):

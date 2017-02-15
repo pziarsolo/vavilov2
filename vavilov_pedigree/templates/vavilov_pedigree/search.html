@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% load extras %}
+{% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
+{% block title %}Accession {{accession.accession_number}} {% endblock title %}
+{% block content %}
+<section>
+<fieldset>
+  <legend>Search:</legend>
+  <form action='' method='POST'>{% csrf_token %}
+    {{form.as_table}}
+    <input type='submit' value='search'>
+  </form>
+</fieldset>
+<hr class='empty_line'>
+{% if plants %}
+    <h3> Plants </h3>
+    {% render_table plants %}
+    <hr class='empty_line'>    
+{% endif %}
+
+{% if seedlots %}
+    <h3> seedlots </h3>
+    {% render_table seedlots %}
+    <hr class='empty_line'>
+{% endif %}
+
+{% if accessions %}
+    <h3> accessions </h3>
+    {% render_table accessions %}
+    <hr class='empty_line'>
+{% endif %}
+
+
+</section>
+ 
+    
+{% endblock %}

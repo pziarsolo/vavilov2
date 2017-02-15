@@ -20,6 +20,10 @@ class Accession(models.Model):
     def seed_lots(self):
         return SeedLot.objects.filter(accession=self)
 
+    @property
+    def seed_lots_beauty(self):
+        return ','.join([s.name for s in self.seed_lots])
+
 
 class Assay(models.Model):
     assay_id = models.AutoField(primary_key=True)
