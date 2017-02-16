@@ -10,8 +10,9 @@ class AccessionTable(tables.Table):
 
     Exp_field = tables.Column('Collecting number',
                               accessor=A('collecting_number'))
-    Seedlots = tables.Column('Seed lots', accessor=A('seed_lots_beauty'))
-
+    # Seedlots = tables.Column('Seed lots', accessor=A('seed_lots_beauty'))
+    Seedlots = tables.TemplateColumn("{{ value|safe }}", 'Seed lots',
+                                     accessor=A('seed_lots_beauty'))
     class Meta:
         attrs = {"class": "searchresult"}
 
@@ -37,9 +38,22 @@ class SeedLotTable(tables.Table):
     Seedlot = tables.LinkColumn(None, args=[A('name')],
                                 accessor=A('name'),
                                 orderable=True, verbose_name='SeedLot')
-    father = tables.Column('Father', accessor=A('father_beauty'), orderable=True)
-    mother = tables.Column('Mother', accessor=A('mother_beauty'), orderable=True)
+    father_plant = tables.TemplateColumn("{{ value|safe }}",
+                                         accessor=A('father_beauty'),
+                                         orderable=True)
+    mother_plant = tables.TemplateColumn("{{ value|safe }}",
+                                         accessor=A('mother_beauty'),
+                                         orderable=True)
 
+    class Meta:
+        attrs = {"class": "searchresult"}
+
+
+class CrossTable(tables.Table):
+    description = tables.Column('Description', accessor=A('description'))
+    father_plant = tables.TemplateColumn("{{ value|safe }}", 'Father Plant', accessor=A('father_beauty'), orderable=True)
+    mother_plant = tables.TemplateColumn("{{ value|safe }}", 'Mother Plant', accessor=A('mother_beauty'), orderable=True)
+    offspring_seedlot = tables.TemplateColumn("{{ value|safe }}", 'Offspring SeedLot', accessor=A('offspring_beauty'), orderable=True)
     class Meta:
         attrs = {"class": "searchresult"}
 

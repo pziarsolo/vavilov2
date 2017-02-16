@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Q
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 FATHER = 'father'
 MOTHER = 'mother'
@@ -27,7 +28,12 @@ class Accession(models.Model):
 
     @property
     def seed_lots_beauty(self):
-        return ','.join([s.name for s in self.seed_lots])
+        return ','.join([s.make_link_tag() for s in self.seed_lots])
+
+    def make_link_tag(self):
+        return mark_safe("<a href='{url}'>{visual}</a>".format(url=self.get_absolute_url(),
+                                                               visual=self.accession_number))
+
 
 
 class Assay(models.Model):
@@ -80,19 +86,22 @@ class SeedLot(models.Model):
     def fathers(self):
         return self._parent(type_='fathers')
 
+    def make_link_tag(self):
+        return mark_safe("<a href='{url}'>{visual}</a>".format(url=self.get_absolute_url(),
+                                                               visual=self.name))
 
     def _parent_beauty(self, type_):
         parents = self._parent(type_=type_)
-        accessions = set([p.seed_lot.accession.accession_number for p in parents])
+        accessions = set([p.seed_lot.accession.make_link_tag() for p in parents])
         accessions_beauty = " (" + ",".join(accessions) + ")"
         if len(self.mothers) == 1:
-            return parents[0].plant_name + accessions_beauty
+            return parents[0].make_link_tag() + accessions_beauty
         else:
             return 'various' + accessions_beauty
 
     @property
     def father_beauty(self):
-        return  self._parent_beauty('fathers')
+        return self._parent_beauty('fathers')
 
     @property
     def mother_beauty(self):
@@ -116,6 +125,9 @@ class Plant(models.Model):
     def get_absolute_url(self):
         return reverse('pedigree:plant-detail', kwargs={'plant_name': self.plant_name})
 
+    def make_link_tag(self):
+        return mark_safe("<a href='{url}'>{visual}</a>".format(url=self.get_absolute_url(),
+                                                               visual=self.plant_name))
     @property
     def clones(self):
         return self._get_recursively_related_accessions([self])
@@ -181,6 +193,31 @@ class CrossExperiment(models.Model):
     @property
     def offspring(self):
         return SeedLot.objects.filter(crossexperimentseedlot__cross_experiment=self)
+
+    @property
+    def offspring_beauty(self):
+        offs_beauties = []
+        for offspring in self.offspring:
+            acc = offspring.accession.make_link_tag()
+            offs_beauties.append('{} ({})'.format(offspring.make_link_tag(), acc))
+        return ",".join(offs_beauties)
+
+    def _parent_beauty(self, type_):
+        parents = self._parents(type_=type_)
+        accessions = set([p.seed_lot.accession.make_link_tag() for p in parents])
+        accessions_beauty = " (" + ",".join(accessions) + ")"
+        if len(parents) == 1:
+            return parents[0].make_link_tag() + accessions_beauty
+        else:
+            return 'various' + accessions_beauty
+
+    @property
+    def father_beauty(self):
+        return self._parent_beauty(FATHER)
+
+    @property
+    def mother_beauty(self):
+        return  self._parent_beauty(MOTHER)
 
 
 class CrossPlant(models.Model):
