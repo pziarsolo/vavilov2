@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from django.core.urlresolvers import reverse
 
 FATHER = 'father'
 MOTHER = 'mother'
@@ -15,6 +16,10 @@ class Accession(models.Model):
 
     def __str__(self):
         return self.accession_number
+
+    def get_absolute_url(self):
+        return reverse('pedigree:accession-detail',
+                       kwargs={'accession_number': self.accession_number})
 
     @property
     def seed_lots(self):
@@ -35,6 +40,9 @@ class Assay(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('pedigree:assay-detail', kwargs={'name': self.name})
+
     @property
     def cross_experiments(self):
         return CrossExperiment.objects.filter(assay=self)
@@ -50,6 +58,9 @@ class SeedLot(models.Model):
 
     class Meta:
         db_table = 'vavilov_pedigree_seed_lot'
+
+    def get_absolute_url(self):
+        return reverse('pedigree:seedlot-detail', kwargs={'name': self.name})
 
     def __str__(self):
         return self.name
@@ -69,19 +80,23 @@ class SeedLot(models.Model):
     def fathers(self):
         return self._parent(type_='fathers')
 
-    @property
-    def mother(self):
+
+    def _parent_beauty(self, type_):
+        parents = self._parent(type_=type_)
+        accessions = set([p.seed_lot.accession.accession_number for p in parents])
+        accessions_beauty = " (" + ",".join(accessions) + ")"
         if len(self.mothers) == 1:
-            return self.mothers[0].plant_name
+            return parents[0].plant_name + accessions_beauty
         else:
-            return 'various'
+            return 'various' + accessions_beauty
 
     @property
-    def father(self):
-        if len(self.fathers) == 1:
-            return self.fathers[0].plant_name
-        else:
-            return 'various'
+    def father_beauty(self):
+        return  self._parent_beauty('fathers')
+
+    @property
+    def mother_beauty(self):
+        return  self._parent_beauty('mothers')
 
 class Plant(models.Model):
     plant_id = models.AutoField(primary_key=True)
@@ -97,6 +112,9 @@ class Plant(models.Model):
 
     def __str__(self):
         return self.plant_name
+
+    def get_absolute_url(self):
+        return reverse('pedigree:plant-detail', kwargs={'plant_name': self.plant_name})
 
     @property
     def clones(self):

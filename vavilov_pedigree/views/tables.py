@@ -34,11 +34,11 @@ class PlantTable(tables.Table):
 
 
 class SeedLotTable(tables.Table):
-    Seedlot = tables.LinkColumn('pedigree:seedlot-detail', args=[A('name')],
+    Seedlot = tables.LinkColumn(None, args=[A('name')],
                                 accessor=A('name'),
                                 orderable=True, verbose_name='SeedLot')
-    father = tables.Column('Father', accessor=A('father'), orderable=True)
-    mother = tables.Column('Mother', accessor=A('mother'), orderable=True)
+    father = tables.Column('Father', accessor=A('father_beauty'), orderable=True)
+    mother = tables.Column('Mother', accessor=A('mother_beauty'), orderable=True)
 
     class Meta:
         attrs = {"class": "searchresult"}
