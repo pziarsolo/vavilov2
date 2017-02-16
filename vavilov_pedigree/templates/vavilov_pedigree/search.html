@@ -13,6 +13,10 @@
   </form>
 </fieldset>
 <hr class='empty_line'>
+
+{% if request.method != 'GET' and not plants and not seedlots and not accessions%}
+<p> Nothing found</p>
+{% endif%}
 {% if plants %}
     <h3> Plants </h3>
     {% render_table plants %}
