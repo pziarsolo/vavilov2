@@ -11,7 +11,7 @@
 	{% if object_list %}
 	   <h3> Search result</h3>
 	  {% render_table object_list %}
-      {% url 'search_accessions' as base_url %}
+      {% url 'accessions' as base_url %}
       {% load urlbuilder %}
       <div class=download_csv>
           <ul> 
