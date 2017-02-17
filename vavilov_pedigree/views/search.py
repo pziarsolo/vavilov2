@@ -1,11 +1,12 @@
 from django import forms
 from django.db.models import Q
-from vavilov_pedigree.models import Accession, Plant, SeedLot, \
-    CrossExperimentSeedLot, CrossExperiment, FATHER, MOTHER
+from vavilov_pedigree.models import (Accession, Plant, SeedLot,
+                                     CrossExperimentSeedLot,
+                                     filter_cross_experiments)
 from vavilov_pedigree.views.tables import (plant_to_table, seedlot_to_table,
                                            accession_to_table, CrossTable)
-from vavilov.views.generic import search_criteria_to_get_parameters, \
-    SearchListView
+from vavilov.views.generic import (search_criteria_to_get_parameters,
+                                   SearchListView)
 from django.template.context import RequestContext
 from django.template.context_processors import csrf
 from django.shortcuts import render_to_response
@@ -60,37 +61,12 @@ def search(request):
     return render_to_response(template, context, content_type=content_type)
 
 
-
 class SearchCrossForm(forms.Form):
     description = forms.CharField(required=False,)
     father = forms.CharField(required=False, label='Father plant code or accession')
     mother = forms.CharField(required=False, label='Mother plant code or accession')
     offspring = forms.CharField(required=False, label='Offspring seedlot code or accession')
 
-
-def filter_cross_experiments(search_criteria):
-    query = CrossExperiment.objects.all()
-    if 'description' in search_criteria and search_criteria['description']:
-        desc = search_criteria['description']
-        query = query.filter(description__icontains=desc)
-    if 'father' in search_criteria and search_criteria['father']:
-        father = search_criteria['father']
-        query = query.filter(Q(crossplant__type=FATHER) &
-                             (Q(crossplant__plant__plant_name__icontains=father) |
-                              Q(crossplant__plant__seed_lot__accession__accession_number__icontains=father) |
-                              Q(crossplant__plant__seed_lot__accession__collecting_number__icontains=father)))
-        query = query.distinct()
-
-    if 'mother' in search_criteria and search_criteria['mother']:
-        mother = search_criteria['mother']
-        query = query.filter(Q(crossplant__type=MOTHER) &
-                             (Q(crossplant__plant__plant_name__icontains=mother) |
-                              Q(crossplant__plant__seed_lot__accession__accession_number__icontains=mother) |
-                              Q(crossplant__plant__seed_lot__accession__collecting_number__icontains=mother)))
-        query = query.distinct()
-
-
-    return query
 
 class CrossExperiments(SearchListView):
     model = CrossExperimentSeedLot

@@ -34,6 +34,12 @@ class Accession(models.Model):
         return mark_safe("<a href='{url}'>{visual}</a>".format(url=self.get_absolute_url(),
                                                                visual=self.accession_number))
 
+    @property
+    def cross_exps(self):
+        exps = set()
+        for search_key in ('father', 'mother', 'offspring'):
+            exps.update(filter_cross_experiments({search_key: self.accession_number}))
+        return exps
 
 
 class Assay(models.Model):
@@ -102,12 +108,18 @@ class SeedLot(models.Model):
     @property
     def father_beauty(self):
         fathers = self._parent_beauty('fathers')
-        print("a", fathers)
         return fathers if fathers else "-"
 
     @property
     def mother_beauty(self):
         return  self._parent_beauty('mothers')
+
+    @property
+    def cross_exps(self):
+        exps = set()
+        for search_key in ('father', 'mother', 'offspring'):
+            exps.update(filter_cross_experiments({search_key: self.name}))
+        return exps
 
 class Plant(models.Model):
     plant_id = models.AutoField(primary_key=True)
@@ -239,3 +251,33 @@ class CrossExperimentSeedLot(models.Model):
 
     class Meta:
         db_table = 'vavilov_pedigree_cross_experiment_seed_lot'
+
+
+def filter_cross_experiments(search_criteria):
+    query = CrossExperiment.objects.all()
+    if 'description' in search_criteria and search_criteria['description']:
+        desc = search_criteria['description']
+        query = query.filter(description__icontains=desc)
+    if 'father' in search_criteria and search_criteria['father']:
+        father = search_criteria['father']
+        query = query.filter(Q(crossplant__type=FATHER) &
+                             (Q(crossplant__plant__plant_name__icontains=father) |
+                              Q(crossplant__plant__seed_lot__name__icontains=father) |
+                              Q(crossplant__plant__seed_lot__accession__accession_number__icontains=father) |
+                              Q(crossplant__plant__seed_lot__accession__collecting_number__icontains=father)))
+
+    if 'mother' in search_criteria and search_criteria['mother']:
+        mother = search_criteria['mother']
+        query = query.filter(Q(crossplant__type=MOTHER) &
+                             (Q(crossplant__plant__plant_name__icontains=mother) |
+                              Q(crossplant__plant__seed_lot__name__icontains=mother) |
+                              Q(crossplant__plant__seed_lot__accession__accession_number__icontains=mother) |
+                              Q(crossplant__plant__seed_lot__accession__collecting_number__icontains=mother)))
+
+    if 'offspring' in search_criteria and search_criteria['offspring']:
+        offspring = search_criteria['offspring']
+        query = query.filter(Q(crossexperimentseedlot__seed_lot__name__icontains=offspring) |
+                             Q(crossexperimentseedlot__seed_lot__accession__accession_number__icontains=offspring) |
+                             Q(crossexperimentseedlot__seed_lot__accession__collecting_number__icontains=offspring))
+    query = query.distinct()
+    return query

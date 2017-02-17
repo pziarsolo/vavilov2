@@ -17,26 +17,24 @@
 {% if request.method != 'GET' and not plants and not seedlots and not accessions%}
 <p> Nothing found</p>
 {% endif%}
+
+{% if accessions %}
+    <h3> Accessions: </h3>
+    {% render_table accessions %}
+    <hr class='empty_line'>
+{% endif %}
+
+{% if seedlots %}
+    <h3> Seedlots: </h3>
+    {% render_table seedlots %}
+    <hr class='empty_line'>
+{% endif %}
+
 {% if plants %}
     <h3> Plants </h3>
     {% render_table plants %}
     <hr class='empty_line'>    
 {% endif %}
 
-{% if seedlots %}
-    <h3> seedlots </h3>
-    {% render_table seedlots %}
-    <hr class='empty_line'>
-{% endif %}
-
-{% if accessions %}
-    <h3> accessions </h3>
-    {% render_table accessions %}
-    <hr class='empty_line'>
-{% endif %}
-
-
 </section>
- 
-    
 {% endblock %}

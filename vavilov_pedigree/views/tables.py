@@ -58,6 +58,17 @@ class CrossTable(tables.Table):
         attrs = {"class": "searchresult"}
 
 
+def cross_to_table(cross_exps, request, obj_per_page=7):
+    if cross_exps:
+        cross_exps_table = CrossTable(cross_exps, template='table.html',
+                                      prefix='cross_exps-')
+        RequestConfig(request, paginate={'per_page': obj_per_page}).configure(
+            cross_exps_table)
+    else:
+        cross_exps_table = None
+    return cross_exps_table
+
+
 def seedlot_to_table(seed_lots, request, obj_per_page=7):
     if seed_lots:
         seedlot_table = SeedLotTable(seed_lots, template='table.html',

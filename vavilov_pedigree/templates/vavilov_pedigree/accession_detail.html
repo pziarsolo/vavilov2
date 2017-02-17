@@ -10,7 +10,7 @@
 	    <table class="data_table">
 	    <tr>
 	        <td class="key">Accession number :</td>
-	        <td class="value">{{accession.accession_number}}</td>
+	        <td class="value"><a href='{% url 'accession-detail' accession.accession_number %}'>{{accession.accession_number}}</a></td>
 	    </tr>
 	    {% if accession.donor_accession %}
 	        <tr>
@@ -89,10 +89,16 @@
     {% endif %}
     {% include 'vavilov/galleria_js.html' with images=obs_images %}
     {% if seedlots %}
+        <hr class='empty_line'>
         <H3> Seed lots belongint to this accession</h3>
         {% render_table seedlots %}
     
     {% endif %}
-
+    {% if cross_experiments %}
+        <hr class='empty_line'>
+        <H3> This accession is part of this cross_experiments</h3>
+        {% render_table cross_experiments %}
+    
+    {% endif %}
     
 {% endblock %}

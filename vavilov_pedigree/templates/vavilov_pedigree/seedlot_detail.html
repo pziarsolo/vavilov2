@@ -58,6 +58,11 @@
 	        
 		</table>
 	</div>
+{% if cross_experiments %}
+    <hr class='empty_line'>
+    <H3> This seed lot has been used  or is a result of this cross_experiments</h3>
+    {% render_table cross_experiments %}
+{% endif %}
 </section>
 
 
