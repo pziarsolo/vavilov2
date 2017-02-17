@@ -112,7 +112,7 @@ class SeedLot(models.Model):
 
     @property
     def mother_beauty(self):
-        return  self._parent_beauty('mothers')
+        return self._parent_beauty('mothers')
 
     @property
     def cross_exps(self):
@@ -120,6 +120,7 @@ class SeedLot(models.Model):
         for search_key in ('father', 'mother', 'offspring'):
             exps.update(filter_cross_experiments({search_key: self.name}))
         return exps
+
 
 class Plant(models.Model):
     plant_id = models.AutoField(primary_key=True)
@@ -142,6 +143,7 @@ class Plant(models.Model):
     def make_link_tag(self):
         return mark_safe("<a href='{url}'>{visual}</a>".format(url=self.get_absolute_url(),
                                                                visual=self.plant_name))
+
     @property
     def clones(self):
         return self._get_recursively_related_accessions([self])
@@ -195,7 +197,8 @@ class CrossExperiment(models.Model):
 
     def _parents(self, type_):
         return Plant.objects.filter(Q(crossplant__cross=self) &
-                             Q(crossplant__type=type_))
+                                    Q(crossplant__type=type_))
+
     @property
     def fathers(self):
         return self._parents(FATHER)
@@ -231,7 +234,7 @@ class CrossExperiment(models.Model):
 
     @property
     def mother_beauty(self):
-        return  self._parent_beauty(MOTHER)
+        return self._parent_beauty(MOTHER)
 
 
 class CrossPlant(models.Model):

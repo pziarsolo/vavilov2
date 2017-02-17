@@ -3,10 +3,8 @@ from django_tables2.utils import A
 import django_tables2 as tables
 from django_tables2.config import RequestConfig
 
-
 from vavilov.conf.settings import ACCESSION_SEARCH_RESULT_FIELDS
 from vavilov.views.generic import calc_duration
-
 
 
 class ObservationsTable(tables.Table):
@@ -25,7 +23,7 @@ class ObservationsTable(tables.Table):
     trait = tables.LinkColumn('trait-detail', args=[A('trait.trait_id')],
                               accessor=A('trait.name'),
                               orderable=True, verbose_name='Trait')
-    value = tables.Column('Value', accessor=A('value'),
+    value = tables.Column('Value', accessor=A('value_beauty'),
                           default='', orderable=True)
     observer = tables.Column('Observer', accessor=A('observer'),
                              default='', orderable=True)
@@ -126,7 +124,6 @@ def obs_to_table(observations, request):
     RequestConfig(request).configure(observations_table)
     prev_time = calc_duration('Observation_ RequestConfig.configure', prev_time)
     return observations_table
-
 
 
 def plants_to_table(plants, request):

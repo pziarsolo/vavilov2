@@ -413,6 +413,24 @@ class Location(models.Model):
         db_table = 'vavilov_location'
         permissions = (('view_location', 'View Location'),)
 
+    def __str__(self):
+        loc = ' '
+        if self.site:
+            loc += self.site
+            loc += ' - '
+        if self.province:
+            loc += self.province
+            loc += ' - '
+
+        if self.region:
+            loc += self.region
+            loc += ' - '
+
+        if self.country_str:
+            loc += self.country_str
+
+        return loc
+
     @property
     def country_str(self):
         if self.country:
@@ -477,7 +495,7 @@ class Passport(models.Model):
     @property
     def collecting_date_str(self):
         if self.collecting_date and self.collecting_date.month == 1 and self.collecting_date.day == 1:
-            return  self.collecting_date.year
+            return self.collecting_date.year
         return self.collecting_date
 
     @property
@@ -731,7 +749,7 @@ class ObservationEntity(models.Model):
         return plants
 
     def observations(self, user):
-        return filter_observations({'obs_emtity': self.name}, user=user)
+        return filter_observations({'obs_entity': self.name}, user=user)
 
     def obs_images(self, user):
         return filter_observations({'obs_entity': self.name}, user=user,
@@ -790,6 +808,10 @@ class Observation(models.Model):
         except ObservationImages.DoesNotExist:
             return None
 
+    @property
+    def value_beauty(self):
+        return self.value
+
 
 def get_photo_dir(instance, filename):
     # photo_dir/accession/imagename
@@ -843,7 +865,7 @@ def filter_observations(search_criteria, user, images=False):
     if images:
         query = Observation.objects
     else:
-        if  OBSERVATIONS_HAVE_TIME:
+        if OBSERVATIONS_HAVE_TIME:
             if 'all_data' in search_criteria and search_criteria['all_data']:
                 query = Observation.objects
             else:

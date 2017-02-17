@@ -13,6 +13,7 @@ class AccessionTable(tables.Table):
     # Seedlots = tables.Column('Seed lots', accessor=A('seed_lots_beauty'))
     Seedlots = tables.TemplateColumn("{{ value|safe }}", 'Seed lots',
                                      accessor=A('seed_lots_beauty'))
+
     class Meta:
         attrs = {"class": "searchresult"}
 
@@ -54,6 +55,7 @@ class CrossTable(tables.Table):
     father_plant = tables.TemplateColumn("{{ value|safe }}", 'Father Plant', accessor=A('father_beauty'), orderable=True)
     mother_plant = tables.TemplateColumn("{{ value|safe }}", 'Mother Plant', accessor=A('mother_beauty'), orderable=True)
     offspring_seedlot = tables.TemplateColumn("{{ value|safe }}", 'Offspring SeedLot', accessor=A('offspring_beauty'), orderable=True)
+
     class Meta:
         attrs = {"class": "searchresult"}
 

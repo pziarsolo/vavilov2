@@ -349,13 +349,14 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
 
             if qualitative_translator:
                 try:
-                    value = qualitative_translator[trait_name][value]
+                    value = qualitative_translator[trait_name][str(value)]
                 except KeyError as error:
                     if raise_on_error:
                         raise
-                else:
-                    sys.stderr.write(str(error) + '\n')
-                    continue
+                    else:
+                        msg = 'Qualitative trait "{}" has no {} value in translator\n'
+                        sys.stderr.write(msg.format(trait_name, value))
+                        continue
 
             try:
                 obs = add_or_load_observation(obs_entity, trait_name, assayname,
