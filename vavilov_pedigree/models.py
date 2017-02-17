@@ -94,14 +94,16 @@ class SeedLot(models.Model):
         parents = self._parent(type_=type_)
         accessions = set([p.seed_lot.accession.make_link_tag() for p in parents])
         accessions_beauty = " (" + ",".join(accessions) + ")"
-        if len(self.mothers) == 1:
+        if len(parents) == 1:
             return parents[0].make_link_tag() + accessions_beauty
         else:
             return 'various' + accessions_beauty
 
     @property
     def father_beauty(self):
-        return self._parent_beauty('fathers')
+        fathers = self._parent_beauty('fathers')
+        print("a", fathers)
+        return fathers if fathers else "-"
 
     @property
     def mother_beauty(self):
@@ -209,7 +211,7 @@ class CrossExperiment(models.Model):
         if len(parents) == 1:
             return parents[0].make_link_tag() + accessions_beauty
         else:
-            return 'various' + accessions_beauty
+            return 'Various Plants' + accessions_beauty
 
     @property
     def father_beauty(self):
