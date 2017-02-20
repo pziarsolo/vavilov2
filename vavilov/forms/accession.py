@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.forms.widgets import Select
 
 from vavilov.caches import get_passport_data_choices
-from vavilov.conf.settings import ACCESSION_SEARCH_FORM_FIELDS
+from vavilov.conf.settings import ACCESSION_SEARCH_FIELDS
 from vavilov.forms.widgets import AutocompleteTextInput
 from vavilov.models import Accession
 
@@ -39,7 +39,7 @@ class SearchPassportForm(forms.Form):
                                 widget=AutocompleteTextInput(source='/apis/accession_numbers/',
                                                              min_length=1,
                                                              force_check=False))
-    if 'taxa' in ACCESSION_SEARCH_FORM_FIELDS:
+    if 'taxa' in ACCESSION_SEARCH_FIELDS:
         help_name = 'Taxa'
         taxa = forms.CharField(max_length=200, required=False, label=help_name,
                                widget=AutocompleteTextInput(source='/apis/taxons/',
@@ -53,17 +53,17 @@ class SearchPassportForm(forms.Form):
 
     pass_choices = get_passport_data_choices()  # json.load(open(SEARCH_CHOICES_CACHE_FILE))
 
-    if 'country' in ACCESSION_SEARCH_FORM_FIELDS:
+    if 'country' in ACCESSION_SEARCH_FIELDS:
         country = forms.CharField(max_length=100, required=False,
                                   widget=Select(choices=pass_choices['country']))
-    if 'region' in ACCESSION_SEARCH_FORM_FIELDS:
+    if 'region' in ACCESSION_SEARCH_FIELDS:
         region = forms.CharField(max_length=100, required=False,
                                  widget=Select(choices=pass_choices['region']))
 
-    if 'biological_status' in ACCESSION_SEARCH_FORM_FIELDS:
+    if 'biological_status' in ACCESSION_SEARCH_FIELDS:
         biological_status = forms.CharField(max_length=100, required=False,
                                             widget=Select(choices=pass_choices['biological_status']))
 
-    if 'collecting_source' in ACCESSION_SEARCH_FORM_FIELDS:
+    if 'collecting_source' in ACCESSION_SEARCH_FIELDS:
         collecting_source = forms.CharField(max_length=100, required=False,
                                             widget=Select(choices=pass_choices['collecting_source']))

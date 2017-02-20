@@ -3,7 +3,7 @@ from django_tables2.utils import A
 import django_tables2 as tables
 from django_tables2.config import RequestConfig
 
-from vavilov.conf.settings import ACCESSION_SEARCH_RESULT_FIELDS
+from vavilov.conf.settings import ACCESSION_TABLE_FIELDS
 from vavilov.views.generic import calc_duration
 
 
@@ -36,7 +36,7 @@ class ObservationsTable(tables.Table):
 
 
 class AccessionsTable(tables.Table):
-    search_fields = ACCESSION_SEARCH_RESULT_FIELDS
+    search_fields = ACCESSION_TABLE_FIELDS
     if 'accession_number' in search_fields:
         accession_number = tables.LinkColumn('accession-detail',
                                              args=[A('accession_number')],
