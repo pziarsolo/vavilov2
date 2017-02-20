@@ -68,7 +68,7 @@ class AccessionTest(TestCase):
 
     def test_observations(self):
         acc = Accession.objects.get(accession_number='BGV000928')
-        assert acc.observations(self.user).count() == 5
+        assert acc.observations(self.user).count() == 6
         assert acc.observations(self.user2).count() == 0
 
 
@@ -81,7 +81,7 @@ class PhenotypeTest(TestCase):
 
     def test_assays(self):
         assay = Assay.objects.get(name='NSF1')
-        self.assertEqual(assay.get_absolute_url, '/assay/NSF1/')
+        self.assertEqual(assay.get_absolute_url(), '/assay/NSF1/')
         self.assertEqual(assay.props, {'campaign': 'NSF-March-2016'})
         self.assertEqual(assay.owner, self.user)
         self.assertEqual(len(assay.traits(user=self.user)), 2)
@@ -89,8 +89,8 @@ class PhenotypeTest(TestCase):
         self.assertEqual(assay.plants(self.admin).count(), 18)
         self.assertEqual(assay.plants(self.user2).count(), 0)
 
-        self.assertEqual(assay.observations(self.user).count(), 12)
-        self.assertEqual(assay.observations(self.admin).count(), 12)
+        self.assertEqual(assay.observations(self.user).count(), 13)
+        self.assertEqual(assay.observations(self.admin).count(), 13)
         self.assertEqual(assay.observations(self.user2).count(), 0)
 
     def test_traits(self):

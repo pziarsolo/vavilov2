@@ -12,7 +12,7 @@ class AccessionViewTest(TestCase):
 
     def test_simple(self):
         client = Client()
-        response = client.get(reverse('accession_view',
+        response = client.get(reverse('accession-detail',
                                       kwargs={'accession_number': 'BGV000933'}))
         assert response.status_code == 200
 
@@ -20,27 +20,27 @@ class AccessionViewTest(TestCase):
 
     def test_search(self):
         client = Client()
-        response = client.get(reverse('search_accession'))
+        response = client.get(reverse('accession-list'))
         assert response.status_code == 200
 
         acc = Accession.objects.get(accession_number='BGV000933')
-        response = client.post(reverse('search_accession'),
+        response = client.post(reverse('accession-list'),
                                {'accession': acc.accession_number})
 
         assert response.status_code == 302
-        assert reverse('accession_view', kwargs={'accession_number': 'BGV000933'}) in response.url
+        assert reverse('accession-detail', kwargs={'accession_number': 'BGV000933'}) in response.url
 
-        response = client.post(reverse('search_accession'),
+        response = client.post(reverse('accession-list'),
                                {'accession': 'BGV00093'})
         assert response.status_code == 200
         assert response.context['table'].data.queryset.all()[0].accession_number == 'BGV000932'
 
         # search by collecting code
-        response = client.post(reverse('search_accession'),
+        response = client.post(reverse('accession-list'),
                                {'accession': 'AN-L-18'})
 
         assert response.status_code == 302
-        assert reverse('accession_view', kwargs={'accession_number': 'BGV000917'}) in response.url
+        assert reverse('accession-detail', kwargs={'accession_number': 'BGV000917'}) in response.url
 
 
 class ObservationsViewTest(TestCase):
@@ -49,16 +49,17 @@ class ObservationsViewTest(TestCase):
 
     def test_observations(self):
         client = Client()
-        response = client.get(reverse('search_observation'))
+        response = client.get(reverse('observation-list'))
         assert response.status_code == 200
 
-        response = client.post(reverse('search_observation'),
+        response = client.post(reverse('observation-list'),
                                {'accession': 'BGV000'})
         assert response.status_code == 200
-        assert response.context['entries'] is None
+        print(response.context['object_list'])
+        assert response.context['object_list'] is None
 
         assert client.login(username='user', password='pass')
-        response = client.post(reverse('search_observation'),
+        response = client.post(reverse('observation-list'),
                                {'accession': 'BGV000'})
         assert response.status_code == 200
         assert response.context['table'].data.queryset.all()

@@ -43,7 +43,7 @@ class ExcelLoadTests(TestCase):
         add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
 
         obs = Observation.objects.all()
-        assert obs.count() == 10
+        assert obs.count() == 12
         creation_time = obs[0].creation_time
         assert creation_time.tzname() == 'UTC'
         assert str(creation_time).startswith("2016-06-07 11:34:")
@@ -54,7 +54,7 @@ class ExcelLoadTests(TestCase):
 
         add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
         obs = Observation.objects.all()
-        assert obs.count() == 10
+        assert obs.count() == 12
 
 
 class ExcelCreateTest(TestCase):

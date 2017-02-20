@@ -191,7 +191,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'vavilov.log'),
-             'formatter': 'verbose',
+            'formatter': 'verbose',
         }
     },
     'loggers': {

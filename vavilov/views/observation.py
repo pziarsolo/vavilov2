@@ -2,13 +2,12 @@ from django.views.generic.detail import DetailView
 from django.template.context import RequestContext
 from django.template.context_processors import csrf
 
-from django_tables2 import RequestConfig
 from guardian.mixins import PermissionRequiredMixin
 
 from vavilov.forms.observations import SearchObservationForm
 from vavilov.models import ObservationEntity, filter_observations, Observation
-from vavilov.views.tables import ObservationsTable, PlantsTable, \
-    plants_to_table, obs_to_table
+from vavilov.views.tables import (ObservationsTable, plants_to_table,
+                                  obs_to_table)
 from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY
 from vavilov.views.generic import SearchListView
 
@@ -34,7 +33,7 @@ class ObservationImageList(SearchListView):
 
     def get_queryset(self, **kwargs):
         obs = filter_observations(kwargs['search_criteria'],
-                                   user=kwargs['user'], images=True)
+                                  user=kwargs['user'], images=True)
         return obs
 
     def get_context_data(self, **kwargs):

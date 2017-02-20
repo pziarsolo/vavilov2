@@ -919,7 +919,8 @@ def filter_observations(search_criteria, user, images=False):
         query = query.exclude(value=None)
 
     if BY_OBJECT_OBS_PERM:
-        query = get_objects_for_user(user, 'vavilov.view_observation', klass=query)
+        query = get_objects_for_user(user, 'vavilov.view_observation',
+                                     klass=query, accept_global_perms=False)
     else:
         if not user.has_perm('vavilov.view_observation'):
             query = query.none()
