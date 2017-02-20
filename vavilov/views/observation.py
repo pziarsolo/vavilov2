@@ -41,8 +41,12 @@ class ObservationImageList(SearchListView):
         context.update(kwargs)
         context.update(csrf(self.request))
         num_photos = self.object_list.count()
+        warning_ = None
         if num_photos > MAX_PHOTO_IN_GALLERY:
             self.object_list = None
+            warning_ = 'Too much photos({}). Not showing photos. Try to filter them'
+            warning_ = warning_.format(MAX_PHOTO_IN_GALLERY)
+        context['warning'] = warning_
         context.update({'object_list': self.object_list})
         return context
 

@@ -8,8 +8,12 @@
     {% endif %}
     {% if object_list%} 
         <h3> Search result</h3>
+        {% if warning_ %}
+            <h2> {{warning_ }}</h2>
+        {% endif %}
         {% include 'vavilov/galleria_js.html' with images=object_list %}
     {% else %}
+    
         <h3> Search Observation images </h3>
         <form action="" method="post">{% csrf_token %}
            <div class='search_form'>
