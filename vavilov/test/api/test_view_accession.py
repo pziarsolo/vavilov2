@@ -19,11 +19,11 @@ class AccessionViewTest(TestCase):
 
     def test_list(self):
         client = Client()
-        response = client.get(reverse('accession-list'))
+        response = client.get(reverse('api:accession-list'))
         assert response.status_code == status.HTTP_200_OK
 
         client.login(username='admin', password='pass')
-        response = client.get(reverse('accession-list'))
+        response = client.get(reverse('api:accession-list'))
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 9
         assert 'accession_number' in response.data[0]
@@ -33,20 +33,20 @@ class AccessionViewTest(TestCase):
         client = Client()
         # add
         test_acc_number = 'prueba'
-        response = client.post(reverse('accession-list'),
+        response = client.post(reverse('api:accession-list'),
                                {'institute': 1, 'accession_number':
                                 test_acc_number})
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         assert client.login(username='admin', password='pass')
-        response = client.post(reverse('accession-list'),
+        response = client.post(reverse('api:accession-list'),
                                {'institute': 1, 'accession_number':
                                 test_acc_number})
         assert response.status_code == status.HTTP_201_CREATED
         acc = Accession.objects.get(accession_number=test_acc_number)
 
         # change
-        url = reverse('accession-detail', kwargs={'accession_number': acc.accession_number})
+        url = reverse('api:accession-detail', kwargs={'accession_number': acc.accession_number})
         response = client.put(url, {'accession_number': acc.accession_number,
                                     'institute': 2})
         assert response.status_code == status.HTTP_200_OK
@@ -55,7 +55,7 @@ class AccessionViewTest(TestCase):
         assert acc.institute.person_id == 2
 
         # delete
-        response = client.delete(reverse('accession-detail',
+        response = client.delete(reverse('api:accession-detail',
                                          kwargs={'accession_number': acc.accession_number}))
 
         try:
@@ -67,7 +67,7 @@ class AccessionViewTest(TestCase):
     def test_search(self):
         client = Client()
         acc = Accession.objects.get(accession_number='BGV000933')
-        response = client.get(reverse('accession-list'),
+        response = client.get(reverse('api:accession-list'),
                               {'accession': acc.accession_number})
 
         assert len(response.data) == 1
@@ -75,13 +75,13 @@ class AccessionViewTest(TestCase):
         assert response.status_code == status.HTTP_200_OK
 
         # search by collecting code
-        response = client.get(reverse('accession-list'),
+        response = client.get(reverse('api:accession-list'),
                               {'accession': 'AN-L-18'})
         assert len(response.data) == 1
         assert response.data[0]['accession_number'] == 'BGV000917'
         assert response.status_code == status.HTTP_200_OK
 
-        response = client.get(reverse('accession-list'),
+        response = client.get(reverse('api:accession-list'),
                               {'accession': 'IVALSA',
                                'region': 'anda'})
 
@@ -94,11 +94,11 @@ class PassportTest(TestCase):
 
     def test_list(self):
         client = Client()
-        response = client.get(reverse('passport-list'))
+        response = client.get(reverse('api:passport-list'))
         assert response.status_code == status.HTTP_200_OK
 
         client.login(username='admin', password='pass')
-        response = client.get(reverse('passport-list'))
+        response = client.get(reverse('api:passport-list'))
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 7
         assert response.data[0]['local_name'] == 'Tomate de pera'
@@ -106,11 +106,11 @@ class PassportTest(TestCase):
     def test_add_change_delete(self):
         client = Client()
         # add
-        response = client.post(reverse('passport-list'),
+        response = client.post(reverse('api:passport-list'),
                                {'accession': 1, 'local_name': 'tomate'})
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert client.login(username='admin', password='pass')
-        response = client.post(reverse('passport-list'),
+        response = client.post(reverse('api:passport-list'),
                                {'accession': 1,
                                 'local_name': 'tomate',
                                 })
@@ -118,7 +118,7 @@ class PassportTest(TestCase):
 
         pass_id = Passport.objects.last().passport_id
         # change
-        url = reverse('passport-detail', kwargs={'pk': pass_id})
+        url = reverse('api:passport-detail', kwargs={'pk': pass_id})
         response = client.patch(url, {'local_name': 'tomate2'})
         assert response.status_code == status.HTTP_200_OK
 
@@ -144,13 +144,13 @@ class LocationTest(TestCase):
 
     def test_list(self):
         client = Client()
-        response = client.get(reverse('location-list'))
+        response = client.get(reverse('api:location-list'))
         assert response.status_code == status.HTTP_200_OK
 
         assert len(response.data) == 5
 
         client.login(username='admin', password='pass')
-        response = client.get(reverse('location-list'))
+        response = client.get(reverse('api:location-list'))
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 6
         assert response.data[-1]['region'] == 'aaa'
@@ -158,19 +158,19 @@ class LocationTest(TestCase):
     def test_add_change_delete(self):
         client = Client()
         # add
-        response = client.post(reverse('location-list'), {'region': 'reg1'})
+        response = client.post(reverse('api:location-list'), {'region': 'reg1'})
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert client.login(username='admin', password='pass')
-        response = client.post(reverse('location-list'), {'region': 'reg1'})
+        response = client.post(reverse('api:location-list'), {'region': 'reg1'})
         assert response.status_code == status.HTTP_201_CREATED
 
         loc_id = Location.objects.last().location_id
         # change
-        url = reverse('location-detail', kwargs={'pk': loc_id})
+        url = reverse('api:location-detail', kwargs={'pk': loc_id})
         response = client.patch(url, {'region': 'reg2'})
         assert response.status_code == status.HTTP_200_OK
 
-        url = reverse('location-detail', kwargs={'pk': loc_id})
+        url = reverse('api:location-detail', kwargs={'pk': loc_id})
         response = client.put(url, {'region': 'reg2'})
         assert response.status_code == status.HTTP_200_OK
         # delete
@@ -189,12 +189,12 @@ class AccessionRelTest(TestCase):
 
     def test_list(self):
         client = Client()
-        response = client.get(reverse('accessionrelationship-list'))
+        response = client.get(reverse('api:accessionrelationship-list'))
 
         assert response.status_code == status.HTTP_200_OK
 
         client.login(username='admin', password='pass')
-        response = client.get(reverse('accessionrelationship-list'))
+        response = client.get(reverse('api:accessionrelationship-list'))
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 3
 
@@ -206,19 +206,19 @@ class AccessionRelTest(TestCase):
         relation = {'object': 1, 'subject': 2,
                     'type': is_duplicated_from.cvterm_id}
 
-        response = client.post(reverse('accessionrelationship-list'), relation)
+        response = client.post(reverse('api:accessionrelationship-list'), relation)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert client.login(username='admin', password='pass')
-        response = client.post(reverse('accessionrelationship-list'), relation)
+        response = client.post(reverse('api:accessionrelationship-list'), relation)
         assert response.status_code == status.HTTP_201_CREATED
 
         acc_id = AccessionRelationship.objects.last().accession_relationship_id
         # change
-        url = reverse('accessionrelationship-detail', kwargs={'pk': acc_id})
+        url = reverse('api:accessionrelationship-detail', kwargs={'pk': acc_id})
         response = client.patch(url, {'subject': 3})
         assert response.status_code == status.HTTP_200_OK
 
-        url = reverse('accessionrelationship-detail', kwargs={'pk': acc_id})
+        url = reverse('api:accessionrelationship-detail', kwargs={'pk': acc_id})
         response = client.put(url, relation)
 
         assert response.status_code == status.HTTP_200_OK

@@ -27,7 +27,7 @@ class AccessionFilter(django_filters.FilterSet):
                                     Q(accessionsynonym__synonym_code__icontains=value))
         accessions = []
         for accession in queryset2:
-            if accession.type.name == 'internal':
+            if accession.type and accession.type.name == 'internal':
                 accessions.append(accession)
             else:
                 equivalents = accession.duplicated_accessions_and_equivalents

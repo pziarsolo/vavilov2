@@ -81,7 +81,8 @@ class CvtermSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Cvterm
         fields = ['url', 'cvterm_id', 'name', 'definition', 'cv']
-        extra_kwargs = {'cv': {'lookup_field': 'name'}}
+        extra_kwargs = {'cv': {'lookup_field': 'name',
+                               'view_name': 'api:cv-detail'}}
 
 
 class CvSerializer(serializers.ModelSerializer):
@@ -205,8 +206,8 @@ class AssaySerializer(serializers.HyperlinkedModelSerializer):
         model = Assay
         fields = ['url', 'assay_id', 'name', 'owner', 'description']
         extra_kwargs = {
-            'url': {'view_name': 'assay-detail', 'lookup_field': 'name'},
-            'owner': {'view_name': 'user-detail', 'lookup_field': 'username'}}
+            'url': {'view_name': 'api:assay-detail', 'lookup_field': 'name'},
+            'owner': {'view_name': 'api:user-detail', 'lookup_field': 'username'}}
 
 
 class AssayPlantSerializer(serializers.ModelSerializer):
