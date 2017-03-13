@@ -3,19 +3,18 @@
     <div class='image_container'>
 	    <h3> Observation Images </h3>
 		 <div class='galleria' style="margin:auto;">
-		    {% for obs_image  in images %}
-		        <a href="{{obs_image.image.url}}"><img src="{{obs_image.thumbnail.url}}" data-title="Assay={{obs_image.assay.name}}" ></a>
-		    {% endfor %}
-		
 		<script>
+            var data =  {{json_images|safe}} ;
 		   Galleria.loadTheme('/static/vavilov/js/galleria/themes/classic/galleria.classic.min.js');
-		   Galleria.run('.galleria', { 
+		   Galleria.run('.galleria', {
+                        dataSource: data,
+                        thumbnails: 'lazy',
 		                trueFullscreen:true,
 		{#                clicknext:true,#}
 		{#                showImagenav:false,#}
 		                showInfo:true,
 		                _toggleInfo:false
-		                }); 
+		                });
 		   Galleria.ready(function() {
 		     var gallery = this;
 		     this.addElement('fscr');
@@ -31,9 +30,9 @@
 		                var image = gallery.getActiveImage();
 		                var value = j(image).getRotateAngle();
 		                j(image).rotate(parseInt(value)+90);
-		                
+
 		            });
-		
+            this.lazyLoadChunks( 30 );
 		    this.addIdleState(this.get('fscr'), { opacity:0 });
 		    this.addIdleState(this.get('rotate'), { opacity:0 });
 		    this.addIdleState(this.get('galleria-info'), { opacity:0 });

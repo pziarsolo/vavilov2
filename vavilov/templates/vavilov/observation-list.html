@@ -3,13 +3,21 @@
 {% block page_spec_js %}{% include 'vavilov/galleria_head.html' %}{% endblock page_spec_js %}
 {% block title %}Search Observations {% endblock title %}
 {% block content %}
-    {% if search_criteria and not object_list%}
-        <p> No observations found</p>
-    {% endif %}
-    {% if object_list%} 
-        <h3> Search result</h3>
-        {% render_table object_list %}
-        {% include 'vavilov/download_observations.html' with search_criteria=search_criteria %}
+    {% if query_made %}
+        {% if not object_list%}
+            <p> No observations found</p>
+            <h3> Search Observations </h3>
+            <form action="" method="post">{% csrf_token %}
+               <div class='search_form'>
+                   {{ form.as_table }}
+               </div>
+               <input type="submit" value="Search" />
+           </form>
+        {% else %}
+            <h3> Search result</h3>
+            {% render_table object_list %}
+            {% include 'vavilov/download_observations.html' with search_criteria=search_criteria %}
+        {% endif %}
     {% else %}
         <h3> Search Observations </h3>
         <form action="" method="post">{% csrf_token %}

@@ -52,8 +52,11 @@ class SearchListView(View):
         if method == 'get':
             form = self.form_class(self.request.GET or None)
             getdata = True if request.GET else False
+            query_made = True if getdata else False
         else:
             form = self.form_class(self.request.POST or None)
+            query_made = True
+
         if form.is_valid():
             search_criteria = form.cleaned_data
             search_criteria = dict([(key, value) for key, value in
@@ -83,19 +86,22 @@ class SearchListView(View):
                                   self.get_context_data(form=form,
                                                         criteria=criteria,
                                                         search_criteria=search_criteria,
-                                                        getdata=getdata))
+                                                        getdata=getdata,
+                                                        query_made=query_made))
 
-    def get_context_data(self, form, criteria, search_criteria, getdata):
+    def get_context_data(self, form, criteria, search_criteria, getdata,
+                         query_made):
         context = RequestContext(self.request)
         if criteria is not None:
             context['criteria'] = criteria
         context['search_criteria'] = search_criteria
         context['form'] = form
         context['getdata'] = getdata
+        context['query_made'] = query_made
         context.update(csrf(self.request))
 
         prev_time = time()
-        if self.object_list:
+        if self.object_list.exists():
             prev_time = calc_duration('Check Query exists', prev_time)
             table = self.table(self.object_list, template='table.html')
             prev_time = calc_duration('Table creation', prev_time)
