@@ -23,8 +23,8 @@ class ObservationsTable(tables.Table):
     trait = tables.LinkColumn('trait-detail', args=[A('trait.trait_id')],
                               accessor=A('trait.name'),
                               orderable=True, verbose_name='Trait')
-    value = tables.Column('Value', accessor=A('value_beauty'),
-                          default='', orderable=True)
+    value = tables.TemplateColumn('{{record.value_beauty}}', accessor=A('value'),
+                                  default='', orderable=True)
     observer = tables.Column('Observer', accessor=A('observer'),
                              default='', orderable=True)
     creation_time = tables.Column('Creation Time',
