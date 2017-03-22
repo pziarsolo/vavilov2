@@ -15,7 +15,7 @@ class ApiTest(TestCase):
         client = Client()
         response = client.get(reverse('api_accession_numbers'))
         accession_numbers = json.loads(response.content.decode())
-        assert len(accession_numbers) == 13
+        assert len(accession_numbers) == 14
 
     def test_taxons(self):
         client = Client()

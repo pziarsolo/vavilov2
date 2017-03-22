@@ -13,6 +13,7 @@ from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
 from vavilov.views.tables import (AccessionsTable, assays_to_table,
                                   plants_to_table, obs_to_table)
 from vavilov.views.generic import SearchListView
+from vavilov.views.observation import observations_to_galleria_json
 
 
 def filter_accessions(search_criteria, user=None):
@@ -79,7 +80,7 @@ class AccessionDetail(PermissionRequiredMixin, DetailView):
         obs = self.object.observations(user)
         context['observations'] = obs_to_table(obs, self.request) if obs else None
 
-        context['obs_images'] = self.object.obs_images(user)
+        context['json_images'] = observations_to_galleria_json(self.object.obs_images(user))
         # search_criteria
         context['obs_search_criteria'] = {'accession': self.object.accession_number}
 
@@ -96,4 +97,4 @@ class AccessionList(SearchListView):
 
     def get_queryset(self, **kwargs):
         return filter_accessions(kwargs['search_criteria'],
-                                      user=kwargs['user'])
+                                 user=kwargs['user'])

@@ -114,7 +114,7 @@ class PlantViewTest(TestCase):
         assert client.login(username='admin', password='pass')
         response = client.get(reverse('api:plant-list'))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 18
+        assert len(response.data) == 19
         # print(response.data[0]['assays'][0])
         # assert response.data[0]['assays'][0] == 'http://testserver/assays/1/'
         assert 'plant_id' in response.data[0]

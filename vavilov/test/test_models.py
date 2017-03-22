@@ -84,7 +84,7 @@ class PhenotypeTest(TestCase):
         self.assertEqual(assay.get_absolute_url(), '/assay/NSF1/')
         self.assertEqual(assay.props, {'campaign': 'NSF-March-2016'})
         self.assertEqual(assay.owner, self.user)
-        self.assertEqual(len(assay.traits(user=self.user)), 2)
+        self.assertEqual(len(assay.traits(user=self.user)), 3)
         self.assertEqual(assay.plants(self.user).count(), 18)
         self.assertEqual(assay.plants(self.admin).count(), 18)
         self.assertEqual(assay.plants(self.user2).count(), 0)

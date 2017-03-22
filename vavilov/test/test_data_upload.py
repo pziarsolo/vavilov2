@@ -6,8 +6,7 @@ from django.test.utils import override_settings
 from vavilov.conf import settings
 from vavilov.db_management.images import add_or_load_image_to_db
 from vavilov.db_management.tests import load_test_data, TEST_DATA_DIR
-from vavilov.models import (Cv, Cvterm, Accession, Person, Plant, Trait,
-                            AssayTrait, Assay)
+from vavilov.models import Cv, Cvterm, Accession
 
 
 class FixturesTest(TestCase):
@@ -30,14 +29,14 @@ class FixturesTest(TestCase):
 class ImageTests(TestCase):
     def setUp(self):
         load_test_data()
-        inst = Person.objects.all().first()
-        acc = Accession.objects.create(accession_number='VOYAGE',
-                                       institute=inst)
-        Plant.objects.create(accession=acc, plant_name='0F16NSF1CN06F04M179')
-        trait_type = Cvterm.objects.get(cv__name='trait_types', name='image')
-        trait = Trait.objects.create(name='image_leaf', type=trait_type)
-        assay = Assay.objects.get(name='NSF1')
-        AssayTrait.objects.create(trait=trait, assay=assay)
+#         inst = Person.objects.all().first()
+#         acc = Accession.objects.create(accession_number='VOYAGE',
+#                                        institute=inst)
+        # Plant.objects.create(accession=acc, plant_name='0F16NSF1CN06F04M179')
+#         trait_type = Cvterm.objects.get(cv__name='trait_types', name='image')
+#         trait = Trait.objects.create(name='image_leaf', type=trait_type)
+#         assay = Assay.objects.get(name='NSF1')
+#         AssayTrait.objects.create(trait=trait, assay=assay)
 
     @override_settings()
     def test_image_load(self):

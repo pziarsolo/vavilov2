@@ -25,7 +25,7 @@ class AccessionViewTest(TestCase):
         client.login(username='admin', password='pass')
         response = client.get(reverse('api:accession-list'))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 9
+        assert len(response.data) == 10
         assert 'accession_number' in response.data[0]
         assert b'BGV000933' in response.content
 
@@ -100,7 +100,7 @@ class PassportTest(TestCase):
         client.login(username='admin', password='pass')
         response = client.get(reverse('api:passport-list'))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 7
+        assert len(response.data) == 8
         assert response.data[0]['local_name'] == 'Tomate de pera'
 
     def test_add_change_delete(self):

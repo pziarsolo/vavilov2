@@ -34,7 +34,7 @@ class ExcelLoadTests(TestCase):
         add_or_load_excel_traits(join(TEST_DATA_DIR, 'traits.xlsx'),
                                  assays=['NSF1', 'NSF2'])
 
-        assert Trait.objects.all().count() == 2
+        assert Trait.objects.all().count() == 3
 
     def test_add_excel_observations(self):
         add_or_load_excel_traits(join(TEST_DATA_DIR, 'traits.xlsx'),

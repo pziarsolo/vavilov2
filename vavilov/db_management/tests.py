@@ -10,6 +10,7 @@ from vavilov.db_management.phenotype import (add_or_load_assays,
                                              add_or_load_excel_traits,
                                              add_or_load_plants,
                                              add_or_load_excel_observations)
+from vavilov.db_management.images import add_or_load_images
 
 
 TEST_DATA_DIR = join(dirname(vavilov.__file__), 'test', 'data')
@@ -44,3 +45,6 @@ def load_test_data():
     add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
     add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations2.xlsx'))
     add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations3.xlsx'))
+    pheno_photo_dir = join(TEST_DATA_DIR, 'media', 'pheno_photos')
+    add_or_load_images(pheno_photo_dir, view_perm_group='NSF1',
+                       create_plant=True, use_image_id_as_plant_id=True)

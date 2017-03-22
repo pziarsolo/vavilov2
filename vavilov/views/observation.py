@@ -27,6 +27,15 @@ class ObservationList(SearchListView):
                                    user=kwargs['user'])
 
 
+def observations_to_galleria_json(obs):
+    prev_time = time()
+    obs_data = [{'image': o.image.url, 'thumb': o.thumbnail.url, 'title': 'Assay=' + o.assay.name} for o in obs]
+    prev_time = calc_duration('Observation_to_dict_images', prev_time)
+    json_data = json.dumps(obs_data)
+    prev_time = calc_duration('Dict_images_to_json_images', prev_time)
+    return json_data
+
+
 class ObservationImageList(SearchListView):
     model = Observation
     template_name = 'vavilov/observation-listimages.html'
@@ -38,15 +47,6 @@ class ObservationImageList(SearchListView):
         obs = filter_observations(kwargs['search_criteria'],
                                   user=kwargs['user'], images=True)
         return obs
-
-    @staticmethod
-    def _obs_to_json(obs):
-        prev_time = time()
-        obs_data = [{'image': o.image.url, 'thumb': o.thumbnail.url, 'title': 'Assay=' + o.assay.name} for o in obs]
-        prev_time = calc_duration('Observation_to_dict_images', prev_time)
-        json_data = json.dumps(obs_data)
-        prev_time = calc_duration('Dict_images_to_json_images', prev_time)
-        return json_data
 
     def get_context_data(self, **kwargs):
         context = RequestContext(self.request)
@@ -65,7 +65,7 @@ class ObservationImageList(SearchListView):
             json_images = json.dumps([])
         else:
             warning_ = None
-            json_images = self._obs_to_json(obs=self.object_list)
+            json_images = observations_to_galleria_json(obs=self.object_list)
 
         context['warning'] = warning_
         context['json_images'] = json_images
@@ -92,5 +92,5 @@ class ObservationEntityDetail(PermissionRequiredMixin, DetailView):
 
             obs = self.object.observations(user)
             context['observations'] = obs_to_table(obs, self.request) if obs else None
-            context['obs_images'] = self.object.obs_images(user)
+            context['json_images'] = observations_to_galleria_json(self.object.obs_images(user))
         return context

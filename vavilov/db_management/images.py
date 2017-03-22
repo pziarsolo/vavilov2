@@ -36,6 +36,7 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     thumb_fpath = get_thumbnail_path(image_fpath, image_format)
 
     exif = get_exif_metadata(image_fpath)
+
     try:
         creation_time = exif.get_date_time()
         creation_time = OUR_TIMEZONE.localize(creation_time, is_dst=True)
@@ -80,9 +81,9 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
 
     if create_plant:
         try:
-            accession = Accession.objects.get(accession_number=exif_data['accession'])
+            accession = Accession.objects.get(accession_number=exif_data['Accession'])
         except Accession.DoesNotExist:
-            print(exif_data['accession'], image_fpath)
+            print(exif_data['Accession'], image_fpath)
             return
         plant = Plant.objects.get_or_create(accession=accession,
                                             plant_name=plant_id)[0]
@@ -136,7 +137,6 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
                                                  thumbnail=thumb_suf)
 
     assign_perm('vavilov.view_observation_images', group, obs_image)
-
     return obs_image
 
 

@@ -3,6 +3,7 @@ from guardian.mixins import PermissionRequiredMixin
 
 from vavilov.models import Plant
 from vavilov.views.tables import assays_to_table, obs_to_table
+from vavilov.views.observation import observations_to_galleria_json
 
 
 class PlantDetail(PermissionRequiredMixin, DetailView):
@@ -25,7 +26,7 @@ class PlantDetail(PermissionRequiredMixin, DetailView):
         obs = self.object.observations(user)
         context['observations'] = obs_to_table(obs, self.request) if obs else None
 
-        context['obs_images'] = self.object.obs_images(user)
+        context['json_images'] = observations_to_galleria_json(self.object.obs_images(user))
         # search_criteria
         context['obs_search_criteria'] = {'plant': self.object.plant_name}
 

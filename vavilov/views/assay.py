@@ -3,6 +3,7 @@ from django.views.generic.detail import DetailView
 
 from vavilov.models import Assay
 from vavilov.views.tables import plants_to_table, obs_to_table
+from vavilov.views.observation import observations_to_galleria_json
 
 
 class AssayDetail(PermissionRequiredMixin, DetailView):
@@ -26,7 +27,7 @@ class AssayDetail(PermissionRequiredMixin, DetailView):
         obs = self.object.observations(user)
         context['observations'] = obs_to_table(obs, self.request) if obs else None
 
-        context['obs_images'] = self.object.obs_images(user)
+        context['json_images'] = observations_to_galleria_json(self.object.obs_images(user))
         # search criteria
         context['obs_search_criteria'] = {'assay': self.object.name}
         return context
