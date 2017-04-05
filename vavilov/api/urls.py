@@ -1,9 +1,14 @@
 from django.conf.urls import url, include
 
+from rest_framework.documentation import include_docs_urls
 from rest_framework import routers
+from rest_framework.schemas import get_schema_view
 
 from vavilov.api.views import core, accession, phenotype
 
+
+API_TITLE = 'Vavilov API DOC'
+API_DESCRIPTION = '...'
 
 # rest_api
 router = routers.DefaultRouter()
@@ -28,9 +33,14 @@ router.register(r'assayprop', phenotype.AssayPropViewSet)
 router.register(r'plants', phenotype.PlantViewSet)
 router.register(r'assayplants', phenotype.AssayPlantViewSet)
 
+schema_view = get_schema_view(title="Server Monitoring API")
 
 urlpatterns = [
+    url('^api/schemma$', schema_view),
+    url(r'^api/docs/', include_docs_urls(title=API_TITLE,
+                                         description=API_DESCRIPTION)),
     url(r'^api/', include(router.urls, namespace='api')),
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework'))
+
 ]
