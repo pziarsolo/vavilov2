@@ -33,7 +33,7 @@ class AccessionViewTest(TestCase):
         response = client.post(reverse('accession-list'),
                                {'accession': 'BGV00093'})
         assert response.status_code == 200
-        assert response.context['table'].data.queryset.all()[0].accession_number == 'BGV000932'
+        assert response.context['table'].as_values()[1][0] == 'BGV000932'
 
         # search by collecting code
         response = client.post(reverse('accession-list'),
@@ -55,11 +55,10 @@ class ObservationsViewTest(TestCase):
         response = client.post(reverse('observation-list'),
                                {'accession': 'BGV000'})
         assert response.status_code == 200
-        print(response.context['object_list'])
         assert response.context['object_list'] is None
 
         assert client.login(username='user', password='pass')
         response = client.post(reverse('observation-list'),
                                {'accession': 'BGV000'})
         assert response.status_code == 200
-        assert response.context['table'].data.queryset.all()
+        assert response.context['table'].as_values()

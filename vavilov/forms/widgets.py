@@ -35,7 +35,7 @@ class AutocompleteTextInput(TextInput):
         'It renders the html and the javascript'
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        final_attrs = self.build_attrs(attrs)
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             # final_attrs['value'] = force_unicode(self._format_value(value))
@@ -136,7 +136,7 @@ class AutocompleteTextMultiInput(TextInput):
         'It renders the html and the javascript'
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        final_attrs = self.build_attrs(attrs)
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             # final_attrs['value'] = force_unicode(self._format_value(value))

@@ -2,7 +2,6 @@ import logging
 from time import time
 
 from django.shortcuts import redirect, render_to_response
-from django.template.context import RequestContext
 from django.template.context_processors import csrf
 from django.views.generic.base import View
 
@@ -91,7 +90,8 @@ class SearchListView(View):
 
     def get_context_data(self, form, criteria, search_criteria, getdata,
                          query_made):
-        context = RequestContext(self.request)
+        context = {'request': self.request}
+
         if criteria is not None:
             context['criteria'] = criteria
         context['search_criteria'] = search_criteria
@@ -99,7 +99,6 @@ class SearchListView(View):
         context['getdata'] = getdata
         context['query_made'] = query_made
         context.update(csrf(self.request))
-
         prev_time = time()
         if self.object_list.exists():
             prev_time = calc_duration('Check Query exists', prev_time)
@@ -111,7 +110,6 @@ class SearchListView(View):
         else:
             object_list = None
         context['object_list'] = object_list
-
         return context
 
     def get_queryset(self, **kwargs):

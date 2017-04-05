@@ -4,12 +4,13 @@ from django.conf.urls.static import static
 from django.core.exceptions import ImproperlyConfigured
 
 from vavilov.conf import settings
-from vavilov.views.observation import ObservationImageList, ObservationList, \
-    ObservationEntityDetail
+from vavilov.views.observation import (ObservationImageList, ObservationList,
+                                       ObservationEntityDetail)
 from vavilov.views.accession import AccessionList, AccessionDetail
 from vavilov.views.plant import PlantDetail
 from vavilov.views.assay import AssayDetail
 from vavilov.views.trait import TraitDetail
+from vavilov.views.api import accession_numbers, taxons, plants, traits
 
 
 urlpatterns = [
@@ -26,10 +27,10 @@ urlpatterns = [
         name='accession-detail'),
     url(r'^accessions/$', AccessionList.as_view(), name='accession-list'),
 
-    url(r'^apis/accession_numbers/$', 'vavilov.views.api.accession_numbers', name='api_accession_numbers'),
-    url(r'^apis/taxons/$', 'vavilov.views.api.taxons', name='api_taxons'),
-    url(r'^apis/plants/$', 'vavilov.views.api.plants', name='api_plants'),
-    url(r'^apis/traits/$', 'vavilov.views.api.traits', name='api_traits'),
+    url(r'^apis/accession_numbers/$', accession_numbers, name='api_accession_numbers'),
+    url(r'^apis/taxons/$', taxons, name='api_taxons'),
+    url(r'^apis/plants/$', plants, name='api_plants'),
+    url(r'^apis/traits/$', traits, name='api_traits'),
 ]
 
 if settings.EXPOSE_API:

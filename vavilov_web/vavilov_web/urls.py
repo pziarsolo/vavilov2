@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
+    url(r'^logout/$', auth_views.LogoutView.as_view(next_page='/')),
     url(r'^pedigree/', include('vavilov_pedigree.urls')),
     url('^', include('django.contrib.auth.urls')),
     url(r'', include('vavilov.urls')),

@@ -36,13 +36,13 @@ class VavilovPedigreeRouter(object):
             return True
         return None
 
-    def allow_migrate(self, db, model):
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
         """
         Make sure the auth app only appears in the 'auth_db'
         database.
         """
         if db == DB_NAME:
-            return model._meta.app_label == APP_NAME
-        elif model._meta.app_label == APP_NAME:
+            return app_label == APP_NAME
+        elif app_label == APP_NAME:
             return False
         return None

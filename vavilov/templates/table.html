@@ -3,7 +3,6 @@
 
 <div class="table-container">
 {% block table %}
-
 <table{% if table.attrs %} {{ table.attrs.as_html }}{% endif %}>
     {% block table.thead %}
     {% if table.show_header %}
@@ -24,7 +23,7 @@
     <tbody>
         {% for row in table.page.object_list|default:table.rows %} {# support pagination #}
         {% block table.tbody.row %}
-        <tr class="{{ forloop.counter|divisibleby:2|yesno:"even,odd" }}"> {# avoid cycle for Django 1.2-1.6 compatibility #}
+        <tr {{ row.attrs.as_html }}>
             {% for column, cell in row.items %}
                 <td {{ column.attrs.td.as_html }}>{% if column.localize == None %}{{ cell }}{% else %}{% if column.localize %}{{ cell|localize }}{% else %}{{ cell|unlocalize }}{% endif %}{% endif %}</td>
             {% endfor %}
@@ -40,9 +39,16 @@
     </tbody>
     {% endblock table.tbody %}
     {% block table.tfoot %}
-    <tfoot></tfoot>
+    {% if table.has_footer %}
+    <tfoot>
+        <tr>
+        {% for column in table.columns %}
+            <td>{{ column.footer }}</td>
+        {% endfor %}
+        </tr>
+    </tfoot>
+    {% endif %}
     {% endblock table.tfoot %}
-
 </table>
 {% endblock table %}
 
@@ -60,13 +66,11 @@
     {% endif %}
 
     {% if table.page.has_previous or table.page.has_next %}
-        {% block pagination.current %}
-            <li class="current">
-                {% blocktrans with table.page.number as current and table.paginator.num_pages as total %}
-                    Page {{ current }} of {{ total }}
-                {% endblocktrans %}
+        {% block pagination.cardinality %}
+            <li class="cardinality">
+                {% blocktrans with table.page.number as current and table.paginator.num_pages as total %}Page {{ current }} of {{ total }}{% endblocktrans %}
             </li>
-        {% endblock pagination.current %}
+        {% endblock pagination.cardinality %}
     {% endif %}
 
     {% if table.page.has_next %}
@@ -76,11 +80,6 @@
             </li>
         {% endblock pagination.next %}
     {% endif %}
-    {% block pagination.cardinality %}
-        <li class="cardinality">
-            {% if total != count %}{% blocktrans %}{{ count }} of {{ total }}{% endblocktrans %}{% else %}{{ total }}{% endif %} {% if total == 1 %}{{ table.data.verbose_name }}{% else %}{{ table.data.verbose_name_plural }}{% endif %}
-        </li>
-    {% endblock pagination.cardinality %}
 </ul>
 {% endblock pagination %}
 {% endwith %}
