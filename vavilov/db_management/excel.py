@@ -17,7 +17,6 @@ from vavilov.models import Trait, Plant
 
 
 DATA_DIR = join(dirname(vavilov.__file__), 'data')
-VBA_MACRO = join(DATA_DIR, 'vbaProject.bin')
 
 PLANT_ID = 'plant_name'
 TRAIT_HEADER_NAME = 'Caracteristica'
@@ -75,6 +74,7 @@ def write_excel_observations_skeleton(entries_fpath, traits_fpath,
                                       synonym_header=None, row_header=None,
                                       column_header=None,
                                       pot_number_header=None,
+                                      vba_macro=None,
                                       rows_per_plant=1):
 
     utc_offset = int(-(time.timezone / 3600))
@@ -103,7 +103,8 @@ def write_excel_observations_skeleton(entries_fpath, traits_fpath,
     sheet = workbook.add_worksheet()
     sheet.set_vba_name('Hoja1')
 
-    workbook.add_vba_project(VBA_MACRO)
+    if vba_macro:
+        workbook.add_vba_project(vba_macro)
 
     # header
     locked = workbook.add_format()
