@@ -2,7 +2,7 @@
 from builtins import isinstance
 import csv
 from operator import attrgetter
-from os.path import join, dirname, splitext
+from os.path import splitext
 import time
 
 from django.utils.html import strip_tags
@@ -12,11 +12,8 @@ try:
 except ImportError:
     pass
 
-import vavilov
 from vavilov.models import Trait, Plant
 
-
-DATA_DIR = join(dirname(vavilov.__file__), 'data')
 
 PLANT_ID = 'plant_name'
 TRAIT_HEADER_NAME = 'Caracteristica'

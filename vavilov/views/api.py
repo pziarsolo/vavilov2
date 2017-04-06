@@ -4,8 +4,8 @@ import re
 from django.http.response import HttpResponse
 
 from vavilov.caches import get_taxons
-from vavilov.models import Accession, AccessionSynonym, Plant, Trait, \
-    Observation
+from vavilov.models import (Accession, AccessionSynonym, Plant, Trait,
+                            Observation)
 
 
 def accession_numbers(request):

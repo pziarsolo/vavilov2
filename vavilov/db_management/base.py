@@ -43,7 +43,10 @@ SHARED_INITIAL_DATA_TO_LOAD = [('cv', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cv.
 
 NO_REF_TABLES = ['cv', 'db', 'country']
 LAT_LON_DEG_REGEX = re.compile('-?[0-9]{1,3}\.[0-9]{2,8}')
-PUBLIC_GROUP = Group.objects.get_or_create(name=PUBLIC_GROUP_NAME)[0]
+
+
+def get_or_create_public_group():
+    return Group.objects.get_or_create(name=PUBLIC_GROUP_NAME)[0]
 
 
 class comma_dialect(csv.excel):
@@ -60,6 +63,7 @@ def flush_vavilov_tables():
 
 
 def add_or_load_users(fpath):
+    public_group = get_or_create_public_group()
     for entry in csv.DictReader(open(fpath), dialect=comma_dialect):
         username = entry['username']
         try:
@@ -73,7 +77,8 @@ def add_or_load_users(fpath):
                 user = User.objects.create_user(username=username,
                                                 email=entry['email'],
                                                 password=entry['password'])
-        PUBLIC_GROUP.user_set.add(user)
+
+        public_group.user_set.add(user)
 
 
 def add_or_load_persons(fhand):
@@ -134,7 +139,8 @@ def load_initial_data():
     flush_vavilov_tables()
     User = get_user_model()
     anon = User.get_anonymous()
-    PUBLIC_GROUP.user_set.add(anon)
+    public_group = get_or_create_public_group()
+    public_group.user_set.add(anon)
     add_view_permissions(anon, filter_perms=['View Observation'])
 
     load_initial_data_from_dict(SHARED_INITIAL_DATA_TO_LOAD)
@@ -409,7 +415,6 @@ def add_accession(accession, institute_name, acc_type=None, make_link=True):
                                              institute=institute,
                                              type=acc_type,
                                              dbxref=dbxref)
-
 
     return accession
 

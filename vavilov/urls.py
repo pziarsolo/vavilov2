@@ -12,14 +12,12 @@ from vavilov.views.assay import AssayDetail
 from vavilov.views.trait import TraitDetail
 from vavilov.views.api import accession_numbers, taxons, plants, traits
 
-
 urlpatterns = [
     url(r'^plant/(?P<plant_name>.+)/$', PlantDetail.as_view(), name='plant-detail'),
     url(r'^assay/(?P<name>.+)/$', AssayDetail.as_view(), name='assay-detail'),
     url(r'^trait/(?P<trait_id>.+)/$', TraitDetail.as_view(), name='trait-detail'),
-    # url(r'^accession/(?P<accession_number>.+)/$', 'vavilov.views.accession.accession', name='accession-detail'),
-    url(r'^obs_entity/(?P<name>.+)/$', ObservationEntityDetail.as_view(), name='obs_entity-detail'),
 
+    url(r'^obs_entity/(?P<name>.+)/$', ObservationEntityDetail.as_view(), name='obs_entity-detail'),
     url(r'^observation_images/$', ObservationImageList.as_view(), name='observation-listimage'),
     url(r'^observations/$', ObservationList.as_view(), name='observation-list'),
 
@@ -32,6 +30,7 @@ urlpatterns = [
     url(r'^apis/plants/$', plants, name='api_plants'),
     url(r'^apis/traits/$', traits, name='api_traits'),
 ]
+
 
 if settings.EXPOSE_API:
     urlpatterns += [url(r'', include('vavilov.api.urls')), ]

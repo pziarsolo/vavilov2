@@ -51,19 +51,24 @@ class SearchPassportForm(forms.Form):
     passport_search_fields = ['country', 'region', 'biological_status',
                               'collecting_source']
 
-    pass_choices = get_passport_data_choices()  # json.load(open(SEARCH_CHOICES_CACHE_FILE))
-
     if 'country' in ACCESSION_SEARCH_FIELDS:
         country = forms.CharField(max_length=100, required=False,
-                                  widget=Select(choices=pass_choices['country']))
+                                  widget=Select(choices=[]))
     if 'region' in ACCESSION_SEARCH_FIELDS:
         region = forms.CharField(max_length=100, required=False,
-                                 widget=Select(choices=pass_choices['region']))
+                                 widget=Select(choices=[]))
 
     if 'biological_status' in ACCESSION_SEARCH_FIELDS:
         biological_status = forms.CharField(max_length=100, required=False,
-                                            widget=Select(choices=pass_choices['biological_status']))
+                                            widget=Select(choices=[]))
 
     if 'collecting_source' in ACCESSION_SEARCH_FIELDS:
         collecting_source = forms.CharField(max_length=100, required=False,
-                                            widget=Select(choices=pass_choices['collecting_source']))
+                                            widget=Select(choices=[]))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        pass_choices = get_passport_data_choices()
+        for field in ('country', 'region', 'biological_status', 'collecting_source'):
+            if field in self.fields:
+                self.fields[field].widget.choices = pass_choices[field]
