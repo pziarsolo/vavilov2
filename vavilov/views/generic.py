@@ -7,8 +7,7 @@ from django.views.generic.base import View
 
 from django_tables2.config import RequestConfig
 
-from vavilov.utils.csv import return_csv_response
-from vavilov.utils.streams import return_excel_response
+from vavilov.utils.streams import return_excel_response, return_csv_response
 from vavilov.conf.settings import APP_LOGGER
 
 

@@ -58,7 +58,7 @@ class AccessionsTable(tables.Table):
 
     if 'country' in search_fields:
         country = tables.Column('Collecting country',
-                                accessor=A('collecting_country'),
+                                accessor=A('collecting_country.__str__'),
                                 default='', orderable=False)
 
     if 'region' in search_fields:
