@@ -35,6 +35,7 @@ class AutocompleteTextInput(TextInput):
         'It renders the html and the javascript'
         if value is None:
             value = ''
+        attrs['type'] = 'text'
         final_attrs = self.build_attrs(attrs)
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
@@ -136,6 +137,7 @@ class AutocompleteTextMultiInput(TextInput):
         'It renders the html and the javascript'
         if value is None:
             value = ''
+        attrs['type'] = 'text'
         final_attrs = self.build_attrs(attrs)
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
