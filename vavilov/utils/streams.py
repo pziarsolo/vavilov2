@@ -1,11 +1,19 @@
 import csv
-
+import logging
+from time import time
 from django.http.response import StreamingHttpResponse, HttpResponse
 
 from openpyxl import Workbook
 from openpyxl.utils.cell import get_column_letter
 
-from vavilov.conf.settings import MAX_OBS_TO_EXCEL
+from vavilov.conf.settings import MAX_OBS_TO_EXCEL, APP_LOGGER
+logger = logging.getLogger(APP_LOGGER)
+
+
+def calc_duration(action, prev_time):
+    now = time()
+    logger.debug('{}: Took {} secs'.format(action, round(now - prev_time, 2)))
+    return now
 
 
 class Echo(object):
@@ -24,10 +32,12 @@ MSG = """<script>
 
 
 def return_csv_response(queryset, table_class):
+    prev_time = time()
     if queryset.count() > MAX_OBS_TO_EXCEL:
         return HttpResponse(MSG, content_type="text/html")
-
+    prev_time = calc_duration('Csv Query Count', prev_time)
     rows = table_class(queryset).as_values()
+    prev_time = calc_duration('table to rows', prev_time)
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     response = StreamingHttpResponse((writer.writerow(row) for row in rows),

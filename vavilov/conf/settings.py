@@ -26,7 +26,7 @@ MAX_PHOTO_IN_GALLERY = getattr(settings, 'VAVILOV_MAX_PHOTO_IN_GALLERY', 100)
 GOOGLEMAPKEY = getattr(settings, 'VAVILOV_GOOGLEMAPKEY', None)
 
 # Limit of observations in a search to convert to excel
-MAX_OBS_TO_EXCEL = 1000
+MAX_OBS_TO_EXCEL = 2000
 
 # Phenotype photos dir path
 PHENO_PHOTO_DIR = getattr(settings, 'VAVILOV_PHENO_PHOTO_DIR', None)
