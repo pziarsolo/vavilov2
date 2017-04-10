@@ -78,6 +78,7 @@ INSTALLED_APPS = (
     'vavilov_pedigree.apps.VavilovPedigreeAppConfig',
     'django_tables2',
     'rest_framework',
+    'rest_framework.authtoken',
     'guardian',
     'django_filters',
     'crispy_forms',
@@ -154,6 +155,7 @@ VAVILOV_PHENO_PHOTO_DIR = 'pheno_photos'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication'
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'vavilov.api.permissions.CustomObjectPermissions',

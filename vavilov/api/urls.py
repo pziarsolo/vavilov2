@@ -3,6 +3,7 @@ from django.conf.urls import url, include
 from rest_framework.documentation import include_docs_urls
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
+from rest_framework.authtoken import views
 
 from vavilov.api.views import core, accession, phenotype
 
@@ -41,6 +42,6 @@ urlpatterns = [
                                          description=API_DESCRIPTION)),
     url(r'^api/', include(router.urls, namespace='api')),
     url(r'^api-auth/', include('rest_framework.urls',
-                               namespace='rest_framework'))
-
+                               namespace='rest_framework')),
+    url(r'^api-token-auth/', views.obtain_auth_token)
 ]
