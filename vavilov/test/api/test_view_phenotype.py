@@ -1,12 +1,23 @@
-from django.contrib.auth.models import User
+from os.path import join, dirname
+
+from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from guardian.shortcuts import remove_perm
 from rest_framework import status
 from rest_framework.test import APIClient as Client
 
+import vavilov
 from vavilov.db_management.tests import load_test_data
 from vavilov.models import Assay, Plant, Cvterm, AssayProp
+from vavilov.db_management.fieldbook import (add_or_load_fieldbook_fields,
+                                             add_or_load_fieldbook_traits,
+                                             add_or_load_fielbook_observations)
+
+TEST_DATA_DIR = join(dirname(vavilov.__file__), 'test', 'data')
+NSF1_PLANTS = join(TEST_DATA_DIR, 'fieldbook_field.csv')
+NSF1_TRAITS = join(TEST_DATA_DIR, 'fieldbook_traits.trt')
+OBSERVATIONS_FPATH = join(TEST_DATA_DIR, 'fieldbook.db')
 
 
 class AssayViewTest(TestCase):
@@ -242,6 +253,52 @@ class AssayPropViewTest(TestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['value'] == '12'
+
+
+class FieldbookObservationTest(TestCase):
+    def setUp(self):
+        load_test_data()
+        self.user = User.objects.get(username='user')
+        Assay.objects.create(name='assay1', owner=self.user)
+        Group.objects.create(name='assay1')
+        add_or_load_fieldbook_fields(NSF1_PLANTS, 'assay1',
+                                     accession_header='BGV',
+                                     synonym_headers=['Accession'])
+        add_or_load_fieldbook_traits(NSF1_TRAITS, assays=['assay1'])
+
+        add_or_load_fielbook_observations(OBSERVATIONS_FPATH, 'test',
+                                          ['assay1'])
+
+    def test_list(self):
+        client = Client()
+        response = client.get(reverse('api:fieldbook_observation-list'))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        assert client.login(username='admin', password='pass')
+        response = client.get(reverse('api:fieldbook_observation-list'))
+        assert len(response.data) == 8
+
+    def test_create(self):
+        client = Client()
+        assert client.login(username='admin', password='pass')
+        response = client.post(reverse('api:fieldbook_observation-list'),
+                               {'name': 'aa'})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == {'detail': 'Incorrect input data'}
+
+        fieldbook_obs = {'rid': '0F16NSF1CN02F01M001', 'parent': 'Area2',
+                         'userValue': '23', 'person': 'test',
+                         'timeTaken': '2017-05-25 14:56:08+0200'}
+        response = client.post(reverse('api:fieldbook_observation-list'),
+                               fieldbook_obs)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['rid'] == fieldbook_obs['rid']
+
+        response = client.post(reverse('api:fieldbook_observation-list'),
+                               fieldbook_obs)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {'detail': 'Already in db'}
 
 
 # class PlantPartViewTest(TestCase):

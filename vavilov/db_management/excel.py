@@ -3,6 +3,7 @@ from builtins import isinstance
 import csv
 from operator import attrgetter
 from os.path import splitext
+from collections import OrderedDict
 import time
 
 from django.utils.html import strip_tags
@@ -217,7 +218,7 @@ def create_excel_from_queryset(out_fhand, queryset, table, in_memory=False):
 def excel_dict_reader(fpath):
     wb = load_workbook(fpath, read_only=True)
     sheet = wb.active
-    header_pos = {}
+    header_pos = OrderedDict()
     first = True
     for row in sheet.rows:
         if first:
@@ -232,7 +233,7 @@ def excel_dict_reader(fpath):
                 header_pos[header] = index
             first = False
             continue
-        row_dict = {}
+        row_dict = OrderedDict()
         for header, pos in header_pos.items():
             value = row[pos].value
             try:

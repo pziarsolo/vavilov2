@@ -21,6 +21,12 @@ from vavilov.models import (Observation, Trait, Assay, AssayPlant,
 TRAIT_PROPS_CV = 'trait_props'
 TRAIT_TYPES_CV = 'trait_types'
 
+ASSAY_HEADER = 'Assay'
+PLANT_PART_HEADER = 'Plant_part'
+PLANT_HEADER = 'Plant_name'
+ACCESSION_HEADER = 'Accession'
+PHOTO_HEADER = 'Photo_id'
+
 
 def add_or_load_assays(fpath):
     fhand = open(fpath)
@@ -78,15 +84,15 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
         msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
         raise ValueError(msg)
     try:
-        obs = Observation.objects.get_or_create(obs_entity=obs_entity,
-                                                trait=trait, assay=assay,
-                                                value=value,
-                                                creation_time=creation_time,
-                                                observer=observer)[0]
+        obs, created = Observation.objects.get_or_create(obs_entity=obs_entity,
+                                                         trait=trait, assay=assay,
+                                                         value=value,
+                                                         creation_time=creation_time,
+                                                         observer=observer)
     except DataError:
         print(value, observer)
         raise
-    return obs
+    return obs, created
 
 
 def add_or_load_excel_traits(fpath, assays):
@@ -360,7 +366,7 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
 
             try:
                 obs = add_or_load_observation(obs_entity, trait_name, assayname,
-                                              value, creation_time, observer)
+                                              value, creation_time, observer)[0]
                 assign_perm('view_observation', perm_gr, obs)
             except ValueError as error:
                 if raise_on_error:
@@ -368,3 +374,23 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
                 else:
                     sys.stderr.write(str(error) + '\n')
                     continue
+
+
+def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
+                                           plant_header=PLANT_HEADER,
+                                           plant_part_header=PLANT_PART_HEADER,
+                                           accession_header=ACCESSION_HEADER,
+                                           photo_header=PHOTO_HEADER):
+    with transaction.atomic():
+        for entry in excel_dict_reader(fpath):
+            plant_name = entry.pop(plant_header)
+            accession_number = entry.pop(accession_header)
+            photo_id = entry.pop(photo_header)
+            plant_part = entry.pop(plant_part_header)
+            for key, value in entry.items():
+                if not value:
+                    continue
+                print(key, value)
+
+
+

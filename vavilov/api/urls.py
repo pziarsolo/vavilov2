@@ -33,6 +33,8 @@ router.register(r'assays', phenotype.AssayViewSet)
 router.register(r'assayprop', phenotype.AssayPropViewSet)
 router.register(r'plants', phenotype.PlantViewSet)
 router.register(r'assayplants', phenotype.AssayPlantViewSet)
+router.register(r'fieldbook_observations', phenotype.FieldBookObservationViewSet,
+                base_name='fieldbook_observation')
 
 schema_view = get_schema_view(title="Server Monitoring API")
 

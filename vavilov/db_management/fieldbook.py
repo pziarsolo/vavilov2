@@ -117,32 +117,44 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
 
     with transaction.atomic():
         for entry in cursor.execute("select * from user_traits"):
-            plant_name = entry[1]
-            trait = entry[2]
-            if trait in excluded_traits:
-                continue
-            value = entry[4]
-            creation_time = parse_datetime(entry[5])
             if len(entry) > 6:
                 if entry[6] != ' ':
                     observer = entry[6]
-            obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
+            fieldbook_entry = {'rid': entry[1], 'parent': entry[2],
+                               'userValue': entry[4], 'timeTaken': entry[5],
+                               'person': observer}
+            add_fieldbook_observations(fieldbook_entry, plant_part=plant_part,
+                                       group=group, assay=assays[0],
+                                       excluded_traits=excluded_traits)
 
-            plant = Plant.objects.get(plant_name=plant_name)
-            plant_part_cv = Cvterm.objects.get(cv__name='plant_parts',
-                                               name=plant_part)
-            obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
-                                                                          part=plant_part_cv)
-            if created:
-                ObservationEntityPlant.objects.create(obs_entity=obs_entity,
-                                                      plant=plant)
-                assign_perm('view_obs_entity', group, obs_entity)
 
-            observation = add_or_load_observation(obs_entity, trait, assays[0],
-                                                  value, creation_time,
-                                                  observer)
+def add_fieldbook_observations(entry, plant_part, group, assay,
+                               excluded_traits=None):
+    plant_name = entry['rid']
+    trait = entry['parent']
+    if excluded_traits and trait in excluded_traits:
+        return
+    value = entry['userValue']
+    creation_time = parse_datetime(entry['timeTaken'])
+    observer = entry['person']
+    obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
 
-            assign_perm('view_observation', group, observation)
+    plant = Plant.objects.get(plant_name=plant_name)
+    plant_part_cv = Cvterm.objects.get(cv__name='plant_parts',
+                                       name=plant_part)
+    obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                  part=plant_part_cv)
+    if created:
+        ObservationEntityPlant.objects.create(obs_entity=obs_entity,
+                                              plant=plant)
+        assign_perm('view_obs_entity', group, obs_entity)
+
+    observation, created = add_or_load_observation(obs_entity, trait, assay,
+                                                   value, creation_time,
+                                                   observer)
+
+    assign_perm('view_observation', group, observation)
+    return observation, created
 
 
 # export db
@@ -180,7 +192,7 @@ ON o.obs_entity_id=oe.obs_entity_id and oe.obs_entity_id IN {}
                             WHERE o.obs_entity_id=o2.obs_entity_id AND o.trait_id=o2.trait_id))'''
 
 
-def _to_fieldbook_local_time(utf_datetime):
+def to_fieldbook_local_time(utf_datetime):
     local_datetimetime = OUR_TIMEZONE.normalize(utf_datetime.astimezone(OUR_TIMEZONE))
     return local_datetimetime.strftime('%Y-%m-%d %H:%M:%S%z')
 
@@ -224,7 +236,7 @@ def insert_newest_observations(fhand, plants, excluded_traits=None,
     for index, observation in enumerate(query):
         if excluded_traits and observation.trait.name in excluded_traits:
             continue
-        local_creation_time = _to_fieldbook_local_time(observation.creation_time)
+        local_creation_time = to_fieldbook_local_time(observation.creation_time)
         fieldbook_trait_type = TraitProp.objects.get(trait=observation.trait,
                                                      type__name=FIELBOOK_TRAIT_TYPE)
         plant_name = observation.plants[0].plant_name
