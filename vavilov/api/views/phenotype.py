@@ -70,7 +70,7 @@ class AssayPlantViewSet(CreateModelMixin, DestroyModelMixin, GenericViewSet):
 
 
 class FieldBookObservationViewSet(ViewSet):
-    queryset = Observation.objects.all()
+    queryset = Observation.objects.all()[:200]
     permission_classes = (IsAuthenticated,)
     base_name = 'fieldbook_observations'
 
