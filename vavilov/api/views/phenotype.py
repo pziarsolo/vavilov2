@@ -94,10 +94,11 @@ class FieldBookObservationViewSet(ViewSet):
                                   'timeTaken': local_creation_time,
                                   'person': observation.observer,
                                   'location': '', 'rep': '1', 'notes': '',
-                                  'exp_i': ''}
+                                  'exp_id': ''}
                 data.append(fielbook_entry)
         except Exception:
-            return Response({'msg: Internal server error'}, status=500)
+            return Response({'detail: Internal server error'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data)
 
@@ -112,15 +113,20 @@ class FieldBookObservationViewSet(ViewSet):
                                                         assay=assay,
                                                         group=group)
                 if created:
-                    return Response(data=request.data, status=201)
+                    return Response(data=request.data,
+                                    status=status.HTTP_201_CREATED)
                 else:
                     return Response(data={'detail': 'Already in db'},
                                     status=status.HTTP_200_OK)
             except MultiValueDictKeyError as error:
-                return Response(exception=error, status=400,
+                return Response(exception=error, status=status.HTTP_400_BAD_REQUEST,
                                 data={'detail': 'Incorrect input data'})
+            except ValueError as error:
+                if 'Trait not loaded yet in db' in str(error):
+                    return Response(exception=error, status=status.HTTP_400_BAD_REQUEST,
+                                    data={'detail': str(error)})
+
 
 #         if len(request.data) != 1:
-        data = {'msg': 'some error'}
-        return Response(data=data, status=400)
-
+        data = {'msg': 'no data provided'}
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
