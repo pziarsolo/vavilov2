@@ -30,10 +30,9 @@ SHARED_INITIAL_DATA_TO_LOAD = [('cv', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cv.
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_collecting_source.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_person_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_accession_types.csv')),
-                               ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_accession_relationship_types.csv')),
+                               ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_relationship_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_synonym_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_taxonomic_ranks.csv')),
-                               ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_taxa_relationships.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_assay_props.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_trait_types.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_trait_props.csv')),
@@ -183,7 +182,7 @@ def _add_main_accession(accession_data, silent, view_perm_group):
     if donor_code and donor_institute:
         donor_accession = add_accession(donor_code, donor_institute)
         assign_perm('view_accession', view_perm_group, donor_accession)
-        is_duplicated_from = Cvterm.objects.get(cv__name='accession_relationship_types',
+        is_duplicated_from = Cvterm.objects.get(cv__name='relationship_types',
                                                 name='is_duplicated_from')
 
         AccessionRelationship.objects.create(subject=accession,
@@ -198,7 +197,7 @@ def _add_main_accession(accession_data, silent, view_perm_group):
     if duplicated_code and duplicated_institute:
         duplicated_acc = add_accession(duplicated_code, duplicated_institute)
         assign_perm('view_accession', view_perm_group, duplicated_acc)
-        is_duplicated_from = Cvterm.objects.get(cv__name='accession_relationship_types',
+        is_duplicated_from = Cvterm.objects.get(cv__name='relationship_types',
                                                 name='is_a_duplicated')
         AccessionRelationship.objects.create(subject=accession,
                                              object=duplicated_acc,
@@ -379,7 +378,7 @@ def add_taxonomies(genus, species=None, subtaxa=None, subtaxa_type=None):
 def _add_taxa(taxa_name, taxa_rank_name, parent_taxa):
     taxo_cv = Cv.objects.get(name='taxonomic_ranks')
     taxa_rank = Cvterm.objects.get_or_create(cv=taxo_cv, name=taxa_rank_name)[0]
-    is_a = Cvterm.objects.get(cv__name='taxa_relationships', name='is_a')
+    is_a = Cvterm.objects.get(cv__name='relationship_types', name='is_a')
     try:
         tr = TaxaRelationship.objects.get(taxa_subject__name=taxa_name,
                                           taxa_subject__rank=taxa_rank,
