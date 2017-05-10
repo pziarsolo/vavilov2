@@ -6,7 +6,12 @@ from django.test.utils import override_settings
 from vavilov.conf import settings
 from vavilov.db_management.images import add_or_load_image_to_db
 from vavilov.db_management.tests import load_test_data, TEST_DATA_DIR
-from vavilov.models import Cv, Cvterm, Accession
+from vavilov.models import Cv, Cvterm, Accession, Observation, \
+    ObservationRelationship
+from vavilov.db_management.phenotype import (add_or_load_excel_related_observations,
+                                             add_or_load_excel_traits)
+
+TRAITS2_FPATH = join(TEST_DATA_DIR, 'traits2.xlsx')
 
 
 class FixturesTest(TestCase):
@@ -71,3 +76,41 @@ class ImageTests(TestCase):
                                      'VOYAGE', 'leaf', 'thumbnails',
                                      image_fname)
         assert obs_image.observation.obs_entity.part.name == 'leaf'
+
+
+class RelatedObservationsTest(TestCase):
+        def setUp(self):
+            load_test_data()
+            add_or_load_excel_traits(TRAITS2_FPATH, assays=['NSF1'])
+
+        def test_related_observations_leaf(self):
+            assert Observation.objects.count() == 15
+            assert not ObservationRelationship.objects.count()
+            related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_leaf.xlsx')
+            add_or_load_excel_related_observations(related_obs_fpath)
+            assert Observation.objects.count() == 43
+            assert ObservationRelationship.objects.count() == 28
+
+            add_or_load_excel_related_observations(related_obs_fpath)
+            assert Observation.objects.count() == 43
+            assert ObservationRelationship.objects.count() == 28
+
+        def test_related_obs_fruits(self):
+            assert Observation.objects.count() == 15
+            related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_fruits.xlsx')
+            add_or_load_excel_related_observations(related_obs_fpath)
+            assert Observation.objects.count() == 187
+
+            add_or_load_excel_related_observations(related_obs_fpath)
+            assert Observation.objects.count() == 187
+
+        def test_related_obs_color(self):
+            assert Observation.objects.count() == 15
+
+            related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_color.xlsx')
+            add_or_load_excel_related_observations(related_obs_fpath,
+                                                   one_part_per_plant=True)
+            assert Observation.objects.count() == 57
+            add_or_load_excel_related_observations(related_obs_fpath,
+                                                   one_part_per_plant=True)
+            assert Observation.objects.count() == 57

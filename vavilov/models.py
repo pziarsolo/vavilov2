@@ -826,6 +826,7 @@ def get_thumb_dir(instance, filename):
     plant_part = instance.observation.obs_entity.part.name
     return join(PHENO_PHOTO_DIR, accession, plant_part, 'thumbnails', filename)
 
+
 only_scan_storage = OnlyScanStorage(location=settings.MEDIA_ROOT,
                                     base_url=settings.MEDIA_URL)
 

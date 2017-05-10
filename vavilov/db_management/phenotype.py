@@ -3,6 +3,7 @@ import datetime
 import os
 from random import Random
 import sys
+import json
 
 from django.contrib.auth.models import User, Group
 from django.db import transaction
@@ -15,17 +16,19 @@ from vavilov.db_management.excel import excel_dict_reader
 from vavilov.models import (Observation, Trait, Assay, AssayPlant,
                             Cvterm, TraitProp, AssayTrait, AssayProp, Plant,
                             Accession, ObservationEntity,
-                            ObservationEntityPlant)
+                            ObservationEntityPlant, ObservationImages,
+                            ObservationRelationship)
 
 
 TRAIT_PROPS_CV = 'trait_props'
 TRAIT_TYPES_CV = 'trait_types'
 
+COLNUMBER_HEADER = 'CollectinCode'
 ASSAY_HEADER = 'Assay'
 PLANT_PART_HEADER = 'Plant_part'
 PLANT_HEADER = 'Plant_name'
 ACCESSION_HEADER = 'Accession'
-PHOTO_HEADER = 'Photo_id'
+PHOTO_HEADER = 'Photo id'
 
 
 def add_or_load_assays(fpath):
@@ -153,7 +156,7 @@ def add_or_load_plants(fpath, assay, experimental_field_header=None,
             if new_plant:
                 try:
                     accession = Accession.objects.get(accession_number=accession_code)
-                except:
+                except BaseException:
                     print(accession_code)
                     raise
 
@@ -194,6 +197,7 @@ class RandomNameSequence:
         letters = [choose(c) for dummy in range(8)]
         return ''.join(letters)
 
+
 NAMER = RandomNameSequence()
 
 
@@ -211,7 +215,8 @@ def suggest_obs_entity_name(plant_name, plant_part):
 
 def get_or_create_obs_entity(accession_number, assay_name, plant_part,
                              plant_name=None, obs_entity_name=None,
-                             plant_number=None, perm_gr=None):
+                             plant_number=None, perm_gr=None,
+                             one_part_per_plant=False, photo_uuid=None):
     try:
         plant_part_type = Cvterm.objects.get(cv__name='plant_parts',
                                              name=plant_part)
@@ -239,8 +244,27 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
             msg = '{} obs_entity'.format(obs_entity_name)
             raise ValueError(msg)
 
+    elif photo_uuid:
+        obs_entity_name = '{}_{}_{}_{}'.format(accession.accession_number,
+                                               assay.name, plant_part,
+                                               photo_uuid)
+        obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
+                                                                   part=plant_part_type)
+        if created:
+            assign_perm('view_obs_entity', perm_gr, obs_ent)
+            plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
+                                                         accession=accession)
+            if p_creat:
+                assign_perm('view_plant', perm_gr, plant)
+                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
+                                                      plant=plant)
+                AssayPlant.objects.create(plant=plant, assay=assay)
     elif plant_name:
-        obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
+        if not one_part_per_plant:
+            obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
+        else:
+            obs_entity_name = '{}_{}_{}'.format(assay.name, plant_name,
+                                                plant_part)
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                    part=plant_part_type)
         if created:
@@ -376,21 +400,162 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
                     continue
 
 
+NOT_USED_OBSERVATION_FILE_FIELDS = ('remarks', COLNUMBER_HEADER, 'Remarks')
+
+
+def _delete_unused_fields(entry):
+    for field in NOT_USED_OBSERVATION_FILE_FIELDS:
+        try:
+            del entry[field]
+        except KeyError:
+            pass
+
+
+def _parse_trait_values(entry, qualitative_transcriptors=None):
+    trait_value = {}
+    morpho_points, morpho_values = _process_morpho_points(entry)
+    if morpho_values:
+        trait_value[morpho_points] = morpho_values
+    for key, value in _process_color_data(entry):
+        trait_value[key] = value
+    for key, value in entry.items():
+        # process and change any particular trait
+        if qualitative_transcriptors and key in qualitative_transcriptors:
+            value = qualitative_transcriptors[value]
+
+        trait_value[key] = value
+    return trait_value
+
+
+def _process_color_data(entry):
+    l_minolta = entry.pop('External fruit color L', None)
+    b_minolta = entry.pop('External fruit color b', None)
+    a_minolta = entry.pop('External fruit color a', None)
+    if l_minolta and b_minolta and a_minolta:
+        lba = json.dumps({'L': l_minolta, 'B': b_minolta, 'A': a_minolta})
+        yield 'External fruit color LAB', lba
+
+    red_average = entry.pop('Average Red', None)
+    green_average = entry.pop('Average Green', None)
+    blue_average = entry.pop('Average Blue', None)
+    lum_average = entry.pop('Average Luminosity', None)
+    if red_average and green_average and blue_average:
+        rgb = json.dumps({'R': red_average, 'G': green_average,
+                          'B': blue_average, 'lum': lum_average})
+        yield 'Average RGB', rgb
+
+    l_average = entry.pop('Average L Value', None)
+    a_average = entry.pop('Average a Value', None)
+    b_average = entry.pop('Average b Value', None)
+    hue_average = entry.pop('Average Hue', None)
+    chroma_average = entry.pop('Average Chroma', None)
+    if l_average and a_average and b_average and hue_average and chroma_average:
+        average_lba = json.dumps({'L': l_average, 'B': b_average,
+                                  'A': a_average, 'chroma': chroma_average,
+                                  'hue': hue_average})
+        yield 'Average LAB', average_lba
+
+    for num in range(1, 5):
+        l_part = entry.pop('L{}'.format(num), None)
+        a_part = entry.pop('a{}'.format(num), None)
+        b_part = entry.pop('b{}'.format(num), None)
+        if l_part and a_part and b_part:
+            lab_color = json.dumps({'L': l_part, 'A': a_part, 'B': b_part})
+            yield 'LAB Color{}'.format(num), lab_color
+
+    l_average = entry.pop('mean_L', None)
+    a_average = entry.pop('mean_a', None)
+    b_average = entry.pop('mean_b', None)
+#     hue_average = entry.pop('Average Hue', None)
+#     chroma_average = entry.pop('Average Chroma', None)
+    if l_average and a_average and b_average and hue_average and chroma_average:
+        average_lba = json.dumps({'L': l_average, 'B': b_average,
+                                  'A': a_average, 'chroma': chroma_average,
+                                  'hue': hue_average})
+        yield 'Average LAB Color', average_lba
+
+
+def _process_morpho_points(entry):
+    morpho_points = []
+    for num in range(1, 11):
+        x_point = '{}x'.format(num)
+        y_point = '{}y'.format(num)
+        x_point_val = entry.pop(x_point, None)
+        y_point_val = entry.pop(y_point, None)
+        if x_point_val is None or y_point_val is None:
+            continue
+        morpho_points.append({x_point: x_point_val,
+                              y_point: y_point_val})
+    if morpho_points:
+        morpho_points = json.dumps(morpho_points)
+    return ('Morphometric points', morpho_points)
+
+
 def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
                                            plant_header=PLANT_HEADER,
                                            plant_part_header=PLANT_PART_HEADER,
                                            accession_header=ACCESSION_HEADER,
-                                           photo_header=PHOTO_HEADER):
+                                           photo_header=PHOTO_HEADER,
+                                           perm_gr=None,
+                                           one_part_per_plant=False):
+
+    rel_type = Cvterm.objects.get(cv__name='relationship_types',
+                                  name='obtained_from')
     with transaction.atomic():
         for entry in excel_dict_reader(fpath):
             plant_name = entry.pop(plant_header)
             accession_number = entry.pop(accession_header)
-            photo_id = entry.pop(photo_header)
             plant_part = entry.pop(plant_part_header)
-            for key, value in entry.items():
+            assay_name = entry.pop(assay_header)
+
+            if perm_gr is None:
+                perm_gr = assay_name
+            perm_gr = Group.objects.get(name=perm_gr)
+
+            try:
+                photo_id = entry.pop(photo_header)
+            except KeyError:
+                photo_id = None
+            try:
+                observer = entry.pop('author')
+            except KeyError:
+                observer = None
+
+            try:
+                creation_time = entry.pop('date')
+            except KeyError:
+                creation_time = None
+
+            _delete_unused_fields(entry)
+
+            if photo_id:
+                obs_image = ObservationImages.objects.get(image__icontains=photo_id)
+                photo_uuid = obs_image.observation_image_uid
+            else:
+                obs_image = None
+                photo_uuid = None
+            # create observation_entity
+            obs_entity = get_or_create_obs_entity(accession_number, assay_name,
+                                                  plant_part,
+                                                  plant_name=plant_name,
+                                                  perm_gr=perm_gr,
+                                                  photo_uuid=photo_uuid,
+                                                  one_part_per_plant=one_part_per_plant)
+            # print(obs_entity)
+            observation_pairs = _parse_trait_values(entry)
+            # print(entry)
+            # print(observation_pairs)
+            for trait_name, value in observation_pairs.items():
                 if not value:
                     continue
-                print(key, value)
 
+                observation, created = add_or_load_observation(obs_entity=obs_entity,
+                                                               trait_name=trait_name,
+                                                               assay_name=assay_name, value=value,
+                                                               creation_time=creation_time,
+                                                               observer=observer)
 
-
+                if created and obs_image:
+                    ObservationRelationship.objects.create(subject=observation,
+                                                           object=obs_image.observation,
+                                                           type=rel_type)
