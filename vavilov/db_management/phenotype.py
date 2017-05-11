@@ -497,7 +497,8 @@ def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
                                            accession_header=ACCESSION_HEADER,
                                            photo_header=PHOTO_HEADER,
                                            perm_gr=None,
-                                           one_part_per_plant=False):
+                                           one_part_per_plant=False,
+                                           qual_translator=None):
 
     rel_type = Cvterm.objects.get(cv__name='relationship_types',
                                   name='obtained_from')
@@ -548,6 +549,11 @@ def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
             for trait_name, value in observation_pairs.items():
                 if not value:
                     continue
+                if qual_translator and trait_name in qual_translator:
+                    try:
+                        value = qual_translator[trait_name][str(value)]
+                    except KeyError:
+                        raise KeyError('{} not in {} trait'.format(value, trait_name))
 
                 observation, created = add_or_load_observation(obs_entity=obs_entity,
                                                                trait_name=trait_name,

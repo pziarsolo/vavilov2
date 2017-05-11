@@ -9,9 +9,12 @@ from vavilov.db_management.tests import load_test_data, TEST_DATA_DIR
 from vavilov.models import Cv, Cvterm, Accession, Observation, \
     ObservationRelationship
 from vavilov.db_management.phenotype import (add_or_load_excel_related_observations,
-                                             add_or_load_excel_traits)
+                                             add_or_load_excel_traits,
+                                             parse_qual_translator)
+from django.core.management import execute_from_command_line
 
 TRAITS2_FPATH = join(TEST_DATA_DIR, 'traits2.xlsx')
+QUAL_TRASLATOR_FPATH = join(TEST_DATA_DIR, 'qualitative_translator.csv')
 
 
 class FixturesTest(TestCase):
@@ -84,14 +87,17 @@ class RelatedObservationsTest(TestCase):
             add_or_load_excel_traits(TRAITS2_FPATH, assays=['NSF1'])
 
         def test_related_observations_leaf(self):
+            qual_translator = parse_qual_translator(open(QUAL_TRASLATOR_FPATH))
             assert Observation.objects.count() == 15
             assert not ObservationRelationship.objects.count()
             related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_leaf.xlsx')
-            add_or_load_excel_related_observations(related_obs_fpath)
+            add_or_load_excel_related_observations(related_obs_fpath,
+                                                   qual_translator=qual_translator)
             assert Observation.objects.count() == 43
             assert ObservationRelationship.objects.count() == 28
 
-            add_or_load_excel_related_observations(related_obs_fpath)
+            add_or_load_excel_related_observations(related_obs_fpath,
+                                                   qual_translator=qual_translator)
             assert Observation.objects.count() == 43
             assert ObservationRelationship.objects.count() == 28
 
@@ -114,3 +120,11 @@ class RelatedObservationsTest(TestCase):
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    one_part_per_plant=True)
             assert Observation.objects.count() == 57
+
+        def test_binary(self):
+            related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_leaf.xlsx')
+            execute_from_command_line(['manage.py',
+                                       'add_or_load_excel_related_observations',
+                                       related_obs_fpath,
+                                       '--qualitative_translator',
+                                       QUAL_TRASLATOR_FPATH])

@@ -1,0 +1,90 @@
+name,score,value,type
+Growth habit,0,Determinate,Vegetative traits
+Growth habit,1,Semi-determinate,Vegetative traits
+Growth habit,2,Indeterminate,Vegetative traits
+Leaf attitude,1,semierect,Vegetative traits
+Leaf attitude,2,horizontal,Vegetative traits
+Leaf attitude,3,horizontal dropping,Vegetative traits
+Leaf attitude,4,dropping,Vegetative traits
+Antho Stem ,0, absent ,Vegetative traits
+Antho Stem ,1,Light Purple  ,Vegetative traits
+Antho Stem ,2,Purple,Vegetative traits
+Leaf Colour,3,  Light green,Vegetative traits
+Leaf Colour,5,medium green         ,Vegetative traits
+Leaf Colour,7,dark green,Vegetative traits
+inflorescence fishbone type,0,absence,Inflorescence traits
+inflorescence fishbone type,1,presence,Inflorescence traits
+inflorescence forked type,0,absence,Inflorescence traits
+inflorescence forked type,1,presence,Inflorescence traits
+inflorescence irregular type,0,absence,Inflorescence traits
+inflorescence irregular type,1,presence,Inflorescence traits
+inflorescence uniparous type,0,absence,Inflorescence traits
+inflorescence uniparous type,1,presence,Inflorescence traits
+Leafy inflorescence ,0, Absence      ,Inflorescence traits
+Leafy inflorescence ,1,Leaves ,Inflorescence traits
+Leafy inflorescence ,2,Leaves and Shoorts,Inflorescence traits
+Petals Curvature  ,3,Low,Flower traits
+Petals Curvature  ,5, intermediate   ,Flower traits
+Petals Curvature  ,7,strong,Flower traits
+Petal colour ,3, Paple yellow,Flower traits
+Petal colour ,5, Yellow,Flower traits
+Petal colour ,7,Yellow-orange,Flower traits
+Stamen colour,3,Yellow        ,Flower traits
+Stamen colour,5, Pale orange,Flower traits
+Stamen colour,7, Orange,Flower traits
+Style curvature,1,Absent      ,Flower traits
+Style curvature           ,2,Slight,Flower traits
+Style curvature           ,3,Strong  ,Flower traits
+Style exertion,1,Inserted,Flower traits
+Style exertion,2,Same level as stamen,Flower traits
+Style exertion,3,slightly exerted,Flower traits
+Style exertion,4, highly exerted,Flower traits
+Colour immature fruit  ,3,Green-white             ,Fruit traits
+Colour immature fruit  ,5,light green  ,Fruit traits
+Colour immature fruit  ,7,Green  ,Fruit traits
+Colour immature fruit  ,9,Dark green,Fruit traits
+Exterior colour of mature fruit ,0, Yellow      ,Fruit traits
+Exterior colour of mature fruit ,1, Yellow-orange        ,Fruit traits
+Exterior colour of mature fruit ,2,Orange   ,Fruit traits
+Exterior colour of mature fruit ,3, Red Orange       ,Fruit traits
+Exterior colour of mature fruit ,4, Pink          ,Fruit traits
+Exterior colour of mature fruit ,5,Red  ,Fruit traits
+Exterior colour of mature fruit ,6,Intense red ,Fruit traits
+Skin color ripe  ,0,Colourless,Fruit traits
+Skin color ripe  ,1,Yellow,Fruit traits
+Green shoulder ,0,Uniform ,Fruit traits
+Green shoulder ,3,Light green       ,Fruit traits
+Green shoulder ,5, Medium green       ,Fruit traits
+Green shoulder ,7,Dark green,Fruit traits
+Width pedicel scar   ,3,Narrow ,Fruit traits
+Width pedicel scar   ,5,Medium,Fruit traits
+Width pedicel scar   ,7,Wide,Fruit traits
+Shape pistil scar,1,Dot        ,Fruit traits
+Shape pistil scar,3,Linear   ,Fruit traits
+Shape pistil scar,5,Estellate,Fruit traits
+Shape pistil scar,7, Irregular,Fruit traits
+Ribbing calyx end,0,Absent ,Fruit traits
+Ribbing calyx end,3,Very weak     ,Fruit traits
+Ribbing calyx end,5,Weak               ,Fruit traits
+Ribbing calyx end,7, Intermediate       ,Fruit traits
+Ribbing calyx end,9,Strong,Fruit traits
+Vascular Content,0, Absent,Fruit traits
+Vascular Content,3,Slight ,Fruit traits
+Vascular Content,5,Intermediate,Fruit traits
+Vascular Content,7,Severe,Fruit traits
+Longitudinal stripes  ,0,Absence ,Fruit traits
+Longitudinal stripes  ,1, Presence  ,Fruit traits
+Fruit fasciation ,0,Not present ,Fruit traits
+Fruit fasciation ,3,Low ,Fruit traits
+Fruit fasciation ,5,Intermediate ,Fruit traits
+Fruit fasciation ,7,Severe,Fruit traits
+Leaf type,0,pimpinellifolium,Leaf traits
+Leaf type,1,Standard,Leaf traits
+Leaf type,2,double,Leaf traits
+Leaf Dissection,0,low,Leaf traits
+Leaf Dissection,1,intermediate,Leaf traits
+Leaf Dissection,2,high,Leaf traits
+Leaf border,0,entire,Leaf traits
+Leaf border,1,undulating,Leaf traits
+Leaf border,2,serrated,Leaf traits
+Leaf border,3,strong serr,Leaf traits
