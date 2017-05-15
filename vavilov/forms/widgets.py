@@ -33,10 +33,14 @@ class AutocompleteTextInput(TextInput):
 
     def render(self, name, value, attrs=None):
         'It renders the html and the javascript'
+#         context = self.get_context(name, value, attrs)
+#         return self._render(self.template_name, context, renderer)
         if value is None:
             value = ''
         attrs['type'] = 'text'
+        attrs['name'] = name
         final_attrs = self.build_attrs(attrs)
+
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             # final_attrs['value'] = force_unicode(self._format_value(value))
@@ -49,7 +53,9 @@ class AutocompleteTextInput(TextInput):
         'The javascript that does the autocomplete'
 # var $j = JQuery.noConflict(true);
         javascript_no_force_check = u'''<script type="text/javascript">
-
+j.expr[':'].textEquals = function (a, i, m) {
+  return j(a).text().match("^" + m[3] + "j");
+};
 j(function() {
 j("#%(field_id)s").autocomplete({
     source:"%(source)s?limit=%(limit)s",
@@ -105,6 +111,7 @@ j(function() {
         javascript %= {'field_id': field_id, 'source': self.source,
                        'min_length': self.min_length,
                        'limit': self.result_limit}
+        # javascript = ''
         return javascript
 
 
@@ -138,6 +145,7 @@ class AutocompleteTextMultiInput(TextInput):
         if value is None:
             value = ''
         attrs['type'] = 'text'
+        attrs['name'] = name
         final_attrs = self.build_attrs(attrs)
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
