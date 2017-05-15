@@ -40,13 +40,16 @@ class SearchListView(View):
     detail_view_name = ''
 
     def post(self, request):
+        print('request.post: ' + str(request.POST))
         return self._search_and_list(request, method='post')
 
     def get(self, request):
+        print('request.post: ' + str(request.POST))
         return self._search_and_list(request, method='get')
 
     def _search_and_list(self, request, method):
         getdata = False
+
         if method == 'get':
             form = self.form_class(self.request.GET or None)
             getdata = True if request.GET else False
@@ -80,6 +83,7 @@ class SearchListView(View):
         if self.detail_view_name and self.object_list.count() == 1:
             return redirect(self.object_list.first().get_absolute_url())
 
+        print(criteria, search_criteria, getdata, query_made)
         return render_to_response(self.template_name,
                                   self.get_context_data(form=form,
                                                         criteria=criteria,
@@ -90,6 +94,7 @@ class SearchListView(View):
     def get_context_data(self, form, criteria, search_criteria, getdata,
                          query_made):
         context = {'request': self.request}
+        context['user'] = self.request.user
 
         if criteria is not None:
             context['criteria'] = criteria
