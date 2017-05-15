@@ -245,8 +245,7 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
             raise ValueError(msg)
 
     elif photo_uuid:
-        obs_entity_name = '{}_{}_{}_{}'.format(accession.accession_number,
-                                               assay.name, plant_part,
+        obs_entity_name = '{}_{}_{}_{}'.format(plant_name, plant_part,
                                                photo_uuid)
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                    part=plant_part_type)
