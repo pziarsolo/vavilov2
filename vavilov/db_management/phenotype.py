@@ -399,7 +399,11 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
                     continue
 
 
-NOT_USED_OBSERVATION_FILE_FIELDS = ('remarks', COLNUMBER_HEADER, 'Remarks')
+NOT_USED_OBSERVATION_FILE_FIELDS = ('remarks', COLNUMBER_HEADER, 'Remarks',
+                                    'Mean_petal_length', 'Mean_petal_width',
+                                    'Mean_sepal_length', 'mean_sepal_width',
+                                    'Average_Fruit_weight_g', 'Leaf angle 1',
+                                    'Leaf angle 2')
 
 
 def _delete_unused_fields(entry):
@@ -528,12 +532,15 @@ def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
 
             _delete_unused_fields(entry)
 
+            obs_image = None
+            photo_uuid = None
             if photo_id:
-                obs_image = ObservationImages.objects.get(image__icontains=photo_id)
-                photo_uuid = obs_image.observation_image_uid
-            else:
-                obs_image = None
-                photo_uuid = None
+                try:
+                    obs_image = ObservationImages.objects.get(image__icontains=photo_id)
+                    photo_uuid = obs_image.observation_image_uid
+                except ObservationImages.DoesNotExist:
+                    print(plant_name, plant_part, accession_number, photo_id)
+
             # create observation_entity
             obs_entity = get_or_create_obs_entity(accession_number, assay_name,
                                                   plant_part,
