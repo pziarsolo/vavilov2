@@ -2,6 +2,7 @@ from time import time
 import json
 
 from django.views.generic.detail import DetailView
+from django.template.context_processors import csrf
 
 from guardian.mixins import PermissionRequiredMixin
 
@@ -47,9 +48,11 @@ class ObservationImageList(SearchListView):
         return obs
 
     def get_context_data(self, **kwargs):
-        context = super(ObservationImageList, self).get_context_data(**kwargs)
-        # context.update(csrf(self.request))
-        # context['query_made'] = kwargs['query_made']
+        context = {'request': self.request}
+        context['user'] = self.request.user
+        context.update(kwargs)
+        context.update(csrf(self.request))
+        context['query_made'] = kwargs['query_made']
         prev_time = time()
         num_photos = self.object_list.count()
         prev_time = calc_duration('Count images', prev_time)
