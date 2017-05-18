@@ -7,7 +7,6 @@ from vavilov_pedigree.views.tables import (plant_to_table, seedlot_to_table,
                                            accession_to_table, CrossTable)
 from vavilov.views.generic import (search_criteria_to_get_parameters,
                                    SearchListView)
-from django.template.context import RequestContext
 from django.template.context_processors import csrf
 from django.shortcuts import render_to_response
 
@@ -17,7 +16,8 @@ class SearchForm(forms.Form):
 
 
 def search(request):
-    context = RequestContext(request)
+    context = {'request': request}
+    context['user'] = request.user
     context.update(csrf(request))
     content_type = None  # default
     getdata = False
