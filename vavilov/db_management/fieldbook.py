@@ -128,8 +128,9 @@ def add_or_load_fielbook_observations(fpath, observer, assays, excluded_traits=N
                                        excluded_traits=excluded_traits)
 
 
-def add_fieldbook_observations(entry, plant_part, group, assay,
+def add_fieldbook_observations(entry, plant_part, assay, group=None,
                                excluded_traits=None):
+
     plant_name = entry['rid']
     trait = entry['parent']
     if excluded_traits and trait in excluded_traits:
@@ -144,6 +145,10 @@ def add_fieldbook_observations(entry, plant_part, group, assay,
                                        name=plant_part)
     obs_entity, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                   part=plant_part_cv)
+
+    Assay.objects.get(name=assay)
+    if group is None:
+        group = Group.objects.get(name=assay)
     if created:
         ObservationEntityPlant.objects.create(obs_entity=obs_entity,
                                               plant=plant)

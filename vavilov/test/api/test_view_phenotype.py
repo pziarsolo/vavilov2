@@ -287,7 +287,7 @@ class FieldbookObservationTest(TestCase):
         assert response.data == {'detail': 'Incorrect input data'}
 
         fieldbook_obs = {'rid': '0F16NSF1CN02F01M001', 'parent': 'Area2',
-                         'userValue': '23', 'person': 'test',
+                         'userValue': '23', 'person': 'test', 'assay': 'assay1',
                          'timeTaken': '2017-05-25 14:56:08+0200'}
         response = client.post(reverse('api:fieldbook_observation-list'),
                                fieldbook_obs)
@@ -300,6 +300,31 @@ class FieldbookObservationTest(TestCase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data == {'detail': 'Already in db'}
 
+        fieldbook_obs = {'rid': '0F16NSF1CN02F01M001', 'parent': 'Area2',
+                         'userValue': '23', 'person': 'test',
+                         'timeTaken': '2017-05-25 14:56:08+0200', 'assay': 'NSF1'}
+        response = client.post(reverse('api:fieldbook_observation-list'),
+                               fieldbook_obs)
+
+        assert response.status_code == 400
+        assert response.data == {'detail': 'Trait not loaded yet in db: Area2:NSF1'}
+
+        fieldbook_obs = {'rid': '0F16NSF1CN02F01M00', 'parent': 'Area2',
+                         'userValue': '23', 'person': 'test',
+                         'timeTaken': '2017-05-25 14:56:08+0200', 'assay': 'assay1'}
+        response = client.post(reverse('api:fieldbook_observation-list'),
+                               fieldbook_obs)
+
+        assert response.status_code == 400
+        assert response.data == {'detail': 'Plant matching query does not exist.'}
+
+        fieldbook_obs = {'rid': '0F16NSF1CN02F01M001', 'parent': 'Area2',
+                         'userValue': '23', 'person': 'test',
+                         'timeTaken': '2017-05-25 14:56:08+0200'}
+        response = client.post(reverse('api:fieldbook_observation-list'),
+                               fieldbook_obs)
+
+        assert response.status_code == 400
 
 # class PlantPartViewTest(TestCase):
 #     def setUp(self):

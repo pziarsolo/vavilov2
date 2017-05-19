@@ -104,14 +104,13 @@ class FieldBookObservationViewSet(ViewSet):
 
     def create(self, request):
         plant_part = 'plant'
-        assay = 'assay1'
-        group = Group.objects.get(name=assay)
+        assay = request.data.get('assay', None)
+
         if request.data:
             try:
                 _, created = add_fieldbook_observations(request.data,
                                                         plant_part=plant_part,
-                                                        assay=assay,
-                                                        group=group)
+                                                        assay=assay)
                 if created:
                     return Response(data=request.data,
                                     status=status.HTTP_201_CREATED)
@@ -125,6 +124,12 @@ class FieldBookObservationViewSet(ViewSet):
                 if 'Trait not loaded yet in db' in str(error):
                     return Response(exception=error, status=status.HTTP_400_BAD_REQUEST,
                                     data={'detail': str(error)})
+            except Plant.DoesNotExist as error:
+                return Response(exception=error, status=status.HTTP_400_BAD_REQUEST,
+                                data={'detail': str(error)})
+            except Assay.DoesNotExist as error:
+                return Response(exception=error, status=status.HTTP_400_BAD_REQUEST,
+                                data={'detail': str(error)})
 
 
 #         if len(request.data) != 1:

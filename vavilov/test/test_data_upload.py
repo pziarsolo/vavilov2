@@ -93,13 +93,13 @@ class RelatedObservationsTest(TestCase):
             related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_leaf.xlsx')
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    qual_translator=qual_translator)
-            assert Observation.objects.count() == 43
-            assert ObservationRelationship.objects.count() == 28
+            assert Observation.objects.count() == 50
+            assert ObservationRelationship.objects.count() == 35
 
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    qual_translator=qual_translator)
-            assert Observation.objects.count() == 43
-            assert ObservationRelationship.objects.count() == 28
+            assert Observation.objects.count() == 50
+            assert ObservationRelationship.objects.count() == 35
 
         def test_related_obs_fruits(self):
             assert Observation.objects.count() == 15
@@ -116,10 +116,11 @@ class RelatedObservationsTest(TestCase):
             related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_color.xlsx')
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    one_part_per_plant=True)
-            assert Observation.objects.count() == 57
+            print(Observation.objects.last().plants)
+            assert Observation.objects.count() == 51
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    one_part_per_plant=True)
-            assert Observation.objects.count() == 57
+            assert Observation.objects.count() == 51
 
         def test_binary(self):
             related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_leaf.xlsx')
