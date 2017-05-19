@@ -253,27 +253,28 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
             assign_perm('view_obs_entity', perm_gr, obs_ent)
             plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
                                                          accession=accession)
+            ObservationEntityPlant.objects.get_or_create(obs_entity=obs_ent,
+                                                         plant=plant)
             if p_creat:
                 assign_perm('view_plant', perm_gr, plant)
-                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
-                                                      plant=plant)
+
                 AssayPlant.objects.create(plant=plant, assay=assay)
     elif plant_name:
         if not one_part_per_plant:
             obs_entity_name = suggest_obs_entity_name(plant_name, plant_part)
         else:
-            obs_entity_name = '{}_{}_{}'.format(assay.name, plant_name,
-                                                plant_part)
+            obs_entity_name = '{}_{}'.format(plant_name, plant_part)
         obs_ent, created = ObservationEntity.objects.get_or_create(name=obs_entity_name,
                                                                    part=plant_part_type)
+        print(obs_ent, created)
         if created:
             assign_perm('view_obs_entity', perm_gr, obs_ent)
             plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
                                                          accession=accession)
+            ObservationEntityPlant.objects.get_or_create(obs_entity=obs_ent,
+                                                         plant=plant)
             if p_creat:
                 assign_perm('view_plant', perm_gr, plant)
-                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
-                                                      plant=plant)
                 AssayPlant.objects.create(plant=plant, assay=assay)
 
     elif plant_number:
@@ -288,10 +289,11 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
                                            assay.name, plant_number)
             plant, p_creat = Plant.objects.get_or_create(plant_name=plant_name,
                                                          accession=accession)
+            ObservationEntityPlant.objects.get_or_create(obs_entity=obs_ent,
+                                                         plant=plant)
             if p_creat:
                 assign_perm('view_plant', perm_gr, plant)
-                ObservationEntityPlant.objects.create(obs_entity=obs_ent,
-                                                      plant=plant)
+
                 AssayPlant.objects.create(plant=plant, assay=assay)
     else:
         # hay que crear una obs entity con todas las plantas de este accession
