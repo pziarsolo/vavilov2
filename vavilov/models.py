@@ -168,7 +168,7 @@ class Accession(models.Model):
 
     @property
     def equivalent_accessions(self):
-        cv = Cv.objects.get(name='accession_relationship_types')
+        cv = Cv.objects.get(name='relationship_types')
         is_relation = Cvterm.objects.get(cv=cv, name='is')
 
         return self._get_recursively_related_accessions([self], [is_relation],
@@ -176,7 +176,7 @@ class Accession(models.Model):
 
     @property
     def duplicated_accessions(self):
-        cv = Cv.objects.get(name='accession_relationship_types')
+        cv = Cv.objects.get(name='relationship_types')
         is_duplicated = Cvterm.objects.get(cv=cv, name='is_a_duplicated')
         equivalents = self.equivalent_accessions + [self]
         dup_accs = set()
@@ -188,7 +188,7 @@ class Accession(models.Model):
 
     @property
     def duplicated_accessions_and_equivalents(self):
-        cv = Cv.objects.get(name='accession_relationship_types')
+        cv = Cv.objects.get(name='relationship_types')
         is_duplicated = Cvterm.objects.get(cv=cv, name='is_a_duplicated')
         is_relation = Cvterm.objects.get(cv=cv, name='is')
 
@@ -199,7 +199,7 @@ class Accession(models.Model):
     @property
     def donor_accession(self):
         equivalents = self.equivalent_accessions + [self]
-        cv = Cv.objects.get(name='accession_relationship_types')
+        cv = Cv.objects.get(name='relationship_types')
         is_duplicated_from = Cvterm.objects.get(cv=cv,
                                                 name='is_duplicated_from')
         donor_accs = set()
@@ -365,7 +365,7 @@ class Accession(models.Model):
 
 
 def get_top_taxons(taxon):
-    is_a = Cvterm.objects.get(cv__name='taxa_relationships', name='is_a')
+    is_a = Cvterm.objects.get(cv__name='relationship_types', name='is_a')
     taxons = [taxon]
     while True:
         try:

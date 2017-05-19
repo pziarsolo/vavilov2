@@ -19,7 +19,7 @@ class AccessionTest(TestCase):
         assert str(acc) == 'Comav Gene bank(ESP026): BGV000932'
 
     def test_accession_dup_equi(self):
-        is_duplicate = Cvterm.objects.get(cv__name='accession_relationship_types',
+        is_duplicate = Cvterm.objects.get(cv__name='relationship_types',
                                           name='is_a_duplicated')
         acc = Accession.objects.get(accession_number='BGV000932')
         dup_rel_numbers = AccessionRelationship.objects.filter(subject=acc, type=is_duplicate)

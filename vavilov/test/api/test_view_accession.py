@@ -201,7 +201,7 @@ class AccessionRelTest(TestCase):
     def test_add_change_delete(self):
         client = Client()
         # add
-        is_duplicated_from = Cvterm.objects.get(cv__name='accession_relationship_types',
+        is_duplicated_from = Cvterm.objects.get(cv__name='relationship_types',
                                                 name='is_duplicated_from')
         relation = {'object': 1, 'subject': 2,
                     'type': is_duplicated_from.cvterm_id}

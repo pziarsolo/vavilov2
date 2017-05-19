@@ -116,7 +116,7 @@ class RelatedObservationsTest(TestCase):
             related_obs_fpath = join(TEST_DATA_DIR, 'obs_related_color.xlsx')
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    one_part_per_plant=True)
-            print(Observation.objects.last().plants)
+
             assert Observation.objects.count() == 51
             add_or_load_excel_related_observations(related_obs_fpath,
                                                    one_part_per_plant=True)
