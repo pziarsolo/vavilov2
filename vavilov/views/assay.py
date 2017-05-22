@@ -1,16 +1,22 @@
-from guardian.mixins import PermissionRequiredMixin
+
 from django.views.generic.detail import DetailView
 
 from vavilov.models import Assay
 from vavilov.views.tables import plants_to_table, obs_to_table
 from vavilov.views.observation import observations_to_galleria_json
+from vavilov.conf.settings import BY_OBJECT_OBS_PERM
+
+if BY_OBJECT_OBS_PERM:
+    from guardian.mixins import PermissionRequiredMixin
+else:
+    from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 class AssayDetail(PermissionRequiredMixin, DetailView):
     model = Assay
     slug_url_kwarg = 'name'
     slug_field = 'name'
-    permission_required = 'view_assay'
+    permission_required = ['vavilov.view_assay']
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context

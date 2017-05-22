@@ -4,8 +4,6 @@ import operator
 from django.db.models import Q
 from django.views.generic.detail import DetailView
 
-from guardian.mixins import PermissionRequiredMixin
-
 from vavilov.forms.accession import SearchPassportForm
 from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
                             Taxa, get_bottom_taxons)
@@ -14,6 +12,12 @@ from vavilov.views.tables import (AccessionsTable, assays_to_table,
                                   plants_to_table, obs_to_table)
 from vavilov.views.generic import SearchListView
 from vavilov.views.observation import observations_to_galleria_json
+from vavilov.conf.settings import BY_OBJECT_OBS_PERM
+
+if BY_OBJECT_OBS_PERM:
+    from guardian.mixins import PermissionRequiredMixin
+else:
+    from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 def filter_accessions(search_criteria, user=None):
@@ -60,7 +64,7 @@ class AccessionDetail(PermissionRequiredMixin, DetailView):
     model = Accession
     slug_url_kwarg = 'accession_number'
     slug_field = 'accession_number'
-    permission_required = 'view_accession'
+    permission_required = ['vavilov.view_accession']
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
