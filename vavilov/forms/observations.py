@@ -40,8 +40,8 @@ class SearchObservationForm(forms.Form):
     experimental_field = forms.CharField(required=False,
                                          label='Experimental field')
     if OBSERVATIONS_HAVE_TIME:
-        all_label = 'Check this if you want all data, not just last value'
-        all_data = forms.BooleanField(required=False, label=all_label)
+        all_label = 'Check this if you just last values, not all data'
+        only_last_data = forms.BooleanField(required=False, label=all_label)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

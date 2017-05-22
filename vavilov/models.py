@@ -866,10 +866,9 @@ def filter_observations(search_criteria, user, images=False):
     if images:
         query = Observation.objects
     else:
-        if OBSERVATIONS_HAVE_TIME:
-            if 'all_data' in search_criteria and search_criteria['all_data']:
-                query = Observation.objects
-            else:
+        if (OBSERVATIONS_HAVE_TIME and
+                'only_last_datadata' in search_criteria and
+                search_criteria['only_last_data']):
                 query = keep_only_last_observation()
         else:
             query = Observation.objects
