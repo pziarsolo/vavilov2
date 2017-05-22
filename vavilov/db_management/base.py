@@ -140,7 +140,10 @@ def load_initial_data():
     anon = User.get_anonymous()
     public_group = get_or_create_public_group()
     public_group.user_set.add(anon)
-    add_view_permissions(anon, filter_perms=['View Observation'])
+    add_view_permissions(anon, filter_perms=['View Observation',
+                                             'View observation images',
+                                             'View Observation Relationship',
+                                             'View Observation entity'])
 
     load_initial_data_from_dict(SHARED_INITIAL_DATA_TO_LOAD)
 

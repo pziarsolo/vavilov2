@@ -4,14 +4,18 @@ import json
 from django.views.generic.detail import DetailView
 from django.template.context_processors import csrf
 
-from guardian.mixins import PermissionRequiredMixin
-
 from vavilov.forms.observations import SearchObservationForm
 from vavilov.models import ObservationEntity, filter_observations, Observation
 from vavilov.views.tables import (ObservationsTable, plants_to_table,
                                   obs_to_table)
-from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY
+from vavilov.conf.settings import MAX_PHOTO_IN_GALLERY, BY_OBJECT_OBS_PERM
 from vavilov.views.generic import SearchListView, calc_duration
+
+
+if BY_OBJECT_OBS_PERM:
+    from guardian.mixins import PermissionRequiredMixin
+else:
+    from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 class ObservationList(SearchListView):
