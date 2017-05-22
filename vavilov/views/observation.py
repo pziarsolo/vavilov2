@@ -81,7 +81,7 @@ class ObservationEntityDetail(PermissionRequiredMixin, DetailView):
     model = ObservationEntity
     slug_url_kwarg = 'name'
     slug_field = 'name'
-    permission_required = 'view_obs_entity'
+    permission_required = ['vavilov.view_obs_entity']
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
