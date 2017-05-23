@@ -5,7 +5,6 @@ from rest_framework.authtoken.models import Token
 from vavilov.permissions import add_view_permissions
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import AppRegistryNotReady
-from guardian.conf.settings import ANONYMOUS_USER_NAME
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -21,15 +20,8 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 @receiver(post_save, sender=User)
 def add_def_view_perms(sender, instance, **kwargs):
-    if instance.username == ANONYMOUS_USER_NAME:
-        filter_perms = ['View Observation', 'View observation images',
-                        'View Observation Relationship',
-                        'View Observation entity']
-    else:
-        filter_perms = None
-
     try:
-        add_view_permissions(instance, filter_perms=filter_perms)
+        add_view_permissions(instance)
     except Permission.DoesNotExist as error:
         if str(error) == 'Permission matching query does not exist.':
             raise AppRegistryNotReady('guardian loaded before vavilov loaded')
