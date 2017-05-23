@@ -3,12 +3,7 @@ from django.views.generic.detail import DetailView
 from vavilov.models import Plant
 from vavilov.views.tables import assays_to_table, obs_to_table
 from vavilov.views.observation import observations_to_galleria_json
-from vavilov.conf.settings import BY_OBJECT_OBS_PERM
-
-if BY_OBJECT_OBS_PERM:
-    from guardian.mixins import PermissionRequiredMixin
-else:
-    from django.contrib.auth.mixins import PermissionRequiredMixin
+from vavilov.permissions import PermissionRequiredMixin
 
 
 class PlantDetail(PermissionRequiredMixin, DetailView):

@@ -1,5 +1,14 @@
 from django.contrib.auth.models import Permission
+
 from guardian.conf.settings import ANONYMOUS_USER_NAME
+
+from vavilov.conf.settings import BY_OBJECT_OBS_PERM
+
+if BY_OBJECT_OBS_PERM:
+    from guardian.mixins import PermissionRequiredMixin
+else:
+    from django.contrib.auth.mixins import PermissionRequiredMixin
+
 
 PUBLIC_VIEW_PERMISSIONS = ('View Accession', 'View Passport', 'View Location',
                            'View Accession Relationship',

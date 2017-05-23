@@ -12,12 +12,7 @@ from vavilov.views.tables import (AccessionsTable, assays_to_table,
                                   plants_to_table, obs_to_table)
 from vavilov.views.generic import SearchListView
 from vavilov.views.observation import observations_to_galleria_json
-from vavilov.conf.settings import BY_OBJECT_OBS_PERM
-
-if BY_OBJECT_OBS_PERM:
-    from guardian.mixins import PermissionRequiredMixin
-else:
-    from django.contrib.auth.mixins import PermissionRequiredMixin
+from vavilov.permissions import PermissionRequiredMixin
 
 
 def filter_accessions(search_criteria, user=None):
