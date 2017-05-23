@@ -1,15 +1,20 @@
+from django.views.generic.detail import DetailView
 
 from vavilov.models import Trait
 from vavilov.views.tables import obs_to_table
-from django.views.generic.detail import DetailView
-from guardian.mixins import PermissionRequiredMixin
+from vavilov.conf.settings import BY_OBJECT_OBS_PERM
+
+if BY_OBJECT_OBS_PERM:
+    from guardian.mixins import PermissionRequiredMixin
+else:
+    from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 class TraitDetail(PermissionRequiredMixin, DetailView):
     model = Trait
     slug_url_kwarg = 'trait_id'
     slug_field = 'trait_id'
-    permission_required = 'view_trait'
+    permission_required = ['vavilov.view_trait']
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
