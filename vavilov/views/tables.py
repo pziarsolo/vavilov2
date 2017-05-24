@@ -8,7 +8,7 @@ from vavilov.views.generic import calc_duration
 
 
 value_template = '''{% if record.obtained_from.image %}
-    {{record.value_beauty}}(<a href='/media/{{record.obtained_from.image}}'>image_origen</a>)
+    {{record.value_beauty}}(<a href='/media/{{record.obtained_from.image}}' onclick="window.open('/media/{{record.obtained_from.image}}', 'newwindow', 'width=800, height=600'); return false;">image_origen</a>)
 {% else %}
     {{record.value_beauty}}
 {% endif %}'''
