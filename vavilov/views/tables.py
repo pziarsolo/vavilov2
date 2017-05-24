@@ -7,6 +7,13 @@ from vavilov.conf.settings import ACCESSION_TABLE_FIELDS
 from vavilov.views.generic import calc_duration
 
 
+value_template = '''{% if record.obtained_from.image %}
+    {{record.value_beauty}}(<a href='/media/{{record.obtained_from.image}}'>image_origen</a>)
+{% else %}
+    {{record.value_beauty}}
+{% endif %}'''
+
+
 class ObservationsTable(tables.Table):
     Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
                                   accessor=A('accession.accession_number'),
@@ -23,7 +30,7 @@ class ObservationsTable(tables.Table):
     trait = tables.LinkColumn('trait-detail', args=[A('trait.trait_id')],
                               accessor=A('trait.name'),
                               orderable=True, verbose_name='Trait')
-    value = tables.TemplateColumn('{{record.value_beauty}}', accessor=A('value'),
+    value = tables.TemplateColumn(value_template, accessor=A('value'),
                                   default='', orderable=True)
     observer = tables.Column('Observer', accessor=A('observer'),
                              default='', orderable=True)

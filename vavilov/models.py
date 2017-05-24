@@ -809,6 +809,14 @@ class Observation(models.Model):
             return None
 
     @property
+    def obtained_from(self):
+        try:
+            return ObservationRelationship.objects.get(subject=self).object
+
+        except ObservationRelationship.DoesNotExist:
+            return None
+
+    @property
     def value_beauty(self):
         return self.value
 
