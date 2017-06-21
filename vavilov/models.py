@@ -909,7 +909,7 @@ def filter_observations(search_criteria, user, images=False):
         query = query.filter(trait__in=traits)
 
     if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
-        query = query.filter(plant__experimental_field__icontains=search_criteria['experimental_field'])
+        query = query.filter(obs_entity__observationentityplant__plant__experimental_field__icontains=search_criteria['experimental_field'])
 
     if 'observer' in search_criteria and search_criteria['observer']:
         observer = search_criteria['observer']

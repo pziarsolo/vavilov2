@@ -28,10 +28,10 @@ class SearchObservationForm(forms.Form):
     plant = forms.CharField(max_length=100, required=False,
                             label='Plant', widget=widget)
 
-    plant_part = forms.CharField(label='Plan part', required=False,
+    plant_part = forms.CharField(label='Plant part', required=False,
                                  widget=Select(choices=[]))
-    assay = forms.ChoiceField(required=False, label='assay', widget=Select,
-                              choices=[])
+    assay = forms.CharField(label='Assay', required=False,
+                            widget=Select(choices=[]))
     traits = forms.CharField(max_length=100, required=False, label='Trait',
                              widget=AutocompleteTextMultiInput(source='/apis/traits/',
                                                                min_length=1,
@@ -45,16 +45,15 @@ class SearchObservationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        assay_choices = [('', '')]
+        assay_choices.extend([(assay.name, assay.name) for assay in Assay.objects.distinct()])
+        self.fields['assay'].widget.choices = assay_choices
+
         plan_part_choices = [('', '')]
         for plant_part in Cvterm.objects.filter(cv__name='plant_parts'):
             part_type = plant_part.name
             plan_part_choices.append((part_type, part_type))
         self.fields['plant_part'].widget.choices = plan_part_choices
-
-        assay_choices = [('', '')]
-        assays = set([assay['name'] for assay in Assay.objects.all().values('name')])
-        assay_choices.extend([(assay, assay) for assay in assays if assay is not None])
-        self.fields['assay'].widget.choices = assay_choices
 
     def clean_acc_list(self):
         acc_list_text = self.cleaned_data['acc_list']
