@@ -275,6 +275,12 @@ class Accession(models.Model):
 
     @property
     def passport(self):
+        try:
+            passport = Passport.objects.get(accession=self)
+        except Passport.DoesNotExist:
+            passport = None
+        return passport
+
         equivalents = self.equivalent_accessions + [self]
         passport_datas = []
         for equi_acc in equivalents:
