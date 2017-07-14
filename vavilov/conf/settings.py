@@ -19,6 +19,9 @@ APP_LOGGER = getattr(settings, 'VAVILOV_APP_LOGGER', 'vavilov.debug')
 # When filtering observations, do by object
 BY_OBJECT_OBS_PERM = getattr(settings, 'VAVILOV_BY_OBJECT_OBS_PERM', True)
 
+# check if the accessions are public
+ACCESSIONS_ARE_PUBLIC = getattr(settings, 'VAVILOV_ACCESSIONS_ARE_PUBLIC', False)
+
 # Max number of photos to show in gallery
 MAX_PHOTO_IN_GALLERY = getattr(settings, 'VAVILOV_MAX_PHOTO_IN_GALLERY', 100)
 

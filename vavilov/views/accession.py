@@ -93,6 +93,7 @@ class AccessionList(SearchListView):
     table = AccessionsTable
     redirect_in_one = True
     detail_view_name = 'accession_view'
+    permission_required = ['vavilov.view_accession']
 
     def get_queryset(self, **kwargs):
         return filter_accessions(kwargs['search_criteria'],
