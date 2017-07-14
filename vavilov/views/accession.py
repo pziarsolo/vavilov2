@@ -15,7 +15,7 @@ from vavilov.views.tables import (AccessionsTable, assays_to_table,
 from vavilov.views.generic import SearchListView
 from vavilov.views.observation import observations_to_galleria_json
 from vavilov.permissions import PermissionRequiredMixin
-from vavilov.conf.setings import BY_OBJECT_OBS_PERM
+from vavilov.conf.settings import BY_OBJECT_OBS_PERM
 
 
 def filter_accessions(search_criteria, user=None):
