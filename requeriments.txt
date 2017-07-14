@@ -1,4 +1,4 @@
-django<1.9
+django
 djangorestframework
 django-filter>=1.0
 django-guardian
@@ -7,3 +7,4 @@ django-tables2
 openpyxl
 pytz
 pillow
+coreapi
