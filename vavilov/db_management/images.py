@@ -78,12 +78,15 @@ def add_or_load_image_to_db(image_fpath, view_perm_group=None,
     if view_perm_group is None:
         view_perm_group = assay.name
     group = Group.objects.get(name=view_perm_group)
-
     if create_plant:
         try:
-            accession = Accession.objects.get(accession_number=exif_data['Accession'])
+            accession_number = exif_data['Accession']
+        except KeyError:
+            accession_number = exif_data['accession']
+        try:
+            accession = Accession.objects.get(accession_number=accession_number)
         except Accession.DoesNotExist:
-            print(exif_data['Accession'], image_fpath)
+            print(accession_number, image_fpath)
             return
         plant = Plant.objects.get_or_create(accession=accession,
                                             plant_name=plant_id)[0]
