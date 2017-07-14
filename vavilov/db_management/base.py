@@ -12,7 +12,7 @@ from guardian.compat import get_user_model
 from guardian.shortcuts import assign_perm
 
 import vavilov
-from vavilov.conf.settings import PUBLIC_GROUP_NAME
+from vavilov.conf.settings import PUBLIC_GROUP_NAME, ACCESSIONS_ARE_PUBLIC
 from vavilov.latlon import lat_to_deg, lon_to_deg
 from vavilov.models import (Accession, Country, Passport, Location, Cvterm,
                             Cv, Taxa, TaxaRelationship, Person, Db, Dbxref,
@@ -140,10 +140,14 @@ def load_initial_data():
     anon = User.get_anonymous()
     public_group = get_or_create_public_group()
     public_group.user_set.add(anon)
-    add_view_permissions(anon, filter_perms=['View Observation',
-                                             'View observation images',
-                                             'View Observation Relationship',
-                                             'View Observation entity'])
+    non_public_permissions = ['View Observation',
+                              'View observation images',
+                              'View Observation Relationship',
+                              'View Observation entity']
+
+    if not ACCESSIONS_ARE_PUBLIC:
+        non_public_permissions.append('View Accession')
+    add_view_permissions(anon, filter_perms=non_public_permissions)
 
     load_initial_data_from_dict(SHARED_INITIAL_DATA_TO_LOAD)
 
