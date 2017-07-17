@@ -4,6 +4,8 @@ import operator
 from django.db.models import Q
 from django.views.generic.detail import DetailView
 
+from guardian.shortcuts import get_objects_for_user
+
 from vavilov.forms.accession import SearchPassportForm
 from vavilov.models import (Accession, AccessionRelationship, Cvterm, Country,
                             Taxa, get_bottom_taxons)
@@ -13,6 +15,7 @@ from vavilov.views.tables import (AccessionsTable, assays_to_table,
 from vavilov.views.generic import SearchListView
 from vavilov.views.observation import observations_to_galleria_json
 from vavilov.permissions import PermissionRequiredMixin
+from vavilov.conf.settings import BY_OBJECT_OBS_PERM
 
 
 def filter_accessions(search_criteria, user=None):
@@ -51,6 +54,13 @@ def filter_accessions(search_criteria, user=None):
         bottom_taxas = get_bottom_taxons([taxa])
         query = query.filter(accessiontaxa__taxa__in=bottom_taxas)
 
+    if BY_OBJECT_OBS_PERM:
+        query = get_objects_for_user(user, 'vavilov.view_accession',
+                                     klass=query, accept_global_perms=False)
+    else:
+        if not user.has_perm('vavilov.view_accession'):
+            query = query.none()
+    
     query = query.filter(type__name='internal')
     return query
 
