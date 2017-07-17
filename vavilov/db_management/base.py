@@ -77,7 +77,7 @@ def add_or_load_users(fpath):
                                                 email=entry['email'],
                                                 password=entry['password'])
         if 'group' in entry and entry['group']:
-            group = Group.objects.get_or_create(name=entry['group'])
+            group = Group.objects.get_or_create(name=entry['group'])[0]
             user.groups.add(group)
 
         user.groups.add(public_group)
