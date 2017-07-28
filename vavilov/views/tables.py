@@ -8,11 +8,12 @@ from vavilov.views.generic import calc_duration
 
 
 value_template = '''{% if record.obtained_from.image %}
-    {{record.value_beauty}}(<a href='/media/{{record.obtained_from.image}}' onclick="window.open('/media/{{record.obtained_from.image}}', 'newwindow', 'width=800, height=600'); return false;">image_origen</a>)
+{{record.value_beauty|striptags|safe}}(<a href='/media/{{record.obtained_from.image}}' onclick="window.open('/media/{{record.obtained_from.image}}', 'newwindow', 'width=800, height=600'); return false;">image_origen</a>)
 {% else %}
-    {{record.value_beauty}}
+{{record.value_beauty|striptags|safe}}
 {% endif %}'''
 
+value_template = value_template.replace('\n', '')
 
 class ObservationsTable(tables.Table):
     Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
