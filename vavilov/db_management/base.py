@@ -76,8 +76,11 @@ def add_or_load_users(fpath):
                 user = User.objects.create_user(username=username,
                                                 email=entry['email'],
                                                 password=entry['password'])
+        if 'group' in entry and entry['group']:
+            group = Group.objects.get_or_create(name=entry['group'])[0]
+            user.groups.add(group)
 
-        public_group.user_set.add(user)
+        user.groups.add(public_group)
 
 
 def add_or_load_persons(fhand):
