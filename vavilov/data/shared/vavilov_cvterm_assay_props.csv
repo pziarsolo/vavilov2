@@ -22,3 +22,20 @@ assay_props,Fine silt (0.002 to 0.02 mm) (%),,
 assay_props,Mode of cultivation,,
 assay_props,EC (dS/m),,
 assay_props,USDA Soil texture classe,,
+assay_props,Temperature mean,,
+assay_props,Relative humidity mean,,
+assay_props,Relative humidity max.,,
+assay_props,Relative humidity min.,,
+assay_props,Total irrigation volume,,
+assay_props,Rainfall ,,
+assay_props,"Daily global 
+solar radiation (Mean Rs)",,
+assay_props,"Daily global 
+solar radiation (Total Rs)",,
+assay_props,"Reference crop 
+evapotranspiration (Mean Eto)",,
+assay_props,"Reference crop 
+evapotranspiration (Total Eto)",,
+assay_props,Mode of cultivation (brief description),,
+assay_props,Plant pruning,,
+assay_props,Number of stems by plant,,
