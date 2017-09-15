@@ -6,8 +6,8 @@ from django.test.utils import override_settings
 from vavilov.conf import settings
 from vavilov.db_management.images import add_or_load_image_to_db
 from vavilov.db_management.tests import load_test_data, TEST_DATA_DIR
-from vavilov.models import Cv, Cvterm, Accession, Observation, \
-    ObservationRelationship
+from vavilov.models import (Cv, Cvterm, Accession, Observation,
+                            ObservationRelationship)
 from vavilov.db_management.phenotype import (add_or_load_excel_related_observations,
                                              add_or_load_excel_traits,
                                              parse_qual_translator)

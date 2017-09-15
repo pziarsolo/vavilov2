@@ -64,6 +64,7 @@ def add_or_load_fieldbook_traits(fpath, assays):
 
 
 def add_or_load_fieldbook_fields(fpath, assay, accession_header,
+                                 plant_id_header='unique_id',
                                  synonym_headers=None,
                                  experimental_field_header=None,
                                  row_header=None, column_header=None,
@@ -73,7 +74,7 @@ def add_or_load_fieldbook_fields(fpath, assay, accession_header,
     group = Group.objects.get(name=assay.name)
     with transaction.atomic():
         for entry in csv.DictReader(fhand, dialect=trt_dialect):
-            plant_name = entry['unique_id']
+            plant_name = entry[plant_id_header]
             accession_code = entry.get(accession_header, None)
             if accession_code in (None, 'UNKNOWN', ''):
                 accession_code = entry.get(synonym_headers[0], None)

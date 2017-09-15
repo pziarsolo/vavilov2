@@ -54,17 +54,24 @@ def add_or_load_assays(fpath):
                 msg = 'user {} owner of assay {} does not exist'
                 raise RuntimeError(msg.format(owner, entry['name']))
             assay_data['owner'] = owner
-            assay, created = Assay.objects.get_or_create(**assay_data)
+            try:
+                assay = Assay.objects.get(name=assay_data['name'])
+            except Assay.DoesNotExist:
+                assay = None
 
-            if created:
-                for key, value in props.items():
-                    type_ = Cvterm.objects.get(cv__name='assay_props',
-                                               name=key)
-                    AssayProp.objects.create(assay=assay, type=type_,
-                                             value=value)
-                group, created = Group.objects.get_or_create(name=assay.name)
-                assign_perm('view_assay', group, assay)
-                group.user_set.add(owner)
+            if assay:
+                continue
+
+            assay = Assay.objects.create(**assay_data)
+
+            for key, value in props.items():
+                type_ = Cvterm.objects.get(cv__name='assay_props',
+                                           name=key)
+                AssayProp.objects.create(assay=assay, type=type_,
+                                         value=value)
+            group = Group.objects.get_or_create(name=assay.name)[0]
+            assign_perm('view_assay', group, assay)
+            group.user_set.add(owner)
 
 
 def add_or_load_observation(obs_entity, trait_name, assay_name, value,

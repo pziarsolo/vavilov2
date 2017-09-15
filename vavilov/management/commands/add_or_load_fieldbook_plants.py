@@ -12,6 +12,9 @@ class Command(BaseCommand):
         parser.add_argument('infhand', type=argparse.FileType('r'))
         parser.add_argument('-a', '--assay', required=True,
                             help='Assay where the traits are used')
+        parser.add_argument('-p', '--plant_id_header', required=False,
+                            default='unique_id',
+                            help='Plant id header in the file')
         parser.add_argument('-i', '--accession',
                             help='Accession header name')
         parser.add_argument('-e', '--exp_field',
@@ -36,9 +39,11 @@ class Command(BaseCommand):
         row_header = options['row']
         column_header = options['column']
         pot_number_header = options['pot_number']
+        plant_id_header = options['plant_id_header']
 
         add_or_load_fieldbook_fields(fhand.name, assay,
                                      accession_header=accession_header,
+                                     plant_id_header=plant_id_header,
                                      synonym_headers=synonym_headers,
                                      experimental_field_header=exp_fields_header,
                                      row_header=row_header,
