@@ -58,7 +58,7 @@
 		                    <td  class="key">{{shown_str}}</td>
 		                    <td>{{ prop_content}}</td>
 		                </tr>
-		              {% endif %}     
+		              {% endif %}
 		            {% endfor %}
 		            </table>
 		        </div>
@@ -67,10 +67,10 @@
 		        {% endwith %}
 		    </div>
         {% endwith %}
-    {% endif %}     	    
+    {% endif %}
 </section>
     {% if assays %}
-        <section class='clear'>    
+        <section class='clear'>
             <hr class='empty_line'>
             <h3> This Accession has been used in these assays</h3>
             {% render_table assays %}
@@ -87,18 +87,20 @@
 	        <span class="clear"></span>
 	</section>
     {% endif %}
-    {% include 'vavilov/galleria_js.html' with images=obs_images %}
+    {% if obs_images %}
+        {% include 'vavilov/galleria_js.html' with images=obs_images %}
+    {% endif %}
     {% if seedlots %}
         <hr class='empty_line'>
         <H3> Seed lots belongint to this accession</h3>
         {% render_table seedlots %}
-    
+
     {% endif %}
     {% if cross_experiments %}
         <hr class='empty_line'>
         <H3> This accession is part of this cross_experiments</h3>
         {% render_table cross_experiments %}
-    
+
     {% endif %}
-    
+
 {% endblock %}

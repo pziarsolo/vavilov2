@@ -1,17 +1,15 @@
 from os.path import join, dirname
 
-from vavilov.db_management.excel import excel_dict_reader
+from django.db.utils import IntegrityError
 
+from vavilov.db_management.excel import excel_dict_reader
 import vavilov_pedigree
 from vavilov_pedigree.models import (Accession, SeedLot, Plant, Assay,
                                      CrossExperiment, CrossExperimentSeedLot,
                                      PlantRelationship, CrossPlant, FATHER,
-    MOTHER)
-from collections import Counter
-
+                                     MOTHER)
 
 TEST_DATA_DIR = join(dirname(vavilov_pedigree.__file__), 'test', 'data')
-
 
 
 def add_or_load_accessions(fpath):
@@ -46,10 +44,14 @@ def add_or_load_plants(fpath):
 
         if plant_name and seedlot_name:
             seed_lot = SeedLot.objects.get(name=seedlot_name)
-            Plant.objects.get_or_create(seed_lot=seed_lot,
-                                        plant_name=plant_name,
-                                        experimental_field=glasshouse,
-                                        row=row_num, pot_number=pot_number)
+            try:
+                Plant.objects.get_or_create(seed_lot=seed_lot,
+                                            plant_name=plant_name,
+                                            experimental_field=glasshouse,
+                                            row=row_num, pot_number=pot_number)
+            except IntegrityError:
+                print(plant_name)
+                continue
 
 
 def add_or_load_plant_relationship(fpath):
@@ -63,9 +65,7 @@ def add_or_load_plant_relationship(fpath):
 
 
 def add_or_load_cross_experiments(fpath):
-    counter = Counter()
     for row in excel_dict_reader(fpath):
-
         father_accession = row['Father(Accession)']
         mother_accession = row['Mother(Accession)']
         father_plant = row['Father(plant)']
@@ -75,19 +75,28 @@ def add_or_load_cross_experiments(fpath):
         assay_name = row['Assay']
 
         cross_exp_desc = '{}x{}'.format(mother_accession, father_accession)
-        counter[cross_exp_desc] += 1
-        cross_exp_desc += '-{}'.format(counter[cross_exp_desc])
+
+        same_name_exps = CrossExperiment.objects.filter(description__icontains=cross_exp_desc).order_by('description')
+        if same_name_exps:
+            last_number = int(same_name_exps.last().description.split('-')[-1])
+        else:
+            last_number = 0
+
+        cross_exp_desc += '-{}'.format(last_number + 1)
 
         offspring_accession = row['OffspringAccession']
         offspring_description = row['OffspringDescription']
 
-
-        if father_plant and mother_plant and offspring and assay_name and cross_exp_desc:
+        if (father_plant and mother_plant and offspring and assay_name and
+                cross_exp_desc):
             try:
                 father_plant = Plant.objects.get(plant_name=father_plant)
             except Plant.DoesNotExist:
                 print(father_plant + ' does not exist')
                 continue
+            except Plant.MultipleObjectsReturned:
+                print(father_plant + ' multiple times')
+                raise
             try:
                 mother_plant = Plant.objects.get(plant_name=mother_plant)
             except Plant.DoesNotExist:
@@ -108,10 +117,13 @@ def add_or_load_cross_experiments(fpath):
             if error:
                 continue
 
-
             assay = Assay.objects.get_or_create(name=assay_name)[0]
-            cross_exp, created = CrossExperiment.objects.get_or_create(description=cross_exp_desc,
-                                                                       assay=assay)
+            try:
+                cross_exp, created = CrossExperiment.objects.get_or_create(description=cross_exp_desc,
+                                                                           assay=assay)
+            except IntegrityError:
+                print(cross_exp_desc)
+                raise
             if created:
                 CrossPlant.objects.get_or_create(cross=cross_exp, plant=father_plant,
                                                  type=FATHER)
@@ -132,10 +144,14 @@ def add_or_load_cross_experiments(fpath):
                 accession = Accession.objects.get_or_create(accession_number=offspring_accession)[0]
             else:
                 accession = None
-            offspring = SeedLot.objects.get_or_create(name=offspring,
-                                                      accession=accession,
-                                                      description=offspring_description,
-                                                      fruit=offspring_fruit)[0]
+            try:
+                offspring = SeedLot.objects.get_or_create(name=offspring,
+                                                          accession=accession,
+                                                          description=offspring_description,
+                                                          fruit=offspring_fruit)[0]
+            except IntegrityError:
+                print(offspring)
+                raise
 
             CrossExperimentSeedLot.objects.get_or_create(cross_experiment=cross_exp,
                                                          seed_lot=offspring)
