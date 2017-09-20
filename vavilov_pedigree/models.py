@@ -124,7 +124,7 @@ class SeedLot(models.Model):
 
 class Plant(models.Model):
     plant_id = models.AutoField(primary_key=True)
-    plant_name = models.CharField(max_length=255)
+    plant_name = models.CharField(max_length=255, unique=True)
     seed_lot = models.ForeignKey(SeedLot)
     experimental_field = models.CharField(max_length=255, null=True)
     row = models.CharField(max_length=10, null=True)

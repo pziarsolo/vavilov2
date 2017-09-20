@@ -14,6 +14,7 @@ def print_duration(msg, prev_time):
     print(msg + ': ' + str(round(now - prev_time, 2)))
     return now
 
+
 class Command(BaseCommand):
     help = 'load initial data into database'
 
@@ -50,3 +51,17 @@ class Command(BaseCommand):
 
         add_or_load_cross_experiments(join(dirpath, 'Crosses_F16NSF3_upv.xlsx'))
         prev_time = print_duration('Crosses_F16NSF3_upv.xlsx', prev_time)
+
+        # 2017 March
+        dirpath_2017march = join(dirpath, 'SEP_2017')
+        add_or_load_plants(join(dirpath_2017march, 'NSF2_PA01_March_2017_plants.xlsx'))
+        prev_time = print_duration('NSF2_PA01_March_2017_plants.xlsx', prev_time)
+
+        add_or_load_plants(join(dirpath_2017march, 'NSF3_AQ01_March_2017_plants.xlsx'))
+        prev_time = print_duration('NSF3_AQ01_March_2017_plants.xlsx', prev_time)
+
+        add_or_load_cross_experiments(join(dirpath_2017march, 'NSF2_PA01_March_2017_crosses.xlsx'))
+        prev_time = print_duration('NSF2_PA01_March_2017_crosses.xlsx', prev_time)
+
+        add_or_load_cross_experiments(join(dirpath_2017march, 'NSF3_AQ01_March_2017_crosses.xlsx'))
+        prev_time = print_duration('NSF3_AQ01_March_2017_crosses.xlsx', prev_time)
