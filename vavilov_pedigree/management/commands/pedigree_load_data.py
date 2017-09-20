@@ -65,3 +65,6 @@ class Command(BaseCommand):
 
         add_or_load_cross_experiments(join(dirpath_2017march, 'NSF3_AQ01_March_2017_crosses.xlsx'))
         prev_time = print_duration('NSF3_AQ01_March_2017_crosses.xlsx', prev_time)
+
+        add_or_load_cross_experiments(join(dirpath_2017march, 'CRUCES_ESPECIFICOS-sep2017.xlsx'))
+        prev_time = print_duration('CRUCES_ESPECIFICOS-sep2017.xlsx', prev_time)
