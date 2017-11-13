@@ -130,10 +130,8 @@ def add_or_load_cvterm(fpath):
                 msg = 'cv {} not in the database'.format(entry['cv'])
                 raise RuntimeError(msg)
 
-            Cvterm.objects.get_or_create(
-                cv=cv,
-                name=entry['name'].strip(),
-                definition=entry['definition'])
+            Cvterm.objects.get_or_create(cv=cv, name=entry['name'].strip(),
+                                         definition=entry['definition'])
             if dbxref:
                 db_name, accession = dbxref.split(':')
                 db = Db.objects.get(name=db_name)

@@ -69,7 +69,7 @@ class Cvterm(models.Model):
     cvterm_id = models.AutoField(primary_key=True)
     cv = models.ForeignKey(Cv)
     name = models.CharField(db_index=True, max_length=255)
-    definition = models.CharField(max_length=255, null=True)
+    definition = models.TextField(null=True)
     dbxref = models.ForeignKey(Dbxref, null=True)
 
     class Meta:
