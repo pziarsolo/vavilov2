@@ -99,3 +99,9 @@ def zip_lists(a, b):
     return zip(a, b)
 
 register.filter('zip', zip_lists, is_safe=True)
+
+
+def get_item(dictionary, key):
+    return dictionary.get(key, '')
+
+register.filter('get_item', get_item, is_safe=True)

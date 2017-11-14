@@ -137,7 +137,7 @@ def add_or_load_excel_traits(fpath, assays):
                         prop_type = Cvterm.objects.get(cv__name=TRAIT_PROPS_CV,
                                                        name=prop)
                     except Cvterm.DoesNotExist:
-                        print(prop)
+                        print('#{}#'.format(prop))
                         raise
                     try:
                         TraitProp.objects.create(trait=trait, type=prop_type,
