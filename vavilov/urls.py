@@ -8,12 +8,13 @@ from vavilov.views.observation import (ObservationImageList, ObservationList,
                                        ObservationEntityDetail)
 from vavilov.views.accession import AccessionList, AccessionDetail
 from vavilov.views.plant import PlantDetail
-from vavilov.views.assay import AssayDetail
+from vavilov.views.assay import AssayDetail, AssayList
 from vavilov.views.trait import TraitDetail
 from vavilov.views.api import accession_numbers, taxons, plants, traits
 
 urlpatterns = [
     url(r'^plant/(?P<plant_name>.+)/$', PlantDetail.as_view(), name='plant-detail'),
+    url(r'^assays/$', AssayList.as_view(), name='assay-list'),
     url(r'^assay/(?P<name>.+)/$', AssayDetail.as_view(), name='assay-detail'),
     url(r'^trait/(?P<trait_id>.+)/$', TraitDetail.as_view(), name='trait-detail'),
 
