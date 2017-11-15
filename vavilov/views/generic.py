@@ -16,12 +16,13 @@ logger = logging.getLogger(APP_LOGGER)
 
 def search_criteria_to_get_parameters(search_criteria):
     get_params = ''
-    for key, value in search_criteria.items():
-        if isinstance(value, list):
-            for val in value:
-                get_params += "&{}={}".format(key, val)
-        else:
-            get_params += "&{}={}".format(key, value)
+    if search_criteria:
+        for key, value in search_criteria.items():
+            if isinstance(value, list):
+                for val in value:
+                    get_params += "&{}={}".format(key, val)
+            else:
+                get_params += "&{}={}".format(key, value)
     return get_params
 
 
@@ -65,7 +66,7 @@ class SearchListView(View):
         else:
             self.object_list = self.model.objects.none()
             search_criteria = None
-        if getdata:
+        if not getdata:
             criteria = search_criteria_to_get_parameters(search_criteria)
         else:
             criteria = None
