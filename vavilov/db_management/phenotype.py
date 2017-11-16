@@ -112,9 +112,9 @@ def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
 def add_or_load_excel_traits(fpath, assays):
     with transaction.atomic():
         for row in excel_dict_reader(fpath):
-            name = row['name']
-            type_ = row['type']
-            description = row.get('description', None)
+            name = row.pop('name')
+            type_ = row.pop('type')
+            #description = row.get('description', None)
             try:
                 type_ = Cvterm.objects.get(name=type_, cv__name=TRAIT_TYPES_CV)
             except Cvterm.DoesNotExist:
@@ -133,11 +133,21 @@ def add_or_load_excel_traits(fpath, assays):
                 if created:
                     assign_perm('view_trait', assay.owner, trait)
 
-            if trait_created and description:
-                desc_type = Cvterm.objects.get(cv__name=TRAIT_PROPS_CV,
-                                               name='description')
-                TraitProp.objects.create(trait=trait, type=desc_type,
-                                         value=description)
+            if trait_created:
+                for prop, prop_value in row.items():
+                    if not prop_value:
+                        continue
+                    try:
+                        prop_type = Cvterm.objects.get(cv__name=TRAIT_PROPS_CV,
+                                                       name=prop)
+                    except Cvterm.DoesNotExist:
+                        print('#{}#'.format(prop))
+                        raise
+                    try:
+                        TraitProp.objects.create(trait=trait, type=prop_type,
+                                                 value=prop_value)
+                    except Exception:
+                        print(trait.name, prop_type.name, prop_value)
 
 
 def add_or_load_plants(fpath, assay, experimental_field_header=None,
