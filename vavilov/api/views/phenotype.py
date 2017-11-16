@@ -1,5 +1,4 @@
-from rest_framework.filters import (DjangoObjectPermissionsFilter,
-                                    DjangoFilterBackend)
+from rest_framework.filters import DjangoObjectPermissionsFilter
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ViewSet
 
@@ -18,6 +17,7 @@ from vavilov.db_management.fieldbook import (to_fieldbook_local_time,
 from django.utils.datastructures import MultiValueDictKeyError
 from django.contrib.auth.models import Group
 from rest_framework import status
+from django_filters.rest_framework.backends import DjangoFilterBackend
 
 
 class AssayViewSet(ModelViewSet):
@@ -25,8 +25,7 @@ class AssayViewSet(ModelViewSet):
     queryset = Assay.objects.all()
     serializer_class = AssaySerializer
     permission_classes = (CustomObjectPermissions,)
-    filter_backends = (DjangoObjectPermissionsFilter,
-                       DjangoFilterBackend)
+    filter_backends = (DjangoObjectPermissionsFilter, DjangoFilterBackend)
 
     filter_class = AssayFilter
 
@@ -35,8 +34,7 @@ class AssayPropViewSet(ModelViewSet):
     queryset = AssayProp.objects.all()
     serializer_class = AssayPropSerializer
     permission_classes = (CustomObjectPermissions,)
-    filter_backends = (DjangoObjectPermissionsFilter,
-                       DjangoFilterBackend)
+    filter_backends = (DjangoObjectPermissionsFilter, DjangoFilterBackend)
 
 
 class PlantViewSet(ModelViewSet):
@@ -44,8 +42,7 @@ class PlantViewSet(ModelViewSet):
     queryset = Plant.objects.all()
     serializer_class = PlantSerializer
     permission_classes = (CustomObjectPermissions,)
-    filter_backends = (DjangoObjectPermissionsFilter,
-                       DjangoFilterBackend)
+    filter_backends = (DjangoObjectPermissionsFilter, DjangoFilterBackend)
 
     filter_class = PlantFilter
 
@@ -54,8 +51,7 @@ class ObservationEntityViewSet(ModelViewSet):
     queryset = ObservationEntity.objects.all()
     serializer_class = ObservationEntitySerializer
     permission_classes = (CustomObjectPermissions,)
-    filter_backends = (DjangoObjectPermissionsFilter,
-                       DjangoFilterBackend)
+    filter_backends = (DjangoObjectPermissionsFilter, DjangoFilterBackend)
 
     filter_class = PlantFilter
 
@@ -130,7 +126,6 @@ class FieldBookObservationViewSet(ViewSet):
             except Assay.DoesNotExist as error:
                 return Response(exception=error, status=status.HTTP_400_BAD_REQUEST,
                                 data={'detail': str(error)})
-
 
 #         if len(request.data) != 1:
         data = {'msg': 'no data provided'}

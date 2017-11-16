@@ -1,3 +1,4 @@
+import copy
 from django.contrib.auth.models import Permission
 
 from guardian.conf.settings import ANONYMOUS_USER_NAME
@@ -8,7 +9,6 @@ if BY_OBJECT_OBS_PERM:
     from guardian.mixins import PermissionRequiredMixin
 else:
     from django.contrib.auth.mixins import PermissionRequiredMixin
-
 
 PUBLIC_VIEW_PERMISSIONS = ['View Accession', 'View Passport', 'View Location',
                            'View Accession Relationship',
@@ -23,9 +23,10 @@ VIEW_PERMISIONS = PUBLIC_VIEW_PERMISSIONS + ['View Assay', 'View Plant',
 
 def add_view_permissions(user, filter_perms=None):
     if user.username == ANONYMOUS_USER_NAME:
-        perms = PUBLIC_VIEW_PERMISSIONS
+        perms = copy.copy(PUBLIC_VIEW_PERMISSIONS)
         if not ACCESSIONS_ARE_PUBLIC:
-           perms.pop(perms.index('View Accession'))
+            perms.pop(perms.index('View Accession'))
+
     else:
         perms = VIEW_PERMISIONS
 

@@ -68,11 +68,12 @@ class AccessionTest(TestCase):
 
     def test_observations(self):
         acc = Accession.objects.get(accession_number='BGV000928')
-        assert acc.observations(self.user).count() == 6
+        assert acc.observations(self.user).count() == 7
         assert acc.observations(self.user2).count() == 0
 
 
 class PhenotypeTest(TestCase):
+
     def setUp(self):
         load_test_data()
         self.user = User.objects.get(username='user')
@@ -84,13 +85,13 @@ class PhenotypeTest(TestCase):
         self.assertEqual(assay.get_absolute_url(), '/assay/NSF1/')
         self.assertEqual(assay.props, {'campaign': 'NSF-March-2016'})
         self.assertEqual(assay.owner, self.user)
-        self.assertEqual(len(assay.traits(user=self.user)), 3)
-        self.assertEqual(assay.plants(self.user).count(), 18)
-        self.assertEqual(assay.plants(self.admin).count(), 18)
+        self.assertEqual(len(assay.traits(user=self.user)), 11)
+        self.assertEqual(assay.plants(self.user).count(), 25)
+        self.assertEqual(assay.plants(self.admin).count(), 25)
         self.assertEqual(assay.plants(self.user2).count(), 0)
 
-        self.assertEqual(assay.observations(self.user).count(), 13)
-        self.assertEqual(assay.observations(self.admin).count(), 13)
+        self.assertEqual(assay.observations(self.user).count(), 14)
+        self.assertEqual(assay.observations(self.admin).count(), 14)
         self.assertEqual(assay.observations(self.user2).count(), 0)
 
     def test_traits(self):
@@ -99,8 +100,8 @@ class PhenotypeTest(TestCase):
         self.assertEqual(trait.description, 'grow habit')
 
         trait = Trait.objects.get(name='Area', assaytrait__assay__name='NSF1')
-        self.assertEqual(trait.observations(self.user).count(), 12)
-        self.assertEqual(trait.observations(self.admin).count(), 12)
+        self.assertEqual(trait.observations(self.user).count(), 13)
+        self.assertEqual(trait.observations(self.admin).count(), 13)
         self.assertEqual(trait.observations(self.user2).count(), 0)
 
     def test_plants(self):

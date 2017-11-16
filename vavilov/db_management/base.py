@@ -20,10 +20,8 @@ from vavilov.models import (Accession, Country, Passport, Location, Cvterm,
                             AccessionSynonym)
 from vavilov.permissions import add_view_permissions
 
-
 INITIAL_DATA_DIR = join(dirname(vavilov.__file__), 'data')
 SHARED_INITIAL_DATA_DIR = join(INITIAL_DATA_DIR, 'shared')
-
 
 SHARED_INITIAL_DATA_TO_LOAD = [('cv', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cv.csv')),
                                ('cvterm', join(SHARED_INITIAL_DATA_DIR, 'vavilov_cvterm_biological_status.csv')),

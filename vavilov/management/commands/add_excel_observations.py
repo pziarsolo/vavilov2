@@ -2,7 +2,7 @@ import argparse
 
 from django.core.management.base import BaseCommand
 
-from vavilov.db_management.phenotype import (add_or_load_excel_observations,
+from vavilov.db_management.phenotype import (add_excel_observations,
                                              parse_qual_translator)
 
 
@@ -74,7 +74,7 @@ class Command(BaseCommand):
         else:
             qual_translator = None
 
-        add_or_load_excel_observations(fhand.name, observer=observer,
+        add_excel_observations(fhand.name, observer=observer,
                                        assay=assay, plant_part=plant_part,
                                        value_header=value_header,
                                        assay_header=assay_header,

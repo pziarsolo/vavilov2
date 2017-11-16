@@ -1,5 +1,4 @@
-from rest_framework.filters import (DjangoObjectPermissionsFilter,
-                                    DjangoFilterBackend)
+from rest_framework.filters import (DjangoObjectPermissionsFilter)
 from rest_framework.viewsets import ModelViewSet
 
 from vavilov.api.filters import AccessionFilter
@@ -11,6 +10,7 @@ from vavilov.api.serializers import (AccessionSerializer,
                                      AccessionTaxaSerializer)
 from vavilov.models import (Accession, AccessionRelationship, AccessionSynonym,
                             Passport, Location, AccessionTaxa)
+from django_filters.rest_framework.backends import DjangoFilterBackend
 
 
 class AccessionViewSet(ModelViewSet):
@@ -18,8 +18,7 @@ class AccessionViewSet(ModelViewSet):
     queryset = Accession.objects.all()
     serializer_class = AccessionSerializer
     permission_classes = (CustomObjectPermissions,)
-    filter_backends = (DjangoObjectPermissionsFilter,
-                       DjangoFilterBackend)
+    filter_backends = (DjangoObjectPermissionsFilter, DjangoFilterBackend)
 
     filter_class = AccessionFilter
 

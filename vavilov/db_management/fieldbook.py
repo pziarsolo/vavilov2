@@ -10,13 +10,12 @@ from guardian.shortcuts import assign_perm
 
 from vavilov.conf import settings
 from vavilov.conf.settings import OUR_TIMEZONE
-from vavilov.db_management.phenotype import (add_or_load_observation,
+from vavilov.db_management.phenotype import (add_observation,
                                              suggest_obs_entity_name)
 from vavilov.models import (Assay, Cvterm, Trait, TraitProp, Plant,
                             AssayPlant, Accession, AssayTrait,
                             Observation, ObservationEntity,
                             ObservationEntityPlant)
-
 
 FIELDBOOK_TO_DB_TYPE_TRANSLATOR = {'categorical': 'text', 'numeric': 'numeric',
                                    'percent': 'percent', 'date': 'date',
@@ -155,9 +154,8 @@ def add_fieldbook_observations(entry, plant_part, assay, group=None,
                                               plant=plant)
         assign_perm('view_obs_entity', group, obs_entity)
 
-    observation, created = add_or_load_observation(obs_entity, trait, assay,
-                                                   value, creation_time,
-                                                   observer)
+    observation = add_observation(obs_entity, trait, assay, value, creation_time,
+                                  observer, force=False)
 
     assign_perm('view_observation', group, observation)
     return observation, created
@@ -201,7 +199,6 @@ ON o.obs_entity_id=oe.obs_entity_id and oe.obs_entity_id IN {}
 def to_fieldbook_local_time(utf_datetime):
     local_datetimetime = OUR_TIMEZONE.normalize(utf_datetime.astimezone(OUR_TIMEZONE))
     return local_datetimetime.strftime('%Y-%m-%d %H:%M:%S%z')
-
 
 # def _encode_plant_id_for_sql(plants):
 #     plantquery = Plant.objects.filter(unique_id__in=plants).values('plant_id')

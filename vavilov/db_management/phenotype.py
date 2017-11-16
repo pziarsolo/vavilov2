@@ -19,7 +19,6 @@ from vavilov.models import (Observation, Trait, Assay, AssayPlant,
                             ObservationEntityPlant, ObservationImages,
                             ObservationRelationship)
 
-
 TRAIT_PROPS_CV = 'trait_props'
 TRAIT_TYPES_CV = 'trait_types'
 
@@ -74,8 +73,8 @@ def add_or_load_assays(fpath):
             group.user_set.add(owner)
 
 
-def add_or_load_observation(obs_entity, trait_name, assay_name, value,
-                            creation_time, observer=None):
+def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
+                    observer=None, force=True):
     try:
         assay = Assay.objects.get(name=assay_name)
     except Assay.DoesNotExist:
@@ -94,15 +93,20 @@ def add_or_load_observation(obs_entity, trait_name, assay_name, value,
         msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
         raise ValueError(msg)
     try:
-        obs, created = Observation.objects.get_or_create(obs_entity=obs_entity,
-                                                         trait=trait, assay=assay,
-                                                         value=value,
-                                                         creation_time=creation_time,
-                                                         observer=observer)
+        if force:
+            obs = Observation.objects.create(obs_entity=obs_entity, trait=trait,
+                                             assay=assay, value=value,
+                                             creation_time=creation_time,
+                                             observer=observer)
+        else:
+            obs = Observation.objects.get_or_create(obs_entity=obs_entity, trait=trait,
+                                                    assay=assay, value=value,
+                                                    creation_time=creation_time,
+                                                    observer=observer)
     except DataError:
         print(value, observer)
         raise
-    return obs, created
+    return obs
 
 
 def add_or_load_excel_traits(fpath, assays):
@@ -332,20 +336,20 @@ def parse_qual_translator(fhand):
     return trait_values
 
 
-def add_or_load_excel_observations(fpath, observer=None, assay=None,
-                                   plant_part=None,
-                                   accession_header='accession',
-                                   value_header='value', date_header='Fecha',
-                                   observer_header='Autor',
-                                   assay_header='assay',
-                                   plant_part_header='plant_part',
-                                   obs_uid_header='part_uid',
-                                   plant_name_header='plant_name',
-                                   plant_number_header='plant_number',
-                                   trait_header='trait',
-                                   view_perm_group=None,
-                                   raise_on_error=True,
-                                   qualitative_translator=None):
+def add_excel_observations(fpath, observer=None, assay=None,
+                           plant_part=None,
+                           accession_header='accession',
+                           value_header='value', date_header='Fecha',
+                           observer_header='Autor',
+                           assay_header='assay',
+                           plant_part_header='plant_part',
+                           obs_uid_header='part_uid',
+                           plant_name_header='plant_name',
+                           plant_number_header='plant_number',
+                           trait_header='trait',
+                           view_perm_group=None,
+                           raise_on_error=True,
+                           qualitative_translator=None):
     with transaction.atomic():
         for row in excel_dict_reader(fpath):
             value = row.get(value_header, None)
@@ -397,8 +401,8 @@ def add_or_load_excel_observations(fpath, observer=None, assay=None,
                         continue
 
             try:
-                obs = add_or_load_observation(obs_entity, trait_name, assayname,
-                                              value, creation_time, observer)[0]
+                obs = add_observation(obs_entity, trait_name, assayname,
+                                      value, creation_time, observer)
                 assign_perm('view_observation', perm_gr, obs)
             except ValueError as error:
                 if raise_on_error:
@@ -503,14 +507,14 @@ def _process_morpho_points(entry):
     return ('Morphometric points', morpho_points)
 
 
-def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
-                                           plant_header=PLANT_HEADER,
-                                           plant_part_header=PLANT_PART_HEADER,
-                                           accession_header=ACCESSION_HEADER,
-                                           photo_header=PHOTO_HEADER,
-                                           perm_gr=None,
-                                           one_part_per_plant=False,
-                                           qual_translator=None):
+def add_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
+                                   plant_header=PLANT_HEADER,
+                                   plant_part_header=PLANT_PART_HEADER,
+                                   accession_header=ACCESSION_HEADER,
+                                   photo_header=PHOTO_HEADER,
+                                   perm_gr=None,
+                                   one_part_per_plant=False,
+                                   qual_translator=None):
 
     rel_type = Cvterm.objects.get(cv__name='relationship_types',
                                   name='obtained_from')
@@ -570,13 +574,13 @@ def add_or_load_excel_related_observations(fpath, assay_header=ASSAY_HEADER,
                     except KeyError:
                         raise KeyError('{} not in {} trait'.format(value, trait_name))
 
-                observation, created = add_or_load_observation(obs_entity=obs_entity,
-                                                               trait_name=trait_name,
-                                                               assay_name=assay_name, value=value,
-                                                               creation_time=creation_time,
-                                                               observer=observer)
+                observation = add_observation(obs_entity=obs_entity,
+                                              trait_name=trait_name,
+                                              assay_name=assay_name, value=value,
+                                              creation_time=creation_time,
+                                              observer=observer)
 
-                if created and obs_image:
+                if obs_image:
                     ObservationRelationship.objects.create(subject=observation,
                                                            object=obs_image.observation,
                                                            type=rel_type)

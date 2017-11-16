@@ -8,7 +8,7 @@ from vavilov.db_management.base import (load_initial_data, INITIAL_DATA_DIR,
                                         add_or_load_persons, add_accessions)
 from vavilov.db_management.excel import (write_excel_observations_skeleton,)
 from vavilov.db_management.fieldbook import (OUR_TIMEZONE)
-from vavilov.db_management.phenotype import (add_or_load_excel_observations,
+from vavilov.db_management.phenotype import (add_excel_observations,
                                              add_or_load_excel_traits,
                                              add_or_load_assays,
                                              add_or_load_plants)
@@ -33,14 +33,13 @@ class ExcelLoadTests(TestCase):
     def test_add_excel_traits(self):
         add_or_load_excel_traits(join(TEST_DATA_DIR, 'traits.xlsx'),
                                  assays=['NSF1', 'NSF2'])
-
-        assert Trait.objects.all().count() == 3
+        assert Trait.objects.all().count() == 11
 
     def test_add_excel_observations(self):
         add_or_load_excel_traits(join(TEST_DATA_DIR, 'traits.xlsx'),
                                  assays=['NSF1', 'NSF2'])
         assert len(Observation.objects.all()) == 0
-        add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
+        add_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
 
         obs = Observation.objects.all()
         assert obs.count() == 12
@@ -52,9 +51,9 @@ class ExcelLoadTests(TestCase):
         assert creation_time.tzname() == 'CEST'
         assert str(creation_time).startswith("2016-06-07 13:34:")
 
-        add_or_load_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
+        add_excel_observations(join(TEST_DATA_DIR, 'observations1.xlsx'))
         obs = Observation.objects.all()
-        assert obs.count() == 12
+        assert obs.count() == 24
 
 
 class ExcelCreateTest(TestCase):

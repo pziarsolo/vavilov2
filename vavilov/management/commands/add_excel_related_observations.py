@@ -3,7 +3,7 @@ import argparse
 from django.core.management.base import BaseCommand
 
 from vavilov.db_management.phenotype import (parse_qual_translator,
-                                             add_or_load_excel_related_observations,
+                                             add_excel_related_observations,
                                              PHOTO_HEADER, ASSAY_HEADER,
                                              PLANT_HEADER, PLANT_PART_HEADER,
                                              ACCESSION_HEADER)
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         else:
             qual_translator = None
 
-        add_or_load_excel_related_observations(fhand.name, assay_header=assay_header,
+        add_excel_related_observations(fhand.name, assay_header=assay_header,
                                                plant_header=plant_name_header,
                                                plant_part_header=plant_part_header,
                                                accession_header=accession_header,

@@ -2,9 +2,9 @@ from django.http.response import Http404
 
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS, BasePermission
-from rest_framework.compat import is_authenticated
 
 from guardian.utils import get_anonymous_user
+from guardian.compat import is_authenticated
 
 
 class UserPermission(permissions.BasePermission):

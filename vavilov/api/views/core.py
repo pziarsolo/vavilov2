@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import status
 from rest_framework.decorators import detail_route
-from rest_framework.filters import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -16,6 +15,7 @@ from vavilov.api.serializers import (PersonSerializer,
                                      CountrySerializer, CvSerializer, DbSerializer)
 from vavilov.models import (Person, PersonRelationship,
                             TaxaRelationship, Taxa, Cvterm, Country, Cv, Db)
+from django_filters.rest_framework.backends import DjangoFilterBackend
 
 
 class UserViewSet(ModelViewSet):
