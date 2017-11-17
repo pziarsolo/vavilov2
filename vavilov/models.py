@@ -641,6 +641,7 @@ class Plant(models.Model):
     row = models.CharField(max_length=10, null=True)
     column = models.CharField(max_length=10, null=True)
     pot_number = models.CharField(max_length=10, null=True)
+    seed_lot = models.CharField(max_length=10, null=True)
 
     class Meta:
         db_table = 'vavilov_plant'

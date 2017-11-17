@@ -67,7 +67,8 @@ def add_or_load_fieldbook_fields(fpath, assay, accession_header,
                                  synonym_headers=None,
                                  experimental_field_header=None,
                                  row_header=None, column_header=None,
-                                 pot_number_header=None):
+                                 pot_number_header=None,
+                                 seedlot_header='seedlot'):
     fhand = open(fpath)
     assay = Assay.objects.get(name=assay)
     group = Group.objects.get(name=assay.name)
@@ -81,6 +82,7 @@ def add_or_load_fieldbook_fields(fpath, assay, accession_header,
             row = entry.get(row_header, None)
             column = entry.get(column_header, None)
             pot_number = entry.get(pot_number_header, None)
+            seed_lot = entry.get(seedlot_header, None)
 
             new_plant = False
             try:
@@ -99,7 +101,8 @@ def add_or_load_fieldbook_fields(fpath, assay, accession_header,
                                          accession=accession,
                                          experimental_field=exp_field,
                                          row=row, column=column,
-                                         pot_number=pot_number)
+                                         pot_number=pot_number,
+                                         seed_lot=seed_lot)
             assign_perm('view_plant', group, plant)
             AssayPlant.objects.create(plant=plant, assay=assay)
 
