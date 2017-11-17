@@ -328,9 +328,15 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
             assign_perm('view_obs_entity', perm_gr, obs_ent)
             plants = Plant.objects.filter(accession=accession,
                                           assayplant__assay=assay)
+            if not plants:
+                plant_name = obs_entity_name
+                plant = Plant.objects.create(plant_name=plant_name,
+                                             accession=accession)
+                plants = [plant]
             for plant in plants:
                 ObservationEntityPlant.objects.create(obs_entity=obs_ent,
                                                       plant=plant)
+
     return obs_ent
 
 
