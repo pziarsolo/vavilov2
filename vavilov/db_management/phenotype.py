@@ -102,7 +102,7 @@ def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
             obs = Observation.objects.get_or_create(obs_entity=obs_entity, trait=trait,
                                                     assay=assay, value=value,
                                                     creation_time=creation_time,
-                                                    observer=observer)
+                                                    observer=observer)[0]
     except DataError:
         print(value, observer)
         raise
@@ -328,9 +328,15 @@ def get_or_create_obs_entity(accession_number, assay_name, plant_part,
             assign_perm('view_obs_entity', perm_gr, obs_ent)
             plants = Plant.objects.filter(accession=accession,
                                           assayplant__assay=assay)
+            if not plants:
+                plant_name = obs_entity_name
+                plant = Plant.objects.create(plant_name=plant_name,
+                                             accession=accession)
+                plants = [plant]
             for plant in plants:
                 ObservationEntityPlant.objects.create(obs_entity=obs_ent,
                                                       plant=plant)
+
     return obs_ent
 
 
