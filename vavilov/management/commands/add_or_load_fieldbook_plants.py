@@ -27,6 +27,7 @@ class Command(BaseCommand):
                             help='Pot number header name')
         parser.add_argument('-s', '--synonym', nargs='?',
                             help='synonym header name')
+        parser.add_argument('-d', '--seedlot', help='seedlot name')
 
     def handle(self, *args, **options):
         fhand = options['infhand']
@@ -40,6 +41,7 @@ class Command(BaseCommand):
         column_header = options['column']
         pot_number_header = options['pot_number']
         plant_id_header = options['plant_id_header']
+        seedlot_header = options['seedlot']
 
         add_or_load_fieldbook_fields(fhand.name, assay,
                                      accession_header=accession_header,
@@ -48,4 +50,5 @@ class Command(BaseCommand):
                                      experimental_field_header=exp_fields_header,
                                      row_header=row_header,
                                      column_header=column_header,
-                                     pot_number_header=pot_number_header)
+                                     pot_number_header=pot_number_header,
+                                     seedlot_header=seedlot_header)
