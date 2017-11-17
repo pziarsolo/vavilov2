@@ -102,7 +102,7 @@ def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
             obs = Observation.objects.get_or_create(obs_entity=obs_entity, trait=trait,
                                                     assay=assay, value=value,
                                                     creation_time=creation_time,
-                                                    observer=observer)
+                                                    observer=observer)[0]
     except DataError:
         print(value, observer)
         raise
