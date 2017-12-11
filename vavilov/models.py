@@ -4,6 +4,7 @@ import operator
 from os.path import join
 import logging
 from time import time
+import json
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -825,7 +826,29 @@ class Observation(models.Model):
 
     @property
     def value_beauty(self):
-        return self.value
+        trait_type = self.trait.type.name
+        if trait_type == 'LAB_color':
+            val = eval(self.value)
+            val = ','.join(['{}:{:.2f}'.format(key, value) for key, value in val.items()])
+            return val
+        elif trait_type == 'RGB_color':
+            val = eval(self.value)
+            nums = []
+            for key in ('R', 'G', 'B', 'lum'):
+                num = val.get(key)
+                if num:
+                    nums.append('{}:{:.2f}'.format(key, num))
+            return ','.join(nums)
+        elif trait_type == 'morphometric_points':
+            val = eval(self.value)
+            vals = []
+            for index, data in enumerate(val):
+                pos = index + 1
+                vals.append('{}:{}-{}'.format(pos, data.get('{}x'.format(pos)),
+                                              data.get('{}y'.format(pos))))
+            return ','.join(vals)
+        else:
+            return self.value
 
 
 def get_photo_dir(instance, filename):
