@@ -3,9 +3,9 @@ from django_tables2.utils import A
 import django_tables2 as tables
 from django_tables2.config import RequestConfig
 
-from vavilov.conf.settings import ACCESSION_TABLE_FIELDS
+from vavilov.conf.settings import (ACCESSION_TABLE_FIELDS,
+                                   OBSERVATION_TABLE_FIELDS)
 from vavilov.views.generic import calc_duration
-
 
 value_template = '''{% if record.obtained_from.image %}
 {{record.value_beauty|striptags|safe}}(<a href='/media/{{record.obtained_from.image}}' onclick="window.open('/media/{{record.obtained_from.image}}', 'newwindow', 'width=800, height=600'); return false;">image_origen</a>)
@@ -15,29 +15,38 @@ value_template = '''{% if record.obtained_from.image %}
 
 value_template = value_template.replace('\n', '')
 
+
 class ObservationsTable(tables.Table):
-    Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
-                                  accessor=A('accession.accession_number'),
-                                  orderable=False, verbose_name='Accession')
-    Obs_entity = tables.LinkColumn('obs_entity-detail', args=[A('obs_entity.name')],
-                                   accessor=A('obs_entity.name'),
-                                   orderable=True,
-                                   verbose_name='Observation entity')
-    plant_part = tables.Column('Plant part', accessor=A('obs_entity.part.name'),
-                               default='', orderable=True)
-    assay = tables.LinkColumn('assay-detail', args=[A('assay.name')],
-                              accessor=A('assay.name'),
-                              orderable=True, verbose_name='Assay')
-    trait = tables.LinkColumn('trait-detail', args=[A('trait.trait_id')],
-                              accessor=A('trait.name'),
-                              orderable=True, verbose_name='Trait')
-    value = tables.TemplateColumn(value_template, accessor=A('value'),
-                                  default='', orderable=True)
-    observer = tables.Column('Observer', accessor=A('observer'),
-                             default='', orderable=True)
-    creation_time = tables.Column('Creation Time',
-                                  accessor=A('creation_time'),
-                                  default='', orderable=True)
+    if 'accession' in OBSERVATION_TABLE_FIELDS:
+        Accession = tables.LinkColumn('accession-detail', args=[A('accession.accession_number')],
+                                      accessor=A('accession.accession_number'),
+                                      orderable=False, verbose_name='Accession')
+    if 'obs_entity' in OBSERVATION_TABLE_FIELDS:
+        Obs_entity = tables.LinkColumn('obs_entity-detail', args=[A('obs_entity.name')],
+                                       accessor=A('obs_entity.name'),
+                                       orderable=True,
+                                       verbose_name='Observation entity')
+    if 'plant_part' in OBSERVATION_TABLE_FIELDS:
+        plant_part = tables.Column('Plant part', accessor=A('obs_entity.part.name'),
+                                   default='', orderable=True)
+    if 'assay' in OBSERVATION_TABLE_FIELDS:
+        assay = tables.LinkColumn('assay-detail', args=[A('assay.name')],
+                                  accessor=A('assay.name'),
+                                  orderable=True, verbose_name='Assay')
+    if 'trait' in OBSERVATION_TABLE_FIELDS:
+        trait = tables.LinkColumn('trait-detail', args=[A('trait.trait_id')],
+                                  accessor=A('trait.name'),
+                                  orderable=True, verbose_name='Trait')
+    if 'value' in OBSERVATION_TABLE_FIELDS:
+        value = tables.TemplateColumn(value_template, accessor=A('value'),
+                                      default='', orderable=True)
+    if 'observer' in OBSERVATION_TABLE_FIELDS:
+        observer = tables.Column('Observer', accessor=A('observer'),
+                                 default='', orderable=True)
+    if 'creation_time' in OBSERVATION_TABLE_FIELDS:
+        creation_time = tables.Column('Creation Time',
+                                      accessor=A('creation_time'),
+                                      default='', orderable=True)
 
     class Meta:
         attrs = {"class": "searchresult"}

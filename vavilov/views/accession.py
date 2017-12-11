@@ -60,7 +60,7 @@ def filter_accessions(search_criteria, user=None):
     else:
         if not user.has_perm('vavilov.view_accession'):
             query = query.none()
-    
+
     query = query.filter(type__name='internal')
     return query
 

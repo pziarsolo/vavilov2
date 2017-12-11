@@ -34,7 +34,6 @@ MAX_OBS_TO_EXCEL = getattr(settings, 'VAVILOV_MAX_OBS_TO_EXCEL', 2000)
 # Phenotype photos dir path
 PHENO_PHOTO_DIR = getattr(settings, 'VAVILOV_PHENO_PHOTO_DIR', None)
 
-
 DEFAULT_ACCESSION_SEARCH_FIELDS = ['accession', 'taxa', 'country', 'region',
                                    'biological_status', 'collecting_source']
 
@@ -47,5 +46,12 @@ DEFAULT_ACCESSION_TABLE_FIELDS = ['accession_number', 'collecting_number',
 
 ACCESSION_TABLE_FIELDS = getattr(settings, 'VAVILOV_ACCESSION_TABLE_FIELDS',
                                  DEFAULT_ACCESSION_TABLE_FIELDS)
+
+DEFAULT_OBSERVATION_TABLE_FIELDS = ['accession', 'obs_entity', 'plant_part',
+                                    'assay', 'trait', 'value', 'observer',
+                                    'creation_time']
+
+OBSERVATION_TABLE_FIELDS = getattr(settings, 'VAVILOV_OBSERVATION_TABLE_FIELDS',
+                                   DEFAULT_OBSERVATION_TABLE_FIELDS)
 
 EXCLUDED_FIELDBOOK_TRAITS_TO_LOAD_IN_DB = ['Photos', 'Audio']
