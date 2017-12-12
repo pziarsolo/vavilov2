@@ -19,6 +19,7 @@ from vavilov.models import (Observation, Trait, Assay, AssayPlant,
                             ObservationEntityPlant, ObservationImages,
                             ObservationRelationship)
 
+NOT_ALLOWED_VALUES = ('.',)
 TRAIT_PROPS_CV = 'trait_props'
 TRAIT_TYPES_CV = 'trait_types'
 
@@ -92,6 +93,11 @@ def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
         msg = 'This assay {} and this plants {} are not related'
         msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
         raise ValueError(msg)
+    if not value or value in NOT_ALLOWED_VALUES:
+        msg = ' No value or value has not allowed characters:{} {} {}'
+        msg = msg.format(obs_entity.accession.accession_number, assay.name,
+                         trait.name)
+        raise ValueError(msg)
     try:
         if force:
             obs = Observation.objects.create(obs_entity=obs_entity, trait=trait,
@@ -99,8 +105,9 @@ def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
                                              creation_time=creation_time,
                                              observer=observer)
         else:
-            obs = Observation.objects.get_or_create(obs_entity=obs_entity, trait=trait,
-                                                    assay=assay, value=value,
+            obs = Observation.objects.get_or_create(obs_entity=obs_entity,
+                                                    trait=trait, assay=assay,
+                                                    value=value,
                                                     creation_time=creation_time,
                                                     observer=observer)[0]
     except DataError:
