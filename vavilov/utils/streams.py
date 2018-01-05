@@ -67,7 +67,7 @@ def queryset_to_columns(queryset):
         obs_entity = ObservationEntity.objects.get(name=obs_entity)
         row.append(obs_entity.accession.accession_number)
         row.append(obs_entity.name)
-        row.append('')#obs_entity.assay.name)
+        row.append('')  # obs_entity.assay.name)
         row.append(obs_entity.part.name)
         observations = queryset.filter(obs_entity=obs_entity)
         for trait in traits:
@@ -77,7 +77,6 @@ def queryset_to_columns(queryset):
             else:
                 value = ''
             row.append(value)
-        #row.extend([':'.join(observations.filter(trait__name=trait).values_list('value_beauty', flat=True)) for trait in traits])
         yield row
 
 
