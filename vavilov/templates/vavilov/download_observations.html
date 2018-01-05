@@ -9,10 +9,15 @@
 		    alert("Be patient, It can take a while");
 		    }
 	</script>
-    <ul> 
+    <ul>
         <li>Download</li>
         {% url 'observation-list' as base_url %}
+
         <li><a href='javascript:AlertIt("{% build_url base_url search_criteria download_search=True,format=csv%}");' ><img src="{% static "vavilov/style/images/csv_icon.png"%}"/></a></li>
         <li><a href='javascript:AlertIt("{% build_url base_url search_criteria download_search=True,format=excel%}");'><img src="{% static "vavilov/style/images/xls_icon.png"%}"/></a></li>
     </ul>
+	<ul>
+		<li>Download with the traits in columns</li>
+		<li><a href='javascript:AlertIt("{% build_url base_url search_criteria download_search=True,format=csv_by_trait_columns%}");' ><img src="{% static "vavilov/style/images/csv_icon.png"%}"/></a></li>
+	</ul>
 </div>
