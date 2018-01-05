@@ -829,6 +829,7 @@ class Observation(models.Model):
         trait_type = self.trait.type.name
         if trait_type == 'LAB_color':
             val = eval(self.value)
+            print(val)
             val = ','.join(['{}:{:.2f}'.format(key, value) for key, value in val.items()])
             return val
         elif trait_type == 'RGB_color':

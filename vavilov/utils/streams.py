@@ -7,6 +7,7 @@ from openpyxl import Workbook
 from openpyxl.utils.cell import get_column_letter
 
 from vavilov.conf.settings import MAX_OBS_TO_EXCEL, APP_LOGGER
+from vavilov.models import ObservationEntity
 logger = logging.getLogger(APP_LOGGER)
 
 
@@ -63,12 +64,20 @@ def queryset_to_columns(queryset):
     yield ['Accession', 'Observation entity', 'Assay', 'Plant_part'] + traits
     for obs_entity in obs_entities:
         row = []
-        row.append(obs_entity.accession)
+        obs_entity = ObservationEntity.objects.get(name=obs_entity)
+        row.append(obs_entity.accession.accession_number)
         row.append(obs_entity.name)
-        row.append(obs_entity.assay.name)
-        row.append(obs_entity.plant_part.name)
-        observations = queryset.filter(obs_entity__name=obs_entity)
-        row.extend([':'.join(observations.filter(trait__name=trait).values_list('value', flat=True)) for trait in traits])
+        row.append('')#obs_entity.assay.name)
+        row.append(obs_entity.part.name)
+        observations = queryset.filter(obs_entity=obs_entity)
+        for trait in traits:
+            obs_ = observations.filter(trait__name=trait)
+            if obs_:
+                value = ':'.join([obs.value_beauty for obs in obs_])
+            else:
+                value = ''
+            row.append(value)
+        #row.extend([':'.join(observations.filter(trait__name=trait).values_list('value_beauty', flat=True)) for trait in traits])
         yield row
 
 

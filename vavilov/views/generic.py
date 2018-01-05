@@ -78,7 +78,7 @@ class SearchListView(View):
                 return return_csv_response(self.object_list, self.table)
             elif format_ == 'excel':
                 return return_excel_response(self.object_list, self.table)
-            elif format == 'csv_by_trait_columns':
+            elif format_ == 'csv_by_trait_columns':
                 return return_csv_trait_columns(self.object_list)
 
         if self.detail_view_name and self.object_list.count() == 1:
