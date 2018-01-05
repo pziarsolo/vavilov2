@@ -20,6 +20,7 @@ class Echo(object):
     """An object that implements just the write method of the file-like
     interface.
     """
+
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
@@ -44,6 +45,31 @@ def return_csv_response(queryset, table_class):
                                      content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
     return response
+
+
+def return_csv_trait_columns(queryset):
+    rows = queryset_to_columns(queryset)
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                     content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    return response
+
+
+def queryset_to_columns(queryset):
+    traits = sorted(list(queryset.distinct().values_list('trait__name', flat=True)))
+    obs_entities = queryset.distinct().values_list('obs_entity__name', flat=True)
+    yield ['Accession', 'Observation entity', 'Assay', 'Plant_part'] + traits
+    for obs_entity in obs_entities:
+        row = []
+        row.append(obs_entity.accession)
+        row.append(obs_entity.name)
+        row.append(obs_entity.assay.name)
+        row.append(obs_entity.plant_part.name)
+        observations = queryset.filter(obs_entity__name=obs_entity)
+        row.extend([':'.join(observations.filter(trait__name=trait).values_list('value', flat=True)) for trait in traits])
+        yield row
 
 
 def return_excel_response(queryset, table_class, column_length=None):
