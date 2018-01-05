@@ -7,7 +7,7 @@ from openpyxl import Workbook
 from openpyxl.utils.cell import get_column_letter
 
 from vavilov.conf.settings import MAX_OBS_TO_EXCEL, APP_LOGGER
-from vavilov.models import ObservationEntity
+from vavilov.utils.column_format import queryset_to_columns
 logger = logging.getLogger(APP_LOGGER)
 
 
@@ -33,51 +33,21 @@ MSG = """<script>
 </script>""".format(MAX_OBS_TO_EXCEL)
 
 
-def return_csv_response(queryset, table_class):
+def return_csv_response(queryset, table_class, column_format=False):
     prev_time = time()
     if queryset.count() > MAX_OBS_TO_EXCEL:
         return HttpResponse(MSG, content_type="text/html")
     prev_time = calc_duration('Csv Query Count', prev_time)
     rows = table_class(queryset).as_values()
+    if column_format:
+        rows = queryset_to_columns(rows)
     prev_time = calc_duration('table to rows', prev_time)
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                      content_type="text/csv")
-    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    response['Content-Disposition'] = 'attachment; filename="search_result.csv"'
     return response
-
-
-def return_csv_trait_columns(queryset):
-    rows = queryset_to_columns(queryset)
-    pseudo_buffer = Echo()
-    writer = csv.writer(pseudo_buffer, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
-                                     content_type="text/csv")
-    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
-    return response
-
-
-def queryset_to_columns(queryset):
-    traits = sorted(list(queryset.distinct().values_list('trait__name', flat=True)))
-    obs_entities = queryset.distinct().values_list('obs_entity__name', flat=True)
-    yield ['Accession', 'Observation entity', 'Assay', 'Plant_part'] + traits
-    for obs_entity in obs_entities:
-        row = []
-        obs_entity = ObservationEntity.objects.get(name=obs_entity)
-        row.append(obs_entity.accession.accession_number)
-        row.append(obs_entity.name)
-        row.append('')  # obs_entity.assay.name)
-        row.append(obs_entity.part.name)
-        observations = queryset.filter(obs_entity=obs_entity)
-        for trait in traits:
-            obs_ = observations.filter(trait__name=trait)
-            if obs_:
-                value = ':'.join([obs.value_beauty for obs in obs_])
-            else:
-                value = ''
-            row.append(value)
-        yield row
 
 
 def return_excel_response(queryset, table_class, column_length=None):

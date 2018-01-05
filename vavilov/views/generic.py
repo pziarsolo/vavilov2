@@ -7,8 +7,7 @@ from django.views.generic.base import View
 
 from django_tables2.config import RequestConfig
 
-from vavilov.utils.streams import (return_excel_response, return_csv_response,
-                                   return_csv_trait_columns)
+from vavilov.utils.streams import (return_excel_response, return_csv_response)
 from vavilov.conf.settings import APP_LOGGER
 
 logger = logging.getLogger(APP_LOGGER)
@@ -79,7 +78,8 @@ class SearchListView(View):
             elif format_ == 'excel':
                 return return_excel_response(self.object_list, self.table)
             elif format_ == 'csv_by_trait_columns':
-                return return_csv_trait_columns(self.object_list)
+                return return_csv_response(self.object_list, self.table,
+                                           column_format=True)
 
         if self.detail_view_name and self.object_list.count() == 1:
             return redirect(self.object_list.first().get_absolute_url())
