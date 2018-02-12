@@ -830,10 +830,10 @@ class Observation(models.Model):
         if trait_type == 'LAB_color':
             val = eval(self.value)
             nums = []
-            for key in ('L', 'A', 'B', 'hue', 'chroma'):
+            for key in ('L', 'a', 'b', 'H', 'C'):
                 num = val.get(key)
-                if num:
-                    nums.append('{}:{:.2f}'.format(key, num))
+                if num and num not in ('nd', 'ND'):
+                    nums.append('{}:{:.2f}'.format(key, float(num)))
             return ','.join(nums)
             # val = ','.join(['{}:{:.2f}'.format(key, value) for key, value in val.items()])
             # return val
@@ -842,16 +842,18 @@ class Observation(models.Model):
             nums = []
             for key in ('R', 'G', 'B', 'lum'):
                 num = val.get(key)
-                if num:
-                    nums.append('{}:{:.2f}'.format(key, num))
+                if num and num not in ('nd', 'ND'):
+                    nums.append('{}:{:.2f}'.format(key, float(num)))
             return ','.join(nums)
         elif trait_type == 'morphometric_points':
             val = eval(self.value)
             vals = []
             for index, data in enumerate(val):
                 pos = index + 1
-                vals.append('{}:{}-{}'.format(pos, data.get('{}x'.format(pos)),
-                                              data.get('{}y'.format(pos))))
+                xval = data.get('{}x'.format(pos))
+                yval = data.get('{}y'.format(pos))
+                if xval and yval:
+                    vals.append('{}:{}-{}'.format(pos, xval, yval))
             return ','.join(vals)
         else:
             return self.value
