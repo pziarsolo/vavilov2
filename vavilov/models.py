@@ -4,7 +4,6 @@ import operator
 from os.path import join
 import logging
 from time import time
-import json
 
 from django.conf import settings
 from django.contrib.auth.models import User
