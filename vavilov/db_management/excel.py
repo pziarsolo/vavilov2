@@ -15,7 +15,6 @@ except ImportError:
 
 from vavilov.models import Trait, Plant
 
-
 PLANT_ID = 'plant_name'
 TRAIT_HEADER_NAME = 'Caracteristica'
 TRAIT_TYPE_NAME = 'Tipo'
@@ -215,9 +214,17 @@ def create_excel_from_queryset(out_fhand, queryset, table, in_memory=False):
     return out_fhand
 
 
-def excel_dict_reader(fpath, data_only=True):
+def get_sheet_names(fpath):
+    wb = load_workbook(fpath, read_only=True)
+    return wb.get_sheet_names()
+
+
+def excel_dict_reader(fpath, data_only=True, sheet_name=None):
     wb = load_workbook(fpath, read_only=True, data_only=data_only)
-    sheet = wb.active
+    if sheet_name:
+        sheet = wb[sheet_name]
+    else:
+        sheet = wb.active
     header_pos = OrderedDict()
     first = True
     for row in sheet.rows:
@@ -243,3 +250,5 @@ def excel_dict_reader(fpath, data_only=True):
             row_dict[header] = value
         if any(row_dict.values()):
             yield row_dict
+        else:
+            break
