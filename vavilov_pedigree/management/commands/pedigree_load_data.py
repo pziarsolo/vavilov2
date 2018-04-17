@@ -5,7 +5,8 @@ from vavilov_pedigree.data_upload import (add_or_load_accessions,
                                           add_or_load_seedlot,
                                           add_or_load_plant_relationship,
                                           add_or_load_cross_experiments,
-                                          add_or_load_plants)
+                                          add_or_load_plants,
+                                          add_or_load_crosses_data)
 from os.path import join
 
 
@@ -31,6 +32,9 @@ class Command(BaseCommand):
         add_or_load_seedlot(join(dirpath, 'SeedLots_originals.xlsx'))
         prev_time = print_duration('SeedLots_originals.xlsx', prev_time)
 
+        add_or_load_crosses_data(join(dirpath, 'varitome_crosses.xlsx'))
+
+        return
         add_or_load_plants(join(dirpath, 'NSF2_PA01_Sep_2016_plants.xlsx'))
         prev_time = print_duration('NSF2_PA01_Sep_2016_plants.xlsx', prev_time)
 

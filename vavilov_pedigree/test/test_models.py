@@ -14,6 +14,7 @@ class FixturesTest(TestCase):
 
 
 class ModelTest(TestCase):
+
     def setUp(self):
         load_test_data()
 
@@ -36,7 +37,6 @@ class ModelTest(TestCase):
         assert seed_lot.description is None
         assert seed_lot.fathers.count() == 3
         assert seed_lot.mothers.count() == 3
-
 
     def test_assay(self):
         assert Assay.objects.first().cross_experiments.count() == 3
