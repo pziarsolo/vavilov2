@@ -54,4 +54,10 @@ DEFAULT_OBSERVATION_TABLE_FIELDS = ['accession', 'obs_entity', 'plant_part',
 OBSERVATION_TABLE_FIELDS = getattr(settings, 'VAVILOV_OBSERVATION_TABLE_FIELDS',
                                    DEFAULT_OBSERVATION_TABLE_FIELDS)
 
+DEFAULT_OBSERVATION_SEARCH_FIELDS = ['accession_number', 'accession_list',
+                                    'plant', 'plant_part', 'assay', 'trait',
+                                    'experimental_field']
+OBSERVATION_SEARCH_FIELDS = getattr(settings, 'VAVILOV_OBSERVATION_SEARCH_FIELDS',
+                                    DEFAULT_OBSERVATION_SEARCH_FIELDS)
+
 EXCLUDED_FIELDBOOK_TRAITS_TO_LOAD_IN_DB = ['Photos', 'Audio']
