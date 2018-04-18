@@ -3,7 +3,7 @@ from django.forms.widgets import Select
 
 from vavilov.forms.widgets import (AutocompleteTextInput,
                                    AutocompleteTextMultiInput)
-from vavilov.models import Trait, Assay, Cvterm, Accession
+from vavilov.models import Trait, Assay, Cvterm, Accession, TraitProp
 from vavilov.conf.settings import OBSERVATIONS_HAVE_TIME, OBSERVATION_SEARCH_FIELDS
 
 
@@ -39,6 +39,9 @@ class SearchObservationForm(forms.Form):
                                  widget=AutocompleteTextMultiInput(source='/apis/traits/',
                                                                    min_length=1,
                                                                    force_check=False))
+    if 'type_tr' in OBSERVATION_SEARCH_FIELDS:
+        tr_trait_type = forms.CharField(label='Traiditom data type ', required=False,
+                                        widget=Select(choices=[]))
     if 'experimental_field' in OBSERVATION_SEARCH_FIELDS:
         experimental_field = forms.CharField(required=False,
                                              label='Experimental field')
@@ -57,6 +60,15 @@ class SearchObservationForm(forms.Form):
             part_type = plant_part.name
             plan_part_choices.append((part_type, part_type))
         self.fields['plant_part'].widget.choices = plan_part_choices
+
+        traditom_trait_type_choices = [('', '')]
+        tr_types = set()
+        for tr_type in TraitProp.objects.filter(type__name='type_tr'):
+            type_name = tr_type.value
+            tr_types.add(type_name)
+        for tr_type in tr_types:
+            traditom_trait_type_choices.append((tr_type, tr_type))
+        self.fields['tr_trait_type'].widget.choices = traditom_trait_type_choices
 
     def clean_acc_list(self):
         acc_list_text = self.cleaned_data['acc_list']

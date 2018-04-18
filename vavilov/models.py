@@ -908,6 +908,7 @@ class ObservationRelationship(models.Model):
 # # Filters
 def filter_observations(search_criteria, user, images=False):
     prev_time = time()
+    print(search_criteria)
     if images:
         query = Observation.objects
     else:
@@ -944,6 +945,10 @@ def filter_observations(search_criteria, user, images=False):
         trait_names = [t.strip() for t in trait_ids.split(',') if t]
         traits = Trait.objects.filter(name__in=trait_names)
         query = query.filter(trait__in=traits)
+
+    if 'tr_trait_type' in search_criteria and search_criteria != "":
+        tradi_trait_type = search_criteria['tr_trait_type']
+        query = query.filter(trait__traitprop__type__name='type_tr').filter(trait__traitprop__value=tradi_trait_type)
 
     if 'experimental_field' in search_criteria and search_criteria['experimental_field']:
         query = query.filter(obs_entity__observationentityplant__plant__experimental_field__icontains=search_criteria['experimental_field'])
