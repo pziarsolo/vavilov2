@@ -21,18 +21,23 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('dir_fpath', help='directory with pedigree files')
+        parser.add_argument('-c', '--only_check', help='only check data',
+                            action='store_true')
 
     def handle(self, *args, **options):
         dirpath = options['dir_fpath']
+        only_check = options['only_check']
         prev_time = time()
-
         add_or_load_accessions(join(dirpath, 'varitome_passport.xlsx'))
         prev_time = print_duration('varitome_passport.xlsx', prev_time)
 
         add_or_load_seedlot(join(dirpath, 'SeedLots_originals.xlsx'))
         prev_time = print_duration('SeedLots_originals.xlsx', prev_time)
 
-        add_or_load_crosses_data(join(dirpath, 'varitome_crosses.xlsx'))
+        add_or_load_crosses_data(join(dirpath, 'varitome_crosses.xlsx'),
+                                 only_check=only_check)
+        add_or_load_crosses_data(join(dirpath, 'varitome_crosses_spring2018.xlsx'),
+                                 only_check=only_check)
 
         return
         add_or_load_plants(join(dirpath, 'NSF2_PA01_Sep_2016_plants.xlsx'))

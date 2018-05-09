@@ -194,10 +194,14 @@ def add_or_load_cross_experiments(fpath):
 def _check_row(assay, seedlot, accession_number, col_number, cross_code,
                plant_name):
     errors = []
-    plant_assay = plant_name[1:8]
+    try:
+        plant_assay = plant_name[1:8]
+    except TypeError:
+        plant_assay = None
+        errors.append('Plant ids not in file')
     if ((assay == 'F16NSF2' and plant_assay == 'F16NSF1') or
             (assay == 'S17NSF3' and plant_assay in('S17NSF4', 'S17NSF6')) or
-            (assay == 'M17NSF2' and plant_assay=='M17NSF3')):
+            (assay == 'M17NSF2' and plant_assay == 'M17NSF3')):
         pass
     elif assay != plant_assay:
         errors.append('Plant assay {} and row assay {} differ'.format(plant_assay, assay))
@@ -263,12 +267,14 @@ def check_data_integrity(data):
     return fail
 
 
-def add_or_load_crosses_data(fpath):
+def add_or_load_crosses_data(fpath, only_check=False):
     sheet_names = get_sheet_names(fpath)
     for sheet_name in sheet_names:
-        print(sheet_name)
+        sys.stderr.write(sheet_name + '\n')
         sheet_data = list(excel_dict_reader(fpath, sheet_name=sheet_name))
         fail = check_data_integrity(sheet_data)
+        if only_check:
+            continue
         if fail:
             sys.exit(1)
 
