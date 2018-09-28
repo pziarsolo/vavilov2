@@ -68,7 +68,7 @@ def filter_accessions(search_criteria, user=None):
 class AccessionDetail(PermissionRequiredMixin, DetailView):
     model = Accession
     slug_url_kwarg = 'accession_number'
-    slug_field = 'accession_number'
+    slug_field = 'accession_number__iexact'
     permission_required = ['vavilov.view_accession']
 
     def get_context_data(self, **kwargs):

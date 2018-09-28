@@ -22,7 +22,7 @@ class AssayList(PermissionRequiredMixin, ListView):
 class AssayDetail(PermissionRequiredMixin, DetailView):
     model = Assay
     slug_url_kwarg = 'name'
-    slug_field = 'name'
+    slug_field = 'name__iexact'
     permission_required = ['vavilov.view_assay']
 
     def get_context_data(self, **kwargs):

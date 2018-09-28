@@ -9,7 +9,7 @@ from vavilov.permissions import PermissionRequiredMixin
 class PlantDetail(PermissionRequiredMixin, DetailView):
     model = Plant
     slug_url_kwarg = 'plant_name'
-    slug_field = 'plant_name'
+    slug_field = 'plant_name__iexact'
     permission_required = ['vavilov.view_plant']
 
     def get_context_data(self, **kwargs):
