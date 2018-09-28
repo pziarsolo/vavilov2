@@ -42,9 +42,13 @@ def add_or_load_seedlot(fpath):
         seeds_weight = row['SeedsWeight']
         if accession and seed_lot:
             accession = Accession.objects.get_or_create(accession_number=accession)[0]
-            SeedLot.objects.get_or_create(accession=accession, name=seed_lot,
-                                          description=description,
-                                          seeds_weight=seeds_weight)
+            try:
+                SeedLot.objects.get_or_create(accession=accession, name=seed_lot,
+                                              description=description,
+                                              seeds_weight=seeds_weight)
+            except IntegrityError:
+                print(seed_lot)
+                raise
 
 
 def add_or_create_plant(plant_name, seedlot_name, glasshouse=None,
@@ -163,41 +167,45 @@ def add_or_load_cross(father_accession, mother_accession, father_plant,
         CrossExperimentSeedLot.objects.get_or_create(cross_experiment=cross_exp,
                                                      seed_lot=offspring)
 
-
-def add_or_load_cross_experiments(fpath):
-    for row in excel_dict_reader(fpath):
-        father_accession = row[FATHER_ACCESSION]
-        mother_accession = row[MOTHER_ACCESSION]
-        father_plant = row[FATHER_PLANT]
-        mother_plant = row[MOTHER_PLANT]
-        offspring_seedlot = row[OFFSPRING_SEEDLOTN]
-        offspring_accession = row[OFFSPRING_ACCESSION]
-        offspring_description = row[OFFSPRING_DESCRIPTION]
-        offspring_fruit = row.get('Fruit #/Inflorescence', None)
-        offspring_weight = row.get('PESO', None)
-        offspring_location = row.get('Localización', None)
-        assay_name = row[ASSAY]
-
-        add_or_load_cross(father_accession=father_accession,
-                          mother_accession=mother_accession,
-                          father_plant=father_plant,
-                          mother_plant=mother_plant,
-                          assay_name=assay_name,
-                          offspring_seedlot=offspring_seedlot,
-                          offspring_fruit=offspring_fruit,
-                          offspring_accession=offspring_accession,
-                          offspring_weight=offspring_weight,
-                          offspring_description=offspring_description,
-                          offspring_location=offspring_location)
+# def add_or_load_cross_experiments(fpath):
+#     for row in excel_dict_reader(fpath):
+#         father_accession = row[FATHER_ACCESSION]
+#         mother_accession = row[MOTHER_ACCESSION]
+#         father_plant = row[FATHER_PLANT]
+#         mother_plant = row[MOTHER_PLANT]
+#         offspring_seedlot = row[OFFSPRING_SEEDLOTN]
+#         offspring_accession = row[OFFSPRING_ACCESSION]
+#         offspring_description = row[OFFSPRING_DESCRIPTION]
+#         offspring_fruit = row.get('Fruit #/Inflorescence', None)
+#         offspring_weight = row.get('PESO', None)
+#         offspring_location = row.get('Localización', None)
+#         assay_name = row[ASSAY]
+#         add_or_load_cross(father_accession=father_accession,
+#                           mother_accession=mother_accession,
+#                           father_plant=father_plant,
+#                           mother_plant=mother_plant,
+#                           assay_name=assay_name,
+#                           offspring_seedlot=offspring_seedlot,
+#                           offspring_fruit=offspring_fruit,
+#                           offspring_accession=offspring_accession,
+#                           offspring_weight=offspring_weight,
+#                           offspring_description=offspring_description,
+#                           offspring_location=offspring_location)
 
 
 def _check_row(assay, seedlot, accession_number, col_number, cross_code,
                plant_name):
     errors = []
-    plant_assay = plant_name[1:8]
+    try:
+        plant_assay = plant_name[1:8]
+    except TypeError:
+        plant_assay = None
+        errors.append('Plant ids not in file')
+
     if ((assay == 'F16NSF2' and plant_assay == 'F16NSF1') or
             (assay == 'S17NSF3' and plant_assay in('S17NSF4', 'S17NSF6')) or
-            (assay == 'M17NSF2' and plant_assay=='M17NSF3')):
+            (assay == 'M17NSF2' and plant_assay == 'M17NSF3') or
+            (assay == 'M18NSF3' and plant_assay == 'M18NSF2')):
         pass
     elif assay != plant_assay:
         errors.append('Plant assay {} and row assay {} differ'.format(plant_assay, assay))
@@ -223,7 +231,7 @@ def _check_row(assay, seedlot, accession_number, col_number, cross_code,
 def check_data_integrity(data):
     fail = False
     for index, row in enumerate(data):
-        row_number = index
+        row_number = index + 2
         assay = row[ASSAY]
         father_seedlot = row[FATHER_SEEDLOT]
         father_accession = row[FATHER_ACCESSION]
@@ -263,12 +271,14 @@ def check_data_integrity(data):
     return fail
 
 
-def add_or_load_crosses_data(fpath):
+def add_or_load_crosses_data(fpath, only_check=False):
     sheet_names = get_sheet_names(fpath)
     for sheet_name in sheet_names:
-        print(sheet_name)
+        sys.stderr.write(sheet_name + '\n')
         sheet_data = list(excel_dict_reader(fpath, sheet_name=sheet_name))
         fail = check_data_integrity(sheet_data)
+        if only_check:
+            continue
         if fail:
             sys.exit(1)
 
@@ -315,4 +325,4 @@ def load_test_data():
     add_or_load_seedlot(join(TEST_DATA_DIR, 'seed_lots.xlsx'))
     add_or_load_plants(join(TEST_DATA_DIR, 'plants.xlsx'))
     add_or_load_plant_relationship(join(TEST_DATA_DIR, 'plant_clones.xlsx'))
-    add_or_load_cross_experiments(join(TEST_DATA_DIR, 'cross_exps.xlsx'))
+#     add_or_load_cross_experiments(join(TEST_DATA_DIR, 'cross_exps.xlsx'))
