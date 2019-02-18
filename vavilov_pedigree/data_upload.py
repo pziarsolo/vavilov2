@@ -205,7 +205,8 @@ def _check_row(assay, seedlot, accession_number, col_number, cross_code,
     if ((assay == 'F16NSF2' and plant_assay == 'F16NSF1') or
             (assay == 'S17NSF3' and plant_assay in('S17NSF4', 'S17NSF6')) or
             (assay == 'M17NSF2' and plant_assay == 'M17NSF3') or
-            (assay == 'M18NSF3' and plant_assay == 'M18NSF2')):
+            (assay == 'M18NSF3' and plant_assay == 'M18NSF2') or
+            (assay == 'S18NSF2' and plant_assay in ('S18NSF5', 'S18NSF3'))):
         pass
     elif assay != plant_assay:
         errors.append('Plant assay {} and row assay {} differ'.format(plant_assay, assay))
