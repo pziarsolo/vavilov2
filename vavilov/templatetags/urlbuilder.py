@@ -2,6 +2,7 @@
 # http://djangosnippets.org/snippets/2332/
 
 from django import template
+import urllib
 
 register = template.Library()
 
@@ -15,18 +16,14 @@ class QuerystringNode(template.Node):
 
     def render(self, context):
         base_url = self.base_url.resolve(context)
-        url = base_url + '?'
 
         params = self.query_params.resolve(context).copy()
 
         if self.override is not None:
             for option in self.override.split(','):
                 k, v = option.split('=')
-                params[k] = v
-        # TODO url encode. meh
-        for k, v in params.items():
-            url += "%s=%s&" % (k, v)
-        return url[:-1]
+                params[k] = urllib.parse.quote_plus(v)
+        return '{}?{}'.format(base_url, urllib.parse.urlencode(params))
 
 
 @register.tag

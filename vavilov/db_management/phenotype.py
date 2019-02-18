@@ -93,7 +93,7 @@ def add_observation(obs_entity, trait_name, assay_name, value, creation_time,
         msg = 'This assay {} and this plants {} are not related'
         msg = msg.format(assay, ','.join([p.plant_name for p in plants]))
         raise ValueError(msg)
-    if not value or value in NOT_ALLOWED_VALUES:
+    if value in (None, '') or value in NOT_ALLOWED_VALUES:
         msg = ' No value or value has not allowed characters:{} {} {}'
         msg = msg.format(obs_entity.accession.accession_number, assay.name,
                          trait.name)
