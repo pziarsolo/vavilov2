@@ -61,14 +61,15 @@ class SearchObservationForm(forms.Form):
             plan_part_choices.append((part_type, part_type))
         self.fields['plant_part'].widget.choices = plan_part_choices
 
-        traditom_trait_type_choices = [('', '')]
-        tr_types = set()
-        for tr_type in TraitProp.objects.filter(type__name='type_tr'):
-            type_name = tr_type.value
-            tr_types.add(type_name)
-        for tr_type in tr_types:
-            traditom_trait_type_choices.append((tr_type, tr_type))
-        self.fields['tr_trait_type'].widget.choices = traditom_trait_type_choices
+        if 'type_tr' in OBSERVATION_SEARCH_FIELDS:
+            traditom_trait_type_choices = [('', '')]
+            tr_types = set()
+            for tr_type in TraitProp.objects.filter(type__name='type_tr'):
+                type_name = tr_type.value
+                tr_types.add(type_name)
+            for tr_type in tr_types:
+                traditom_trait_type_choices.append((tr_type, tr_type))
+            self.fields['tr_trait_type'].widget.choices = traditom_trait_type_choices
 
     def clean_acc_list(self):
         acc_list_text = self.cleaned_data['acc_list']
